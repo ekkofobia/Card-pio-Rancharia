@@ -1,6 +1,34 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
+<script>
+/* ==========================================================================
+   EDITE AQUI — proteínas de cada prato, guarnições e a salada
+   Basta digitar os itens separados por vírgula (,). Pra adicionar mais um
+   item, digite uma vírgula e escreva o próximo. Não precisa mexer no resto
+   do arquivo.
+   ========================================================================== */
+window.EDITAVEL = {
+
+  // CLÁSSICA — proteínas desse prato
+  classica: 'Ensopado de carne moída, Linguiça toscana',
+
+  // PREMIUM — proteínas desse prato
+  premium: 'Frango a passarinha, Bode cozido',
+
+  // GOURMET — proteínas desse prato (leva 2)
+  gourmet: 'Ensopado de carne moída, Linguiça toscana, Frango a passarinha, Bode cozido',
+
+  // EXECUTIVO — proteínas desse prato
+  executivo: 'Carne do sol, Cupim, Contra filé, Bode',
+
+  // GUARNIÇÕES — opções que aparecem em todos os pratos na hora de montar
+  guarnicoes: 'Baião, Arroz, Feijão caldo, Feijão verde, Feijão tropeiro, Macarrão, Farofa',
+
+  // SALADA — nome da salada incluída no prato
+  salada: 'Salada Tropical'
+};
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rancharia — Monte seu prato</title>
@@ -562,22 +590,24 @@ setTimeout(function () { var s = document.getElementById('splash'); if (s) s.cla
 
 /* ---------- 1) CONFIG — edite aqui ---------- */
 const FOTO = k => (typeof IMG !== 'undefined' && IMG[k]) || 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+const EDIT = window.EDITAVEL || {};
+const listar = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);   // "A, B, C" -> ['A','B','C']
 const CONFIG = {
   nome: 'Rancharia',
   whatsapp: '5574988534600',
   maxGuarnicoes: 4,
-  salada: 'Salada Tropical',
+  salada: EDIT.salada,
   planos: [
     { id: 'classica', titulo1: 'Com uma proteína', titulo2: 'Clássica', preco: 15, escolhe: 1,
-      proteinas: ['Ensopado de carne moída', 'Linguiça toscana'], img: FOTO('classica') },
+      proteinas: listar(EDIT.classica), img: FOTO('classica') },
     { id: 'premium', titulo1: 'Com uma proteína', titulo2: 'Premium', preco: 18, escolhe: 1,
-      proteinas: ['Frango a passarinha', 'Bode cozido'], img: FOTO('premium') },
+      proteinas: listar(EDIT.premium), img: FOTO('premium') },
     { id: 'duas', titulo1: 'Com duas Proteínas', titulo2: 'Gourmet', preco: 22, escolhe: 2,
-      proteinas: ['Ensopado de carne moída', 'Linguiça toscana', 'Frango a passarinha', 'Bode cozido'], img: FOTO('duas') },
+      proteinas: listar(EDIT.gourmet), img: FOTO('duas') },
     { id: 'pf', titulo1: 'Com uma proteína', titulo2: 'Executivo', preco: 25, escolhe: 1,
-      proteinas: ['Carne do sol', 'Cupim', 'Contra filé', 'Bode'], img: FOTO('premium') }
+      proteinas: listar(EDIT.executivo), img: FOTO('premium') }
   ],
-  guarnicoes: ['Baião', 'Arroz', 'Feijão caldo', 'Feijão verde', 'Feijão tropeiro', 'Macarrão', 'Farofa'],
+  guarnicoes: listar(EDIT.guarnicoes),
   // Tela de bebidas mostrada ao finalizar (⚠️ CONFERIR TODOS OS PREÇOS E MARCAS)
   // Cada tamanho traz 3 opções (itens); o preço é do tamanho, igual pros 3 itens dele
   bebidas: [
