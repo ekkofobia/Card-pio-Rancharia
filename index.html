@@ -20,13 +20,13 @@ window.EDITAVEL = {
   gourmet: 'Ensopado de carne moída, Linguiça toscana, Frango a passarinha, Bode cozido',
 
   // EXECUTIVO — proteínas desse prato
-  executivo: 'Carne do sol, Cupim, Contra filé, Bode',
+  executivo: 'Carne do sol, Cupim, Contra filé, Bode,',
 
   // GUARNIÇÕES — opções que aparecem em todos os pratos na hora de montar
   guarnicoes: 'Baião, Arroz, Feijão caldo, Feijão verde, Feijão tropeiro, Macarrão, Farofa',
 
-  // SALADA — nome da salada incluída no prato
-  salada: 'Salada Tropical'
+  // SALADA — opções que aparecem para o cliente escolher (mesma lógica da guarnição)
+  salada: 'Salada Tropical, Vinagrete, Pepino em rodela, Quiabo, Tomate'
 };
 </script>
 <meta charset="UTF-8">
@@ -369,7 +369,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 /* ---------- Modo print: 5 cliques na logo (só hero + pratos, 2 colunas, sem rolar) ---------- */
 .brand { cursor: pointer; }
 body.print-mode #heroBrand { cursor: pointer; }
-body.print-mode { overflow: hidden; height: 100dvh; }
+body.print-mode { overflow: hidden; height: 100dvh; --pfs: 1; }
 body.print-mode .top { display: none; }
 body.print-mode main {
   height: 100dvh; overflow: hidden; padding-top: 0 !important;
@@ -382,23 +382,24 @@ body.print-mode .hero .script { font-size: clamp(24px, 7vw, 44px); margin-top: -
 body.print-mode #pratos { padding: 0; }
 body.print-mode .plates { grid-template-columns: 1fr 1fr !important; gap: 8px; }
 body.print-mode .plate { padding: 20px 8px 8px; }
-body.print-mode .plate .price { top: 6px; right: 6px; font-size: 11px; padding: 1px 7px; line-height: 1.3; }
-body.print-mode .plate .price small { font-size: 9px; }
+body.print-mode .plate .price { top: 6px; right: 6px; font-size: calc(11px * var(--pfs)); padding: 1px 7px; line-height: 1.3; }
+body.print-mode .plate .price small { font-size: calc(9px * var(--pfs)); }
 body.print-mode .plate .row { grid-template-columns: 1fr; }
-body.print-mode .plate .t1 { font-size: 10px; }
-body.print-mode .plate .t2 { font-size: 14px; }
-body.print-mode .plate ul { font-size: 10px; }
-body.print-mode .plate .photo { margin-top: 6px; }
-body.print-mode .plate .photo img { width: 100%; }
+body.print-mode .plate .t1 { font-size: calc(10px * var(--pfs)); }
+body.print-mode .plate .t2 { font-size: calc(14px * var(--pfs)); }
+body.print-mode .plate ul { font-size: calc(12px * var(--pfs)); }
+body.print-mode .plate .photo { margin-top: 6px; display: flex; justify-content: center; }
+body.print-mode .plate .photo img { width: 85%; height: auto; }
 body.print-mode .plate .btn { display: none; }
 body.print-mode .final, body.print-mode footer, body.print-mode #cartBar { display: none !important; }
 .print-salad { display: none; }
 body.print-mode .print-salad {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  grid-column: 1 / -1; height: auto; min-height: 44px; padding: 10px 8px; text-align: center;
+  grid-column: 1 / -1; height: auto; min-height: 64px; padding: 16px 10px; text-align: center;
 }
-body.print-mode .print-salad b { font-size: 15px; color: var(--gold); text-transform: uppercase; }
-body.print-mode .print-salad small { display: block; margin-top: 4px; font-size: 11px; color: var(--muted); line-height: 1.3; }
+body.print-mode .print-salad b { font-size: calc(15px * var(--pfs)); color: var(--gold); text-transform: uppercase; }
+body.print-mode .print-salad small { display: block; margin-top: 4px; font-size: calc(13px * var(--pfs)); color: var(--muted); line-height: 1.3; }
+body.print-mode .print-salad small .cnt-frase { color: #fff; font-weight: 700; font-size: calc(14px * var(--pfs)); }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
@@ -594,9 +595,10 @@ const EDIT = window.EDITAVEL || {};
 const listar = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);   // "A, B, C" -> ['A','B','C']
 const CONFIG = {
   nome: 'Rancharia',
-  whatsapp: '5574988534600',
+  whatsapp: '557488052568',
   maxGuarnicoes: 4,
-  salada: EDIT.salada,
+  maxSalada: 4,
+  salada: listar(EDIT.salada),
   planos: [
     { id: 'classica', titulo1: 'Com uma proteína', titulo2: 'Clássica', preco: 15, escolhe: 1,
       proteinas: listar(EDIT.classica), img: FOTO('classica') },
@@ -630,7 +632,7 @@ const CONFIG = {
       ] }
   ],
   // Menu hambúrguer (⚠️ conferir os textos e colocar os links)
-  sobre: 'A Rancharia serve pratos montados por você: escolha a proteína, capriche nas guarnições e leve a Salada Tropical incluída. Tudo em poucos toques, direto pelo WhatsApp.',
+  sobre: 'A Rancharia serve pratos montados por você: escolha a proteína, capriche nas guarnições e monte sua salada. Tudo em poucos toques, direto pelo WhatsApp.',
   // Horário de funcionamento (⚠️ CONFERIR com o dono os dias e horas reais)
   horarios: [
     ['Segunda a sexta', '11h às 15h'],
@@ -639,7 +641,7 @@ const CONFIG = {
   ],
   faq: [
     ['Como faço meu pedido?', 'Escolha um prato, monte com a proteína e as guarnições e finalize. O pedido é enviado pelo WhatsApp.'],
-    ['Quantas guarnições posso escolher?', 'De 1 a 4 por prato. A Salada Tropical vem incluída, e você pode tirar se preferir.'],
+    ['Quantas guarnições e opções de salada posso escolher?', 'De 1 a 4 guarnições e de 1 a 4 opções de salada por prato.'],
     ['Vocês entregam?', 'Sim. Ao finalizar, escolha Entrega e informe o endereço. A taxa é combinada com a gente no WhatsApp.'],
     ['Posso comer no local ou retirar?', 'Pode sim. Ao finalizar, escolha Comer aqui (com o número da mesa), Retirar ou Entrega.']
   ],
@@ -664,7 +666,9 @@ let cart = [];
 try { localStorage.removeItem(KEY); } catch (e) {} // limpa restos de testes antigos
 let uid = Date.now();
 let draft = null;                 // prato em montagem
-let step = 'list';                // etapa do pedido: list | form
+let step = 'list';                // etapa do pedido: list | drinks | form
+let prevStep = 'list';            // pra onde voltar ao sair da tela de bebidas
+let lastAdded = null;             // último prato adicionado, pra reabrir o builder se cancelar na tela de bebidas
 let openDrink = null;             // card de bebida expandido
 let drinksBaseline = 0;            // qtd. de bebidas que já existiam no pedido ao abrir esta tela
 let current = null;               // sheet/modal aberto
@@ -715,8 +719,8 @@ function renderPlates() {
       <button class="btn" data-plano="${p.id}">Montar este prato</button>
     </article>`).join('') + `
     <article class="plate print-salad">
-      <b>${esc(CONFIG.salada)}</b>
-      <small>Salada livre, incluída em todos os pratos</small>
+      <b>Salada</b>
+      <small><b class="cnt-frase">Escolha até ${CONFIG.maxSalada} opções</b>: ${esc(CONFIG.salada.join(', '))}</small>
     </article>`;
 }
 
@@ -750,14 +754,23 @@ document.addEventListener('keydown', e => {
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 });
-$$('[data-close]').forEach(b => b.addEventListener('click', () => closeSheet(b.closest('.sheet'))));
+$$('[data-close]').forEach(b => b.addEventListener('click', () => {
+  const sheet = b.closest('.sheet');
+  if (sheet && sheet.id === 'cart' && step === 'drinks' && b.classList.contains('x')) {
+    if (reopenBuilderFromDrinks()) return;                 // veio de montar prato: reabre o builder com as mesmas escolhas
+    step = prevStep; renderCart(); return;                 // senão, volta sem fechar nem alterar o pedido
+  }
+  closeSheet(sheet);
+}));
 
 /* ---------- 4) Montar prato ---------- */
 const optBtn = (k, v) => `<button type="button" class="opt" data-k="${k}" data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${esc(v)}</button>`;
 
-function openBuilder(id) {
+function openBuilder(id, prefill) {
   const p = CONFIG.planos.find(x => x.id === id);
-  draft = { plano: p, proteinas: [], guarnicoes: [], salada: true, obs: '', qty: 1 };
+  draft = prefill
+    ? { plano: p, proteinas: [...prefill.proteinas], guarnicoes: [...prefill.guarnicoes], saladas: [...prefill.saladas], obs: prefill.obs, qty: prefill.qty }
+    : { plano: p, proteinas: [], guarnicoes: [], saladas: [], obs: '', qty: 1 };
   $('#bTitle').innerHTML = `${esc(p.titulo2)}<small>${esc(p.titulo1)} · ${brl(p.preco)}</small>`;
   $('#bBody').innerHTML = `
     <div class="grp">
@@ -769,17 +782,16 @@ function openBuilder(id) {
       <div class="opts" id="optG">${CONFIG.guarnicoes.map(n => optBtn('g', n)).join('')}</div>
     </div>
     <div class="grp">
-      <button type="button" class="sw" id="swSalad" role="switch" aria-checked="true">
-        <span><b>${esc(CONFIG.salada)}</b><small>Salada livre, incluída no prato</small></span><i></i>
-      </button>
+      <div class="grp-h"><h3>Salada</h3><span id="cntS"></span></div>
+      <div class="opts" id="optS">${CONFIG.salada.map(n => optBtn('s', n)).join('')}</div>
     </div>
     <div class="grp">
       <label class="lbl" for="bObs">Alguma observação?</label>
-      <textarea id="bObs" maxlength="140" placeholder="Ex.: sem cebola, pouco sal..."></textarea>
+      <textarea id="bObs" maxlength="140" placeholder="Ex.: sem cebola, pouco sal...">${esc(draft.obs || '')}</textarea>
     </div>`;
   $('#bFoot').innerHTML = `
     <div class="foot-row">
-      <div class="qty"><button type="button" data-q="-1" aria-label="Menos um">−</button><output id="bQty">1</output><button type="button" data-q="1" aria-label="Mais um">+</button></div>
+      <div class="qty"><button type="button" data-q="-1" aria-label="Menos um">−</button><output id="bQty">${draft.qty}</output><button type="button" data-q="1" aria-label="Mais um">+</button></div>
       <button type="button" class="btn" id="addBtn"></button>
     </div>`;
   syncBuilder();
@@ -790,17 +802,17 @@ function openBuilder(id) {
 function syncBuilder() {
   const d = draft, p = d.plano;
   $$('#bBody .opt').forEach(b => {
-    const arr = b.dataset.k === 'p' ? d.proteinas : d.guarnicoes;
+    const arr = b.dataset.k === 'p' ? d.proteinas : b.dataset.k === 'g' ? d.guarnicoes : d.saladas;
     const on = arr.includes(b.dataset.v);
     b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
   });
-  const cp = $('#cntP'), cg = $('#cntG');
+  const cp = $('#cntP'), cg = $('#cntG'), cs = $('#cntS');
   cp.textContent = `${d.proteinas.length}/${p.escolhe}`; cp.classList.toggle('full', d.proteinas.length === p.escolhe);
   cg.textContent = `${d.guarnicoes.length}/${CONFIG.maxGuarnicoes}`; cg.classList.toggle('full', d.guarnicoes.length === CONFIG.maxGuarnicoes);
-  $('#swSalad').setAttribute('aria-checked', d.salada);
+  cs.textContent = `${d.saladas.length}/${CONFIG.maxSalada}`; cs.classList.toggle('full', d.saladas.length === CONFIG.maxSalada);
   $('#bQty').textContent = d.qty;
   const add = $('#addBtn'), falta = p.escolhe - d.proteinas.length, semG = d.guarnicoes.length === 0;
-  add.disabled = falta > 0 || semG;                        // precisa de proteína(s) e ao menos 1 guarnição
+  add.disabled = falta > 0 || semG;                        // precisa de proteína(s) e ao menos 1 guarnição; salada é opcional
   add.textContent = falta > 0 ? `Escolha ${falta} proteína${falta > 1 ? 's' : ''}`
     : semG ? 'Escolha 1 guarnição'
     : `Adicionar · ${brl(p.preco * d.qty)}`;
@@ -812,7 +824,10 @@ $('#bBody').addEventListener('click', e => {
   const d = draft, p = d.plano;
   const b = e.target.closest('.opt');
   if (b) {
-    const isP = b.dataset.k === 'p', arr = isP ? d.proteinas : d.guarnicoes, max = isP ? p.escolhe : CONFIG.maxGuarnicoes, v = b.dataset.v;
+    const isP = b.dataset.k === 'p', isG = b.dataset.k === 'g';
+    const arr = isP ? d.proteinas : isG ? d.guarnicoes : d.saladas;
+    const max = isP ? p.escolhe : isG ? CONFIG.maxGuarnicoes : CONFIG.maxSalada;
+    const v = b.dataset.v;
     const i = arr.indexOf(v);
     if (i > -1) arr.splice(i, 1);
     else if (arr.length < max) arr.push(v);
@@ -820,7 +835,6 @@ $('#bBody').addEventListener('click', e => {
     else { shake(b.parentElement); return; }
     syncBuilder();
   }
-  if (e.target.closest('#swSalad')) { d.salada = !d.salada; syncBuilder(); }
 });
 $('#bBody').addEventListener('input', e => { if (e.target.id === 'bObs') draft.obs = e.target.value; });
 $('#bFoot').addEventListener('click', e => {
@@ -829,17 +843,27 @@ $('#bFoot').addEventListener('click', e => {
   if (e.target.closest('#addBtn')) tryAdd();
 });
 
-/* Se faltar guarnição (menos de 4), avisa antes de adicionar */
+/* Se faltar guarnição e/ou salada (menos que o máximo), avisa antes de adicionar.
+   Guarnição é obrigatória (mín. 1); salada é opcional — o aviso só serve de lembrete. */
+let askState = { faltaG: 0, faltaS: 0 };
 function tryAdd() {
   const d = draft;
   if (d.proteinas.length < d.plano.escolhe) return;
   if (!d.guarnicoes.length) { shake($('#optG')); return; }
-  if (d.guarnicoes.length < CONFIG.maxGuarnicoes) askMoreG(); else addToCart();
+  const faltaG = CONFIG.maxGuarnicoes - d.guarnicoes.length;
+  const faltaS = CONFIG.maxSalada - d.saladas.length;
+  if (faltaG > 0 || faltaS > 0) askMoreG(faltaG, faltaS); else addToCart();
 }
-function askMoreG() {
-  const falta = CONFIG.maxGuarnicoes - draft.guarnicoes.length;
-  $('#mgTitle').innerHTML = `Você pode escolher mais <em>${falta}</em> ${falta > 1 ? 'guarnições' : 'guarnição'}`;
-  $('#mgText').textContent = `Seu prato leva até ${CONFIG.maxGuarnicoes} guarnições.`;
+function askMoreG(faltaG, faltaS) {
+  askState = { faltaG, faltaS };
+  const partes = [];
+  if (faltaG > 0) partes.push(`<em>${faltaG}</em> ${faltaG > 1 ? 'guarnições' : 'guarnição'}`);
+  if (faltaS > 0) partes.push(`<em>${faltaS}</em> ${faltaS > 1 ? 'opções de salada' : 'opção de salada'}`);
+  $('#mgTitle').innerHTML = `Você pode escolher mais <br>${partes.join(' e <br>')}`;
+  const limites = [];
+  if (faltaG > 0) limites.push(`até ${CONFIG.maxGuarnicoes} guarnições`);
+  if (faltaS > 0) limites.push(`até ${CONFIG.maxSalada} opções de salada`);
+  $('#mgText').innerHTML = `Seu prato leva ${limites.join(' <br>e ')}.`;
   const m = $('#moreG');
   m.hidden = false; current = m;
   requestAnimationFrame(() => requestAnimationFrame(() => m.classList.add('open')));
@@ -851,9 +875,10 @@ function closeMoreG() {
   setTimeout(() => { m.hidden = true; }, reduce ? 0 : 250);
   current = $('#builder');
 }
-$('#mgPick').addEventListener('click', () => {            // Escolher: volta pro prato, na lista de guarnições
+$('#mgPick').addEventListener('click', () => {            // Escolher: volta pro prato, na lista que ainda falta
   closeMoreG();
-  const alvo = $$('#optG .opt').find(b => b.getAttribute('aria-pressed') !== 'true');
+  const sel = askState.faltaG > 0 ? '#optG' : '#optS';
+  const alvo = $$(`${sel} .opt`).find(b => b.getAttribute('aria-pressed') !== 'true');
   if (alvo) { alvo.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); setTimeout(() => alvo.focus({ preventScroll: true }), 80); }
 });
 $('#mgGo').addEventListener('click', () => { closeMoreG(); addToCart(); });   // Continuar: segue sem completar
@@ -861,18 +886,32 @@ $('#moreG').addEventListener('click', e => { if (e.target === e.currentTarget) c
 
 function addToCart() {
   const d = draft, p = d.plano;
-  cart.push({ uid: ++uid, kind: 'prato', nome: p.titulo2, preco: p.preco, qty: d.qty, img: p.img,
-    proteinas: [...d.proteinas], guarnicoes: [...d.guarnicoes], salada: d.salada, obs: d.obs.trim() });
+  const uidNovo = ++uid;
+  cart.push({ uid: uidNovo, kind: 'prato', nome: p.titulo2, preco: p.preco, qty: d.qty, img: p.img,
+    proteinas: [...d.proteinas], guarnicoes: [...d.guarnicoes], saladas: [...d.saladas], obs: d.obs.trim() });
+  lastAdded = { uid: uidNovo, plano: p, proteinas: [...d.proteinas], guarnicoes: [...d.guarnicoes], saladas: [...d.saladas], obs: d.obs.trim(), qty: d.qty };
   save();
   closeSheet($('#builder'), false);
   updateBar();
   setTimeout(goCheckout, reduce ? 0 : 250);            // vai direto para o check-out
 }
 
+/* Se o x da tela de bebidas for clicado logo após montar um prato, volta pro builder com as mesmas escolhas */
+function reopenBuilderFromDrinks() {
+  if (!lastAdded) return false;
+  cart = cart.filter(x => x.uid !== lastAdded.uid);
+  save(); updateBar();
+  closeSheet($('#cart'), false);
+  const la = lastAdded; lastAdded = null;
+  openBuilder(la.plano.id, la);
+  return true;
+}
+
 /* Abre o pedido já na tela de bebidas — só chamada logo após montar um prato */
 function goCheckout() {
   openDrink = null;
   drinksBaseline = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0);
+  prevStep = 'list';
   step = 'drinks';
   renderCart(); openSheet($('#cart'));
 }
@@ -894,7 +933,7 @@ function lineHTML(it) {
     ? `<ul>
         <li>${esc(it.proteinas.join(' + '))}</li>
         <li>${it.guarnicoes.length ? esc(it.guarnicoes.join(', ')) : 'Sem guarnições'}</li>
-        ${it.salada ? `<li>${esc(CONFIG.salada)}</li>` : ''}
+        <li>${it.saladas.length ? esc(it.saladas.join(', ')) : 'Sem salada'}</li>
         ${it.obs ? `<li>Obs.: ${esc(it.obs)}</li>` : ''}
       </ul>` : '<ul></ul>';
   return `<div class="line">
@@ -973,6 +1012,7 @@ $('#viewOrder').addEventListener('click', e => {
 
 function renderCart() {
   const body = $('#cBody'), foot = $('#cFoot');
+  $('#cart').classList.toggle('sheet--full', step === 'drinks');
   $('#cTitle').textContent = { list: 'Seu pedido', drinks: 'Bebidas', form: 'Quase lá' }[step];
   if (step === 'list') {
     if (!cart.length) {
@@ -988,8 +1028,7 @@ function renderCart() {
     body.innerHTML = `<p class="drinks-intro">Quer uma bebida para acompanhar?</p>` + CONFIG.bebidas.map(drinkHTML).join('');
     const bebNow = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0);
     const bebLabel = bebNow > drinksBaseline ? 'Continuar' : (drinksBaseline > 0 ? 'Não obrigado, já escolhi.' : 'Continuar sem bebida');
-    foot.innerHTML = `<button class="btn btn--block" data-a="toform">${bebLabel}</button>
-      <button class="link" style="display:block;margin:6px auto 0" data-a="back">Voltar ao pedido</button>`;
+    foot.innerHTML = `<button class="btn btn--block" data-a="toform">${bebLabel}</button>`;
   } else {
     const ent = form.modo === 'entregar';
     body.innerHTML = `
@@ -1007,6 +1046,7 @@ function renderCart() {
         <input id="fTroco" type="text" inputmode="decimal" aria-label="Troco para quanto" placeholder="Troco para? — ex.: 50 (opcional)" value="${esc(form.troco)}"></div>
       <div class="field"><textarea id="fObs" maxlength="200" aria-label="Observação do pedido" placeholder="Observação (opcional) — ex.: talheres extras, sem gelo">${esc(form.obs)}</textarea></div>`;
     foot.innerHTML = `<div class="total"><button type="button" class="link vp-btn" data-a="toggleItems" style="padding:0">Ver pedido</button><b id="cTotal">${brl(total())}</b></div>
+      <button type="button" class="link" style="display:block;margin:2px auto 10px" data-a="drinks">Ver bebidas</button>
       <button class="btn btn--block" data-a="send">Enviar pedido no WhatsApp</button>
       <button class="btn btn--ghost btn--block" data-a="newDish" style="margin-top:10px;min-height:58px;font-size:18px">Montar outro prato</button>`;
   }
@@ -1032,7 +1072,7 @@ $('#cart').addEventListener('click', e => {
     changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
     refreshDrinks(`[data-a="${a}"][data-d="${t.dataset.d}"][data-t="${t.dataset.t}"][data-i="${t.dataset.i}"]`); return;
   }
-  if (a === 'drinks') { step = 'drinks'; openDrink = null; drinksBaseline = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0); renderCart(); return; }
+  if (a === 'drinks') { lastAdded = null; prevStep = step; step = 'drinks'; openDrink = null; drinksBaseline = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0); renderCart(); return; }
   if (a === 'toform') { step = 'form'; renderCart(); return; }
   if (a === 'inc' && it) { it.qty = Math.min(20, it.qty + 1); }
   if (a === 'dec' && it) { it.qty = Math.max(1, it.qty - 1); }
@@ -1041,7 +1081,7 @@ $('#cart').addEventListener('click', e => {
   if (a === 'close') closeSheet($('#cart'));
   if (a === 'toggleItems') { renderOrderView(); openSheet($('#viewOrder')); return; }
   if (a === 'newDish') { closeSheet($('#cart')); setTimeout(() => window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }), reduce ? 0 : 60); return; }
-  if (a === 'back') { step = 'list'; renderCart(); }
+  if (a === 'back') { step = prevStep; renderCart(); }
   if (a === 'checkout') { step = 'form'; renderCart(); }
   if (a === 'send') sendOrder();
 });
@@ -1077,7 +1117,7 @@ function sendOrder() {
     if (it.kind === 'prato') {
       msg += `  • Proteína: ${it.proteinas.join(' + ')}\n`;
       msg += `  • Guarnições: ${it.guarnicoes.length ? it.guarnicoes.join(', ') : 'nenhuma'}\n`;
-      if (it.salada) msg += `  • ${CONFIG.salada}\n`;
+      msg += `  • Salada: ${it.saladas.length ? it.saladas.join(', ') : 'nenhuma'}\n`;
       if (it.obs) msg += `  • Obs.: ${it.obs}\n`;
     }
   });
@@ -1154,10 +1194,23 @@ let logoClicks = 0;
 $('.brand').addEventListener('click', () => {
   if (document.body.classList.contains('print-mode')) { document.body.classList.remove('print-mode'); logoClicks = 0; return; }
   logoClicks++;
-  if (logoClicks >= 5) { document.body.classList.add('print-mode'); logoClicks = 0; }
+  if (logoClicks >= 5) { document.body.classList.add('print-mode'); logoClicks = 0; fitPrintMode(); }
 });
 document.addEventListener('click', e => { if (!e.target.closest('.brand')) logoClicks = 0; }, true);
 $('#heroBrand').addEventListener('click', () => { if (document.body.classList.contains('print-mode')) document.body.classList.remove('print-mode'); });
+
+/* Se tiver muitos itens no cardápio, encolhe as fontes (menos a hero) até caber na tela sem rolar */
+function fitPrintMode() {
+  const body = document.body, main = $('main');
+  body.style.setProperty('--pfs', '1');
+  requestAnimationFrame(() => {
+    let scale = 1;
+    while (main.scrollHeight > main.clientHeight + 1 && scale > 0.65) {
+      scale = +(scale - 0.05).toFixed(2);
+      body.style.setProperty('--pfs', scale);
+    }
+  });
+}
 
 /* ---------- Início ---------- */
 renderPlates();
