@@ -20,13 +20,22 @@ window.EDITAVEL = {
   gourmet: 'Ensopado de carne moída, Linguiça toscana, Frango a passarinha, Bode cozido',
 
   // EXECUTIVO — proteínas desse prato
-  executivo: 'Carne do sol, Cupim, Contra filé, Bode,',
+  executivo: 'Carne do sol, Cupim, Contra filé, Bode',
 
   // GUARNIÇÕES — opções que aparecem em todos os pratos na hora de montar
   guarnicoes: 'Baião, Arroz, Feijão caldo, Feijão verde, Feijão tropeiro, Macarrão, Farofa',
 
-  // SALADA — opções que aparecem para o cliente escolher (mesma lógica da guarnição)
-  salada: 'Salada Tropical, Vinagrete, Pepino em rodela, Quiabo, Tomate'
+  // Quantas guarnições o cliente pode escolher (número)
+  maxGuarnicoes: 4,
+
+  // SALADA — nome/título da seção
+  salada: 'Salada Tropical',
+
+  // SALADA — opções que o cliente pode escolher
+  saladaItens: 'Alface, Tomate, Cebola roxa, Pepino, Milho',
+
+  // Quantos itens de salada o cliente pode escolher (número)
+  maxSalada: 4
 };
 </script>
 <meta charset="UTF-8">
@@ -69,7 +78,7 @@ body {
   font-family: var(--f-body); font-size: 16px; line-height: 1.5;
   -webkit-tap-highlight-color: transparent;
 }
-body.lock { overflow: hidden; }
+body.lock { overflow: hidden; position: fixed; inset: 0; width: 100%; }
 img { display: block; max-width: 100%; }
 button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
 h1, h2, h3, p, ul { margin: 0; }
@@ -298,7 +307,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .empty { text-align: center; padding: 34px 10px; color: var(--muted); }
 .total { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
 .total .link { font-size: 15px; text-decoration: underline; }
-.vp-btn { color: #fff; font-size: 18px; font-weight: 700; text-decoration: underline; }
+.vp-btn { color: #fff; font-size: 33px; font-weight: 700; text-decoration: underline; }
 .sheet--full .panel { width: 100%; max-width: none; height: 100%; max-height: none; border-radius: 0; border: 0; }
 .total span { color: var(--muted); }
 .total b { font-size: 30px; color: var(--gold); }
@@ -341,10 +350,10 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .drink.open .chev { transform: rotate(-135deg); margin: 4px 4px 0 2px; }
 .drink-opts { display: grid; gap: 4px; padding: 0 14px 12px; }
 .drink-opts[hidden] { display: none; }
-.d-sub { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 12px 0 4px; margin-top: 8px; border-top: 1px solid var(--line); font-size: 14px; }
+.d-sub { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 12px 0 6px; margin-top: 8px; border-top: 1px solid var(--line); }
 .d-sub:first-child { margin-top: 0; padding-top: 2px; border-top: 0; }
-.d-sub b { color: var(--cream); font-weight: 700; }
-.d-sub span { color: var(--gold); font-weight: 700; }
+.d-sub b { color: var(--cream); font-weight: 800; font-size: 19px; }
+.d-sub span { color: var(--gold); font-weight: 700; font-size: 13px; }
 .d-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0 0 6px; }
 .d-row b { font-weight: 500; font-size: 15px; }
 .qty button.off { opacity: .35; }
@@ -369,7 +378,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 /* ---------- Modo print: 5 cliques na logo (só hero + pratos, 2 colunas, sem rolar) ---------- */
 .brand { cursor: pointer; }
 body.print-mode #heroBrand { cursor: pointer; }
-body.print-mode { overflow: hidden; height: 100dvh; --pfs: 1; }
+body.print-mode { overflow: hidden; height: 100dvh; }
 body.print-mode .top { display: none; }
 body.print-mode main {
   height: 100dvh; overflow: hidden; padding-top: 0 !important;
@@ -382,24 +391,23 @@ body.print-mode .hero .script { font-size: clamp(24px, 7vw, 44px); margin-top: -
 body.print-mode #pratos { padding: 0; }
 body.print-mode .plates { grid-template-columns: 1fr 1fr !important; gap: 8px; }
 body.print-mode .plate { padding: 20px 8px 8px; }
-body.print-mode .plate .price { top: 6px; right: 6px; font-size: calc(11px * var(--pfs)); padding: 1px 7px; line-height: 1.3; }
-body.print-mode .plate .price small { font-size: calc(9px * var(--pfs)); }
+body.print-mode .plate .price { top: 6px; right: 6px; font-size: 11px; padding: 1px 7px; line-height: 1.3; }
+body.print-mode .plate .price small { font-size: 9px; }
 body.print-mode .plate .row { grid-template-columns: 1fr; }
-body.print-mode .plate .t1 { font-size: calc(10px * var(--pfs)); }
-body.print-mode .plate .t2 { font-size: calc(14px * var(--pfs)); }
-body.print-mode .plate ul { font-size: calc(12px * var(--pfs)); }
-body.print-mode .plate .photo { margin-top: 6px; display: flex; justify-content: center; }
-body.print-mode .plate .photo img { width: 85%; height: auto; }
+body.print-mode .plate .t1 { font-size: 10px; }
+body.print-mode .plate .t2 { font-size: 14px; }
+body.print-mode .plate ul { font-size: 10px; }
+body.print-mode .plate .photo { margin-top: 6px; }
+body.print-mode .plate .photo img { width: 100%; }
 body.print-mode .plate .btn { display: none; }
 body.print-mode .final, body.print-mode footer, body.print-mode #cartBar { display: none !important; }
 .print-salad { display: none; }
 body.print-mode .print-salad {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  grid-column: 1 / -1; height: auto; min-height: 64px; padding: 16px 10px; text-align: center;
+  grid-column: 1 / -1; height: auto; min-height: 44px; padding: 10px 8px; text-align: center;
 }
-body.print-mode .print-salad b { font-size: calc(15px * var(--pfs)); color: var(--gold); text-transform: uppercase; }
-body.print-mode .print-salad small { display: block; margin-top: 4px; font-size: calc(13px * var(--pfs)); color: var(--muted); line-height: 1.3; }
-body.print-mode .print-salad small .cnt-frase { color: #fff; font-weight: 700; font-size: calc(14px * var(--pfs)); }
+body.print-mode .print-salad b { font-size: 15px; color: var(--gold); text-transform: uppercase; }
+body.print-mode .print-salad small { display: block; margin-top: 4px; font-size: 11px; color: var(--muted); line-height: 1.3; }
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
@@ -442,7 +450,7 @@ a.pill:hover { background: rgba(242, 196, 109, .12); }
 
 </style>
 </head>
-<body>
+<body class="lock">
 
 <!-- Loading inicial -->
 <div id="splash" aria-hidden="true">
@@ -504,7 +512,7 @@ a.pill:hover { background: rgba(242, 196, 109, .12); }
 </button>
 
 <!-- Sheet: montar prato -->
-<div class="sheet" id="builder" role="dialog" aria-modal="true" aria-labelledby="bTitle" hidden>
+<div class="sheet sheet--full" id="builder" role="dialog" aria-modal="true" aria-labelledby="bTitle" hidden>
   <div class="back" data-close></div>
   <div class="panel">
     <div class="head"><h2 id="bTitle"></h2><button class="x" data-close aria-label="Fechar">×</button></div>
@@ -545,7 +553,7 @@ a.pill:hover { background: rgba(242, 196, 109, .12); }
       <div class="msec"><h3>Sobre</h3><p id="sobre"></p></div>
       <div class="msec"><h3>Horário de funcionamento</h3><div class="hrs" id="horas"></div></div>
       <div class="msec"><h3>Perguntas frequentes</h3><div class="faq" id="faq"></div></div>
-      <div class="msec"><h3>Outros sites</h3><div class="pills" id="sites"></div></div>
+      <div class="msec"><div class="pills" id="sites"></div></div>
       <div class="mk">
         <p>Tenha um site assim.</p>
         <a class="btn btn--block" id="mkBtn" target="_blank" rel="noopener" style="min-height:44px">Quero um site assim</a>
@@ -575,7 +583,7 @@ const IMG = {
 </script>
 <script>
 /* Segurança: se algo falhar no script principal, o splash some do mesmo jeito */
-setTimeout(function () { var s = document.getElementById('splash'); if (s) s.classList.add('done'); document.body.classList.add('ready'); }, 2500);
+setTimeout(function () { var s = document.getElementById('splash'); if (s) s.classList.add('done'); document.body.classList.add('ready'); document.body.classList.remove('lock'); }, 2500);
 </script>
 <script>
 'use strict';
@@ -595,10 +603,11 @@ const EDIT = window.EDITAVEL || {};
 const listar = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);   // "A, B, C" -> ['A','B','C']
 const CONFIG = {
   nome: 'Rancharia',
-  whatsapp: '557488052568',
-  maxGuarnicoes: 4,
-  maxSalada: 4,
-  salada: listar(EDIT.salada),
+  whatsapp: '5574988534600',
+  maxGuarnicoes: Number(EDIT.maxGuarnicoes) || 4,
+  salada: EDIT.salada,
+  saladaItens: listar(EDIT.saladaItens),
+  maxSalada: Number(EDIT.maxSalada) || 4,
   planos: [
     { id: 'classica', titulo1: 'Com uma proteína', titulo2: 'Clássica', preco: 15, escolhe: 1,
       proteinas: listar(EDIT.classica), img: FOTO('classica') },
@@ -613,18 +622,18 @@ const CONFIG = {
   // Tela de bebidas mostrada ao finalizar (⚠️ CONFERIR TODOS OS PREÇOS E MARCAS)
   // Cada tamanho traz 3 opções (itens); o preço é do tamanho, igual pros 3 itens dele
   bebidas: [
-    { id: 'refri', emoji: '🥤', nome: 'Refrigerante', desc: 'Lata, 1L ou 2L',
+    { id: 'refri', emoji: '🥤', nome: 'Refrigerante', desc: 'Lata, 1 Litro ou 2 Litros',
       tamanhos: [
         { nome: 'Lata', preco: 5,  itens: ['Coca-Cola', 'Guaraná Antarctica', 'Fanta Laranja'] },
-        { nome: '1L',   preco: 8,  itens: ['Coca-Cola', 'Guaraná Antarctica', 'Fanta Laranja'] },
-        { nome: '2L',   preco: 12, itens: ['Coca-Cola', 'Guaraná Antarctica', 'Fanta Laranja'] }
+        { nome: '1 Litro', preco: 8,  itens: ['Coca-Cola', 'Guaraná Antarctica', 'Fanta Laranja'] },
+        { nome: '2 Litros', preco: 12, itens: ['Coca-Cola', 'Guaraná Antarctica', 'Fanta Laranja'] }
       ] },
-    { id: 'cerveja', emoji: '🍺', nome: 'Cerveja', desc: 'Piriguete, long neck, 600ml e 1L',
+    { id: 'cerveja', emoji: '🍺', nome: 'Cerveja', desc: 'Piriguete, long neck, 600ml e 1 Litro',
       tamanhos: [
         { nome: 'Piriguete', preco: 4,  itens: ['Skol', 'Brahma', 'Antarctica'] },
         { nome: 'Long neck', preco: 8,  itens: ['Heineken', 'Budweiser', 'Original'] },
         { nome: '600ml',     preco: 12, itens: ['Skol', 'Brahma', 'Antarctica'] },
-        { nome: '1L',        preco: 16, itens: ['Skol', 'Brahma', 'Antarctica'] }
+        { nome: '1 Litro',   preco: 16, itens: ['Skol', 'Brahma', 'Antarctica'] }
       ] },
     { id: 'suco', emoji: '🧃', nome: 'Suco', desc: '500ml · preço único',
       tamanhos: [
@@ -632,7 +641,7 @@ const CONFIG = {
       ] }
   ],
   // Menu hambúrguer (⚠️ conferir os textos e colocar os links)
-  sobre: 'A Rancharia serve pratos montados por você: escolha a proteína, capriche nas guarnições e monte sua salada. Tudo em poucos toques, direto pelo WhatsApp.',
+  sobre: 'A Rancharia serve pratos montados por você: escolha a proteína, capriche nas guarnições e leve a Salada Tropical incluída. Tudo em poucos toques, direto pelo WhatsApp.',
   // Horário de funcionamento (⚠️ CONFERIR com o dono os dias e horas reais)
   horarios: [
     ['Segunda a sexta', '11h às 15h'],
@@ -641,7 +650,7 @@ const CONFIG = {
   ],
   faq: [
     ['Como faço meu pedido?', 'Escolha um prato, monte com a proteína e as guarnições e finalize. O pedido é enviado pelo WhatsApp.'],
-    ['Quantas guarnições e opções de salada posso escolher?', 'De 1 a 4 guarnições e de 1 a 4 opções de salada por prato.'],
+    ['Quantas guarnições posso escolher?', 'De 1 a 4 guarnições e de 1 a 4 itens de salada por prato, do jeito que preferir.'],
     ['Vocês entregam?', 'Sim. Ao finalizar, escolha Entrega e informe o endereço. A taxa é combinada com a gente no WhatsApp.'],
     ['Posso comer no local ou retirar?', 'Pode sim. Ao finalizar, escolha Comer aqui (com o número da mesa), Retirar ou Entrega.']
   ],
@@ -666,14 +675,12 @@ let cart = [];
 try { localStorage.removeItem(KEY); } catch (e) {} // limpa restos de testes antigos
 let uid = Date.now();
 let draft = null;                 // prato em montagem
-let step = 'list';                // etapa do pedido: list | drinks | form
-let prevStep = 'list';            // pra onde voltar ao sair da tela de bebidas
-let lastAdded = null;             // último prato adicionado, pra reabrir o builder se cancelar na tela de bebidas
+let step = 'list';                // etapa do pedido: list | form
 let openDrink = null;             // card de bebida expandido
 let drinksBaseline = 0;            // qtd. de bebidas que já existiam no pedido ao abrir esta tela
 let current = null;               // sheet/modal aberto
 let lastFocus = null;
-const form = { nome: '', modo: 'local', mesa: '', end: '', pag: 'pix', troco: '', obs: '' };
+const form = { nome: '', modo: 'local', mesa: '', bairro: '', rua: '', numero: '', pag: 'pix', troco: '', obs: '' };
 
 function load() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } }
 function save() { try { localStorage.setItem(KEY, JSON.stringify(cart)); } catch (e) { /* modo privado */ } }
@@ -716,11 +723,11 @@ function renderPlates() {
         </div>
         <div class="photo"><img src="${p.img}" alt="Prato ${esc(p.titulo2)}" loading="lazy" width="298" height="220"></div>
       </div>
-      <button class="btn" data-plano="${p.id}">Montar este prato</button>
+      <button class="btn" data-plano="${p.id}">Montar esse prato</button>
     </article>`).join('') + `
     <article class="plate print-salad">
-      <b>Salada</b>
-      <small><b class="cnt-frase">Escolha até ${CONFIG.maxSalada} opções</b>: ${esc(CONFIG.salada.join(', '))}</small>
+      <b>${esc(CONFIG.salada)}</b>
+      <small>${esc(CONFIG.saladaItens.join(', '))}</small>
     </article>`;
 }
 
@@ -754,23 +761,14 @@ document.addEventListener('keydown', e => {
     else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
   }
 });
-$$('[data-close]').forEach(b => b.addEventListener('click', () => {
-  const sheet = b.closest('.sheet');
-  if (sheet && sheet.id === 'cart' && step === 'drinks' && b.classList.contains('x')) {
-    if (reopenBuilderFromDrinks()) return;                 // veio de montar prato: reabre o builder com as mesmas escolhas
-    step = prevStep; renderCart(); return;                 // senão, volta sem fechar nem alterar o pedido
-  }
-  closeSheet(sheet);
-}));
+$$('[data-close]').forEach(b => b.addEventListener('click', () => closeSheet(b.closest('.sheet'))));
 
 /* ---------- 4) Montar prato ---------- */
 const optBtn = (k, v) => `<button type="button" class="opt" data-k="${k}" data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${esc(v)}</button>`;
 
-function openBuilder(id, prefill) {
+function openBuilder(id) {
   const p = CONFIG.planos.find(x => x.id === id);
-  draft = prefill
-    ? { plano: p, proteinas: [...prefill.proteinas], guarnicoes: [...prefill.guarnicoes], saladas: [...prefill.saladas], obs: prefill.obs, qty: prefill.qty }
-    : { plano: p, proteinas: [], guarnicoes: [], saladas: [], obs: '', qty: 1 };
+  draft = { plano: p, proteinas: [], guarnicoes: [], salada: [], obs: '', qty: 1 };
   $('#bTitle').innerHTML = `${esc(p.titulo2)}<small>${esc(p.titulo1)} · ${brl(p.preco)}</small>`;
   $('#bBody').innerHTML = `
     <div class="grp">
@@ -778,20 +776,20 @@ function openBuilder(id, prefill) {
       <div class="opts one" id="optP">${p.proteinas.map(n => optBtn('p', n)).join('')}</div>
     </div>
     <div class="grp">
-      <div class="grp-h"><h3>Guarnições</h3><span id="cntG"></span></div>
+      <div class="grp-h"><h3 id="guarnicoesTitle">Guarnições</h3><span id="cntG"></span></div>
       <div class="opts" id="optG">${CONFIG.guarnicoes.map(n => optBtn('g', n)).join('')}</div>
     </div>
     <div class="grp">
-      <div class="grp-h"><h3>Salada</h3><span id="cntS"></span></div>
-      <div class="opts" id="optS">${CONFIG.salada.map(n => optBtn('s', n)).join('')}</div>
+      <div class="grp-h"><h3>${esc(CONFIG.salada)}</h3><span id="cntS"></span></div>
+      <div class="opts" id="optS">${CONFIG.saladaItens.map(n => optBtn('s', n)).join('')}</div>
     </div>
     <div class="grp">
       <label class="lbl" for="bObs">Alguma observação?</label>
-      <textarea id="bObs" maxlength="140" placeholder="Ex.: sem cebola, pouco sal...">${esc(draft.obs || '')}</textarea>
+      <textarea id="bObs" maxlength="140" placeholder="Ex.: sem cebola, pouco sal..."></textarea>
     </div>`;
   $('#bFoot').innerHTML = `
     <div class="foot-row">
-      <div class="qty"><button type="button" data-q="-1" aria-label="Menos um">−</button><output id="bQty">${draft.qty}</output><button type="button" data-q="1" aria-label="Mais um">+</button></div>
+      <div class="qty"><button type="button" data-q="-1" aria-label="Menos um">−</button><output id="bQty">1</output><button type="button" data-q="1" aria-label="Mais um">+</button></div>
       <button type="button" class="btn" id="addBtn"></button>
     </div>`;
   syncBuilder();
@@ -802,17 +800,17 @@ function openBuilder(id, prefill) {
 function syncBuilder() {
   const d = draft, p = d.plano;
   $$('#bBody .opt').forEach(b => {
-    const arr = b.dataset.k === 'p' ? d.proteinas : b.dataset.k === 'g' ? d.guarnicoes : d.saladas;
+    const arr = b.dataset.k === 'p' ? d.proteinas : b.dataset.k === 'g' ? d.guarnicoes : d.salada;
     const on = arr.includes(b.dataset.v);
     b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
   });
   const cp = $('#cntP'), cg = $('#cntG'), cs = $('#cntS');
   cp.textContent = `${d.proteinas.length}/${p.escolhe}`; cp.classList.toggle('full', d.proteinas.length === p.escolhe);
   cg.textContent = `${d.guarnicoes.length}/${CONFIG.maxGuarnicoes}`; cg.classList.toggle('full', d.guarnicoes.length === CONFIG.maxGuarnicoes);
-  cs.textContent = `${d.saladas.length}/${CONFIG.maxSalada}`; cs.classList.toggle('full', d.saladas.length === CONFIG.maxSalada);
+  cs.textContent = `${d.salada.length}/${CONFIG.maxSalada}`; cs.classList.toggle('full', d.salada.length === CONFIG.maxSalada);
   $('#bQty').textContent = d.qty;
   const add = $('#addBtn'), falta = p.escolhe - d.proteinas.length, semG = d.guarnicoes.length === 0;
-  add.disabled = falta > 0 || semG;                        // precisa de proteína(s) e ao menos 1 guarnição; salada é opcional
+  add.disabled = falta > 0 || semG;                         // precisa de proteína(s) e 1+ guarnição (salada é opcional)
   add.textContent = falta > 0 ? `Escolha ${falta} proteína${falta > 1 ? 's' : ''}`
     : semG ? 'Escolha 1 guarnição'
     : `Adicionar · ${brl(p.preco * d.qty)}`;
@@ -824,9 +822,9 @@ $('#bBody').addEventListener('click', e => {
   const d = draft, p = d.plano;
   const b = e.target.closest('.opt');
   if (b) {
-    const isP = b.dataset.k === 'p', isG = b.dataset.k === 'g';
-    const arr = isP ? d.proteinas : isG ? d.guarnicoes : d.saladas;
-    const max = isP ? p.escolhe : isG ? CONFIG.maxGuarnicoes : CONFIG.maxSalada;
+    const k = b.dataset.k, isP = k === 'p';
+    const arr = isP ? d.proteinas : k === 'g' ? d.guarnicoes : d.salada;
+    const max = isP ? p.escolhe : k === 'g' ? CONFIG.maxGuarnicoes : CONFIG.maxSalada;
     const v = b.dataset.v;
     const i = arr.indexOf(v);
     if (i > -1) arr.splice(i, 1);
@@ -843,27 +841,21 @@ $('#bFoot').addEventListener('click', e => {
   if (e.target.closest('#addBtn')) tryAdd();
 });
 
-/* Se faltar guarnição e/ou salada (menos que o máximo), avisa antes de adicionar.
-   Guarnição é obrigatória (mín. 1); salada é opcional — o aviso só serve de lembrete. */
-let askState = { faltaG: 0, faltaS: 0 };
+/* Se faltar guarnição e/ou salada, avisa antes de adicionar (mensagem combinada) */
 function tryAdd() {
   const d = draft;
   if (d.proteinas.length < d.plano.escolhe) return;
   if (!d.guarnicoes.length) { shake($('#optG')); return; }
   const faltaG = CONFIG.maxGuarnicoes - d.guarnicoes.length;
-  const faltaS = CONFIG.maxSalada - d.saladas.length;
+  const faltaS = CONFIG.maxSalada - d.salada.length;   // sugere salada mesmo com 0 escolhidos (mas não bloqueia o Adicionar)
   if (faltaG > 0 || faltaS > 0) askMoreG(faltaG, faltaS); else addToCart();
 }
 function askMoreG(faltaG, faltaS) {
-  askState = { faltaG, faltaS };
   const partes = [];
-  if (faltaG > 0) partes.push(`<em>${faltaG}</em> ${faltaG > 1 ? 'guarnições' : 'guarnição'}`);
-  if (faltaS > 0) partes.push(`<em>${faltaS}</em> ${faltaS > 1 ? 'opções de salada' : 'opção de salada'}`);
-  $('#mgTitle').innerHTML = `Você pode escolher mais <br>${partes.join(' e <br>')}`;
-  const limites = [];
-  if (faltaG > 0) limites.push(`até ${CONFIG.maxGuarnicoes} guarnições`);
-  if (faltaS > 0) limites.push(`até ${CONFIG.maxSalada} opções de salada`);
-  $('#mgText').innerHTML = `Seu prato leva ${limites.join(' <br>e ')}.`;
+  if (faltaG > 0) partes.push(`${faltaG} ${faltaG > 1 ? 'guarnições' : 'guarnição'}`);
+  if (faltaS > 0) partes.push(`${faltaS} ${faltaS > 1 ? 'itens de salada' : 'item de salada'}`);
+  $('#mgTitle').innerHTML = `Você pode escolher mais <em>${partes.join(' e ')}</em>`;
+  $('#mgText').textContent = `Seu prato leva até ${CONFIG.maxGuarnicoes} guarnições e ${CONFIG.maxSalada} itens de salada.`;
   const m = $('#moreG');
   m.hidden = false; current = m;
   requestAnimationFrame(() => requestAnimationFrame(() => m.classList.add('open')));
@@ -875,43 +867,28 @@ function closeMoreG() {
   setTimeout(() => { m.hidden = true; }, reduce ? 0 : 250);
   current = $('#builder');
 }
-$('#mgPick').addEventListener('click', () => {            // Escolher: volta pro prato, na lista que ainda falta
+$('#mgPick').addEventListener('click', () => {            // Escolher: leve rolagem até o título de Guarnições
   closeMoreG();
-  const sel = askState.faltaG > 0 ? '#optG' : '#optS';
-  const alvo = $$(`${sel} .opt`).find(b => b.getAttribute('aria-pressed') !== 'true');
-  if (alvo) { alvo.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' }); setTimeout(() => alvo.focus({ preventScroll: true }), 80); }
+  const alvo = $('#guarnicoesTitle');
+  if (alvo) alvo.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
 });
 $('#mgGo').addEventListener('click', () => { closeMoreG(); addToCart(); });   // Continuar: segue sem completar
 $('#moreG').addEventListener('click', e => { if (e.target === e.currentTarget) closeMoreG(); });
 
 function addToCart() {
   const d = draft, p = d.plano;
-  const uidNovo = ++uid;
-  cart.push({ uid: uidNovo, kind: 'prato', nome: p.titulo2, preco: p.preco, qty: d.qty, img: p.img,
-    proteinas: [...d.proteinas], guarnicoes: [...d.guarnicoes], saladas: [...d.saladas], obs: d.obs.trim() });
-  lastAdded = { uid: uidNovo, plano: p, proteinas: [...d.proteinas], guarnicoes: [...d.guarnicoes], saladas: [...d.saladas], obs: d.obs.trim(), qty: d.qty };
+  cart.push({ uid: ++uid, kind: 'prato', nome: p.titulo2, preco: p.preco, qty: d.qty, img: p.img,
+    proteinas: [...d.proteinas], guarnicoes: [...d.guarnicoes], salada: [...d.salada], obs: d.obs.trim() });
   save();
   closeSheet($('#builder'), false);
   updateBar();
   setTimeout(goCheckout, reduce ? 0 : 250);            // vai direto para o check-out
 }
 
-/* Se o x da tela de bebidas for clicado logo após montar um prato, volta pro builder com as mesmas escolhas */
-function reopenBuilderFromDrinks() {
-  if (!lastAdded) return false;
-  cart = cart.filter(x => x.uid !== lastAdded.uid);
-  save(); updateBar();
-  closeSheet($('#cart'), false);
-  const la = lastAdded; lastAdded = null;
-  openBuilder(la.plano.id, la);
-  return true;
-}
-
 /* Abre o pedido já na tela de bebidas — só chamada logo após montar um prato */
 function goCheckout() {
   openDrink = null;
   drinksBaseline = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0);
-  prevStep = 'list';
   step = 'drinks';
   renderCart(); openSheet($('#cart'));
 }
@@ -933,7 +910,7 @@ function lineHTML(it) {
     ? `<ul>
         <li>${esc(it.proteinas.join(' + '))}</li>
         <li>${it.guarnicoes.length ? esc(it.guarnicoes.join(', ')) : 'Sem guarnições'}</li>
-        <li>${it.saladas.length ? esc(it.saladas.join(', ')) : 'Sem salada'}</li>
+        ${it.salada && it.salada.length ? `<li>${esc(CONFIG.salada)}: ${esc(it.salada.join(', '))}</li>` : ''}
         ${it.obs ? `<li>Obs.: ${esc(it.obs)}</li>` : ''}
       </ul>` : '<ul></ul>';
   return `<div class="line">
@@ -1012,8 +989,8 @@ $('#viewOrder').addEventListener('click', e => {
 
 function renderCart() {
   const body = $('#cBody'), foot = $('#cFoot');
-  $('#cart').classList.toggle('sheet--full', step === 'drinks');
   $('#cTitle').textContent = { list: 'Seu pedido', drinks: 'Bebidas', form: 'Quase lá' }[step];
+  $('#cart').classList.toggle('sheet--full', step === 'form' || step === 'drinks');
   if (step === 'list') {
     if (!cart.length) {
       body.innerHTML = '<div class="empty">Seu pedido está vazio.<br>Escolha um prato para começar.</div>';
@@ -1023,30 +1000,40 @@ function renderCart() {
     body.innerHTML = cart.map(lineHTML).join('');
     foot.innerHTML = `<div class="total"><span>Total</span><b id="cTotal">${brl(total())}</b></div>
       <button class="btn btn--block" data-a="checkout">Finalizar pedido</button>
-      <button class="link" style="display:block;margin:6px auto 0" data-a="drinks">Adicionar bebida</button>`;
+      <button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Adicionar bebida</button>`;
   } else if (step === 'drinks') {
     body.innerHTML = `<p class="drinks-intro">Quer uma bebida para acompanhar?</p>` + CONFIG.bebidas.map(drinkHTML).join('');
     const bebNow = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0);
     const bebLabel = bebNow > drinksBaseline ? 'Continuar' : (drinksBaseline > 0 ? 'Não obrigado, já escolhi.' : 'Continuar sem bebida');
-    foot.innerHTML = `<button class="btn btn--block" data-a="toform">${bebLabel}</button>`;
+    foot.innerHTML = `<button class="btn btn--block" data-a="toform">${bebLabel}</button>
+      <button class="link" style="display:block;margin:6px auto 0" data-a="back">Voltar ao pedido</button>`;
   } else {
     const ent = form.modo === 'entregar';
     body.innerHTML = `
-      <div class="field"><input id="fNome" type="text" autocomplete="name" aria-label="Seu nome" placeholder="Seu nome — ex.: Maria" value="${esc(form.nome)}"></div>
+      <div class="field"><input id="fNome" type="text" autocomplete="name" aria-label="Seu nome" placeholder="Seu nome" value="${esc(form.nome)}"></div>
       <div class="field"><span class="lbl">Como quer receber?</span>
         <div class="seg">${seg('modo', [['local', 'Comer aqui'], ['retirar', 'Retirar'], ['entregar', 'Entrega']], form.modo)}</div></div>
       <div class="field" id="fMesaW" ${form.modo === 'local' ? '' : 'hidden'}>
         <input id="fMesa" type="text" inputmode="numeric" aria-label="Número da mesa" placeholder="Número da mesa — ex.: 12" value="${esc(form.mesa)}"></div>
       <div class="field" id="fEndW" ${ent ? '' : 'hidden'}>
-        <input id="fEnd" type="text" autocomplete="street-address" aria-label="Endereço e bairro" placeholder="Endereço — ex.: Rua das Flores, 45" value="${esc(form.end)}">
+        <input id="fBairro" type="text" autocomplete="address-level2" aria-label="Bairro" placeholder="Bairro" value="${esc(form.bairro)}" style="margin-bottom:8px">
+        <div style="display:flex;gap:8px">
+          <input id="fRua" type="text" autocomplete="street-address" aria-label="Rua" placeholder="Rua" value="${esc(form.rua)}" style="flex:2">
+          <input id="fNumero" type="text" inputmode="numeric" aria-label="Número da casa" placeholder="Nº" value="${esc(form.numero)}" style="flex:1;min-width:0">
+        </div>
         <p class="note">A taxa de entrega é combinada com a gente no WhatsApp.</p></div>
       <div class="field" id="fPagW" ${ent ? '' : 'hidden'}><span class="lbl">Pagamento</span>
         <div class="seg">${seg('pag', [['pix', 'Pix'], ['cartao', 'Cartão'], ['dinheiro', 'Dinheiro']], form.pag)}</div></div>
       <div class="field" id="fTrocoW" ${ent && form.pag === 'dinheiro' ? '' : 'hidden'}>
         <input id="fTroco" type="text" inputmode="decimal" aria-label="Troco para quanto" placeholder="Troco para? — ex.: 50 (opcional)" value="${esc(form.troco)}"></div>
       <div class="field"><textarea id="fObs" maxlength="200" aria-label="Observação do pedido" placeholder="Observação (opcional) — ex.: talheres extras, sem gelo">${esc(form.obs)}</textarea></div>`;
-    foot.innerHTML = `<div class="total"><button type="button" class="link vp-btn" data-a="toggleItems" style="padding:0">Ver pedido</button><b id="cTotal">${brl(total())}</b></div>
-      <button type="button" class="link" style="display:block;margin:2px auto 10px" data-a="drinks">Ver bebidas</button>
+    foot.innerHTML = `<div class="total">
+      <span style="display:flex;align-items:baseline;gap:16px">
+        <button type="button" class="link vp-btn" data-a="toggleItems" style="padding:0">Ver pedido</button>
+        <button type="button" class="link" data-a="drinks" style="padding:0;color:#fff;font-weight:700;font-size:16px;text-decoration:underline">Ver bebida</button>
+      </span>
+      <span style="text-align:right"><small style="display:block;color:var(--muted);font-size:13px;font-weight:600">Total</small><b id="cTotal" style="font-size:24px">${brl(total())}</b></span>
+    </div>
       <button class="btn btn--block" data-a="send">Enviar pedido no WhatsApp</button>
       <button class="btn btn--ghost btn--block" data-a="newDish" style="margin-top:10px;min-height:58px;font-size:18px">Montar outro prato</button>`;
   }
@@ -1067,12 +1054,18 @@ $('#cart').addEventListener('click', e => {
     return;
   }
   const a = t.dataset.a, it = cart.find(x => x.uid === +t.dataset.u);
-  if (a === 'dtoggle') { openDrink = openDrink === t.dataset.d ? null : t.dataset.d; refreshDrinks(`[data-a="dtoggle"][data-d="${t.dataset.d}"]`); return; }
+  if (a === 'dtoggle') {
+    const willOpen = openDrink !== t.dataset.d;
+    openDrink = willOpen ? t.dataset.d : null;
+    refreshDrinks(`[data-a="dtoggle"][data-d="${t.dataset.d}"]`);
+    if (willOpen) { const el = $(`[data-a="dtoggle"][data-d="${t.dataset.d}"]`); if (el) el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); }
+    return;
+  }
   if (a === 'dinc' || a === 'ddec') {
     changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
     refreshDrinks(`[data-a="${a}"][data-d="${t.dataset.d}"][data-t="${t.dataset.t}"][data-i="${t.dataset.i}"]`); return;
   }
-  if (a === 'drinks') { lastAdded = null; prevStep = step; step = 'drinks'; openDrink = null; drinksBaseline = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0); renderCart(); return; }
+  if (a === 'drinks') { step = 'drinks'; openDrink = null; drinksBaseline = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0); renderCart(); return; }
   if (a === 'toform') { step = 'form'; renderCart(); return; }
   if (a === 'inc' && it) { it.qty = Math.min(20, it.qty + 1); }
   if (a === 'dec' && it) { it.qty = Math.max(1, it.qty - 1); }
@@ -1081,12 +1074,12 @@ $('#cart').addEventListener('click', e => {
   if (a === 'close') closeSheet($('#cart'));
   if (a === 'toggleItems') { renderOrderView(); openSheet($('#viewOrder')); return; }
   if (a === 'newDish') { closeSheet($('#cart')); setTimeout(() => window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }), reduce ? 0 : 60); return; }
-  if (a === 'back') { step = prevStep; renderCart(); }
+  if (a === 'back') { step = 'list'; renderCart(); }
   if (a === 'checkout') { step = 'form'; renderCart(); }
   if (a === 'send') sendOrder();
 });
 $('#cart').addEventListener('input', e => {
-  const m = { fNome: 'nome', fMesa: 'mesa', fEnd: 'end', fTroco: 'troco', fObs: 'obs' }[e.target.id];
+  const m = { fNome: 'nome', fMesa: 'mesa', fBairro: 'bairro', fRua: 'rua', fNumero: 'numero', fTroco: 'troco', fObs: 'obs' }[e.target.id];
   if (m) { form[m] = e.target.value; e.target.classList.remove('err'); }
 });
 
@@ -1095,7 +1088,8 @@ function sendOrder() {
   let bad = null;
   if (!form.nome.trim()) bad = $('#fNome');
   else if (form.modo === 'local' && !form.mesa.trim()) bad = $('#fMesa');
-  else if (form.modo === 'entregar' && !form.end.trim()) bad = $('#fEnd');
+  else if (form.modo === 'entregar' && !form.bairro.trim()) bad = $('#fBairro');
+  else if (form.modo === 'entregar' && !form.rua.trim()) bad = $('#fRua');
   if (bad) { bad.classList.add('err'); bad.focus(); shake(bad); toast('Preencha os campos em destaque'); return; }
 
   const modo = { retirar: 'Retirar no local', entregar: 'Entrega', local: 'Comer no local' }[form.modo];
@@ -1107,9 +1101,11 @@ function sendOrder() {
 
   msg += `*Cliente*\n`;
   msg += `Nome: ${form.nome.trim()}\n`;
-  msg += `Recebimento: ${modo}\n`;
   if (form.modo === 'local') msg += `Mesa: ${form.mesa.trim()}\n`;
-  if (form.modo === 'entregar') msg += `Endereço: ${form.end.trim()}\n`;
+  if (form.modo === 'entregar') {
+    msg += `Bairro: ${form.bairro.trim()}\n`;
+    msg += `Rua: ${form.rua.trim()}${form.numero.trim() ? ', nº ' + form.numero.trim() : ''}\n`;
+  }
 
   msg += `\n*Itens do pedido*\n`;
   cart.forEach(it => {
@@ -1117,7 +1113,7 @@ function sendOrder() {
     if (it.kind === 'prato') {
       msg += `  • Proteína: ${it.proteinas.join(' + ')}\n`;
       msg += `  • Guarnições: ${it.guarnicoes.length ? it.guarnicoes.join(', ') : 'nenhuma'}\n`;
-      msg += `  • Salada: ${it.saladas.length ? it.saladas.join(', ') : 'nenhuma'}\n`;
+      if (it.salada && it.salada.length) msg += `  • ${CONFIG.salada}: ${it.salada.join(', ')}\n`;
       if (it.obs) msg += `  • Obs.: ${it.obs}\n`;
     }
   });
@@ -1182,6 +1178,7 @@ function hideSplash() {
   if (splashDone) return; splashDone = true;
   $('#splash').classList.add('done');
   document.body.classList.add('ready');
+  document.body.classList.remove('lock');   // libera a rolagem só depois do loading
   // Clássica e Premium sobem em sequência, logo depois da animação do botão "Montar meu prato"
   $$('.plate.first-card').forEach((c, i) => setTimeout(() => c.classList.add('in'), reduce ? 0 : 900 + i * 150));
 }
@@ -1194,23 +1191,10 @@ let logoClicks = 0;
 $('.brand').addEventListener('click', () => {
   if (document.body.classList.contains('print-mode')) { document.body.classList.remove('print-mode'); logoClicks = 0; return; }
   logoClicks++;
-  if (logoClicks >= 5) { document.body.classList.add('print-mode'); logoClicks = 0; fitPrintMode(); }
+  if (logoClicks >= 5) { document.body.classList.add('print-mode'); logoClicks = 0; }
 });
 document.addEventListener('click', e => { if (!e.target.closest('.brand')) logoClicks = 0; }, true);
 $('#heroBrand').addEventListener('click', () => { if (document.body.classList.contains('print-mode')) document.body.classList.remove('print-mode'); });
-
-/* Se tiver muitos itens no cardápio, encolhe as fontes (menos a hero) até caber na tela sem rolar */
-function fitPrintMode() {
-  const body = document.body, main = $('main');
-  body.style.setProperty('--pfs', '1');
-  requestAnimationFrame(() => {
-    let scale = 1;
-    while (main.scrollHeight > main.clientHeight + 1 && scale > 0.65) {
-      scale = +(scale - 0.05).toFixed(2);
-      body.style.setProperty('--pfs', scale);
-    }
-  });
-}
 
 /* ---------- Início ---------- */
 renderPlates();
