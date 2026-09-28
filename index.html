@@ -11,7 +11,7 @@
 window.EDITAVEL = {
 
   // CLÁSSICA — proteínas desse prato
-  classica: 'Ensopado de carne moída, Linguiça toscana, macarronada de miojo',
+  classica: 'Ensopado de carne moída, Linguiça toscana',
 
   // PREMIUM — proteínas desse prato
   premium: 'Frango a passarinha, Bode cozido',
@@ -1085,20 +1085,20 @@ $('#cart').addEventListener('input', e => {
 
 /* Supabase — guarda o pedido em segundo plano (fetch nativo, sem SDK; nunca bloqueia o envio) */
 const SUPABASE_URL = 'https://svvvzwsajneesmuatcvc.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_ARLDqBsmhhfOUp6I2zKiw_9G7pQ5_O';
+const SUPABASE_KEY = 'sb_publishable_ARLDqBsmhhhfOUp6I2zKiw_9G7pQ5_O';
 function salvarPedidoSupabase(cliente, valorTotal) {
   try {
     fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`,
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
       body: JSON.stringify({ cliente: String(cliente).slice(0, 80), total: valorTotal }),
       keepalive: true
-    }).catch(err => console.warn('Supabase: pedido não salvo', err));
+    }).then(r => { if (!r.ok) r.text().then(t => console.warn('Supabase recusou o pedido', r.status, t)); })
+      .catch(err => console.warn('Supabase: pedido não salvo', err));
   } catch (err) {
     console.warn('Supabase: pedido não salvo', err);
   }
