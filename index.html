@@ -11,7 +11,7 @@
 window.EDITAVEL = {
 
   // CLÁSSICA — proteínas desse prato
-  classica: 'Ensopado de carne moída, Linguiça toscana',
+  classica: 'Ensopado de carne moída, Linguiça toscana, macarronada de miojo',
 
   // PREMIUM — proteínas desse prato
   premium: 'Frango a passarinha, Bode cozido',
@@ -1083,6 +1083,27 @@ $('#cart').addEventListener('input', e => {
   if (m) { form[m] = e.target.value; e.target.classList.remove('err'); }
 });
 
+/* Supabase — guarda o pedido em segundo plano (fetch nativo, sem SDK; nunca bloqueia o envio) */
+const SUPABASE_URL = 'https://svvvzwsajneesmuatcvc.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_ARLDqBsmhhfOUp6I2zKiw_9G7pQ5_O';
+function salvarPedidoSupabase(cliente, valorTotal) {
+  try {
+    fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({ cliente: String(cliente).slice(0, 80), total: valorTotal }),
+      keepalive: true
+    }).catch(err => console.warn('Supabase: pedido não salvo', err));
+  } catch (err) {
+    console.warn('Supabase: pedido não salvo', err);
+  }
+}
+
 /* Envio pelo WhatsApp */
 function sendOrder() {
   let bad = null;
@@ -1127,6 +1148,7 @@ function sendOrder() {
   }
   if (form.obs.trim()) msg += `\n*Observação geral*\n${form.obs.trim()}`;
 
+  salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100);   // segundo plano, não espera resposta
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
   setTimeout(() => {                                       // limpa o pedido depois de abrir o WhatsApp
     cart = []; save(); form.obs = '';
