@@ -11,7 +11,7 @@
 window.EDITAVEL = {
 
   // CLÁSSICA — proteínas desse prato
-  classica: 'Ensopado de carne moída, Linguiça toscana, uva',
+  classica: 'Ensopado de carne moída, Linguiça toscana',
 
   // PREMIUM — proteínas desse prato
   premium: 'Frango a passarinha, Bode cozido',
@@ -1086,7 +1086,7 @@ $('#cart').addEventListener('input', e => {
 /* Supabase — guarda o pedido em segundo plano (fetch nativo, sem SDK; nunca bloqueia o envio) */
 const SUPABASE_URL = 'https://svvvzwsajneesmuatcvc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ARLDqBsmhhhfOUp6I2zKiw_9G7pQ5_O';
-function salvarPedidoSupabase(cliente, valorTotal) {
+function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
   try {
     fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
       method: 'POST',
@@ -1095,7 +1095,7 @@ function salvarPedidoSupabase(cliente, valorTotal) {
         'Content-Type': 'application/json',
         'Prefer': 'return=minimal'
       },
-      body: JSON.stringify({ cliente: String(cliente).slice(0, 80), total: valorTotal }),
+      body: JSON.stringify({ cliente: String(cliente).slice(0, 80), total: valorTotal, detalhes: String(detalhes || '').slice(0, 4000) }),
       keepalive: true
     }).then(r => { if (!r.ok) r.text().then(t => console.warn('Supabase recusou o pedido', r.status, t)); })
       .catch(err => console.warn('Supabase: pedido não salvo', err));
@@ -1148,7 +1148,7 @@ function sendOrder() {
   }
   if (form.obs.trim()) msg += `\n*Observação geral*\n${form.obs.trim()}`;
 
-  salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100);   // segundo plano, não espera resposta
+  salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100, `Tipo: ${modo}\n${msg}`);   // segundo plano, não espera resposta
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
   setTimeout(() => {                                       // limpa o pedido depois de abrir o WhatsApp
     cart = []; save(); form.obs = '';
