@@ -1223,6 +1223,46 @@ renderPlates();
 initReveal();
 updateBar();
 
+/* ---------- Cardápio vindo do painel (Supabase). Se falhar, fica o cardápio acima ---------- */
+function aplicarCardapio(cats, prods) {
+  const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const por = c => prods.filter(x => x.categoria_id === c.id);
+  const achar = n => cats.find(c => norm(c.nome) === n);
+  const pr = achar('pratos'), pro = achar('proteinas'), gar = achar('guarnicoes'), sal = achar('salada');
+  if (pr) CONFIG.planos = por(pr).map(x => {
+    const old = CONFIG.planos.find(o => norm(o.titulo2) === norm(x.nome)), k = norm(x.nome);
+    return { id: old ? old.id : 'p' + x.id, titulo1: x.descricao || 'Com uma proteína', titulo2: x.nome,
+      preco: Number(x.preco), escolhe: /duas|2/i.test(x.descricao || '') ? 2 : 1,
+      proteinas: pro ? por(pro).filter(q => listar(norm(q.descricao)).includes(k)).map(q => q.nome) : (old ? old.proteinas : []),
+      img: old ? old.img : FOTO('premium') };
+  });
+  if (gar) CONFIG.guarnicoes = por(gar).map(x => x.nome);
+  if (sal) CONFIG.saladaItens = por(sal).map(x => x.nome);
+  const bs = cats.filter(c => /^bebidas/.test(norm(c.nome)));
+  if (bs.length) CONFIG.bebidas = bs.map(c => {
+    const nome = c.nome.replace(/^bebidas\s*[·\-–:]?\s*/i, '') || c.nome, tam = [];
+    por(c).forEach(x => {
+      const k = x.descricao || 'Único'; let t = tam.find(z => z.nome === k);
+      if (!t) tam.push(t = { nome: k, preco: Number(x.preco), itens: [] });
+      t.itens.push(x.nome);
+    });
+    const n = norm(nome);
+    return { id: 'b' + c.id, emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : '🥤', nome,
+      desc: tam.map(t => t.nome).join(', '), tamanhos: tam };
+  }).filter(d => d.tamanhos.length);
+}
+(async function carregarCardapio() {
+  try {
+    const get = u => fetch(`${SUPABASE_URL}/rest/v1/${u}`, { headers: { apikey: SUPABASE_KEY } })
+      .then(r => { if (!r.ok) throw 0; return r.json(); });
+    const limite = new Promise((_, no) => setTimeout(() => no(new Error('tempo esgotado')), 6000));
+    const [c, p] = await Promise.race([Promise.all([get('categorias?select=*&order=ordem.asc,id.asc'), get('produtos?select=*&order=id.asc')]), limite]);
+    if (!c.length || !p.length) return;          // painel ainda sem cardápio: mantém o padrão
+    aplicarCardapio(c, p.filter(x => !x.pausado));
+    renderPlates(); initReveal(); updateBar();
+  } catch (e) { console.warn('Cardápio do painel indisponível; usando o padrão', e); }
+})();
+
 </script>
 </body>
 </html>
