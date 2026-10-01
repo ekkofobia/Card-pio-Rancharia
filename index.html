@@ -934,7 +934,7 @@ function lineHTML(it) {
 const seg = (name, list, val) => list.map(([v, l]) => `<button type="button" class="opt ${val === v ? 'on' : ''}" data-seg="${name}" data-v="${v}" aria-pressed="${val === v}">${l}</button>`).join('');
 
 /* Bebidas: cada opção vira um item 'extra' no carrinho */
-const drinkName = (d, t, item) => `${d.nome} ${t.nome} ${item}`;
+const drinkName = (d, t, item) => [d.nome, t.nome, item].filter(Boolean).join(' ');
 const drinkQty = nome => { const it = cart.find(x => x.kind === 'extra' && x.nome === nome); return it ? it.qty : 0; };
 
 function drinkHTML(d) {
@@ -952,7 +952,7 @@ function drinkHTML(d) {
           <button type="button" data-a="dinc" data-d="${d.id}" data-t="${ti}" data-i="${ii}" aria-label="Mais um ${esc(drinkName(d, t, item))}">+</button>
         </div></div>`;
     }).join('');
-    return `<div class="d-sub"><b>${esc(t.nome)}</b><span>${brl(t.preco)}</span></div>${rows}`;
+    return `<div class="d-sub">${t.nome ? `<b>${esc(t.nome)}</b>` : ''}<span>${brl(t.preco)}</span></div>${rows}`;
   }).join('');
   return `<div class="drink ${open ? 'open' : ''}">
     <button type="button" class="drink-h" data-a="dtoggle" data-d="${d.id}" aria-expanded="${open}">
@@ -1011,7 +1011,7 @@ function renderCart() {
       <button class="btn btn--block" data-a="checkout">Finalizar pedido</button>
       <button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Adicionar bebida</button>`;
   } else if (step === 'drinks') {
-    body.innerHTML = `<p class="drinks-intro">Quer uma bebida para acompanhar?</p>` + CONFIG.bebidas.map(drinkHTML).join('');
+    body.innerHTML = `<p class="drinks-intro">${CONFIG.temExtras ? 'Quer uma bebida ou algo mais para acompanhar?' : 'Quer uma bebida para acompanhar?'}</p>` + CONFIG.bebidas.map(drinkHTML).join('');
     const bebNow = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0);
     const bebLabel = bebNow > drinksBaseline ? 'Continuar' : (drinksBaseline > 0 ? 'Não obrigado, já escolhi.' : 'Continuar sem bebida');
     foot.innerHTML = `<button class="btn btn--block" data-a="toform">${bebLabel}</button>
@@ -1254,17 +1254,21 @@ function aplicarCardapio(cats, prods) {
   });
   if (gar) CONFIG.guarnicoes = por(gar).map(x => x.nome);
   if (sal) CONFIG.saladaItens = por(sal).map(x => x.nome);
-  const bs = cats.filter(c => /^bebidas/.test(norm(c.nome)));
+  /* Bebidas e QUALQUER outra categoria nova (sobremesas, porções...) viram grupos na etapa "algo para acompanhar" */
+  const fixas = ['pratos', 'proteinas'], bs = cats.filter(c => !/^__/.test(c.nome) && !fixas.includes(norm(c.nome)) &&
+    !pcs.includes(c) && c !== gar && c !== sal);
+  CONFIG.temExtras = bs.some(c => !/^bebidas/.test(norm(c.nome)));
   if (bs.length) CONFIG.bebidas = bs.map(c => {
     const nome = c.nome.replace(/^bebidas\s*[·\-–:]?\s*/i, '') || c.nome, tam = [];
     por(c).forEach(x => {
-      const k = x.descricao || 'Único'; let t = tam.find(z => z.nome === k);
-      if (!t) tam.push(t = { nome: k, preco: Number(x.preco), itens: [] });
+      const k = (x.descricao || '') + '|' + Number(x.preco); let t = tam.find(z => z.k === k);
+      if (!t) tam.push(t = { k, nome: x.descricao || '', preco: Number(x.preco), itens: [] });
       t.itens.push(x.nome);
     });
-    const n = norm(nome);
-    return { id: 'b' + c.id, emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : '🥤', nome,
-      desc: tam.map(t => t.nome).join(', '), tamanhos: tam };
+    const n = norm(c.nome), beb = /^bebidas/.test(n);
+    return { id: 'b' + c.id, nome, tamanhos: tam, desc: tam.map(t => t.nome).filter(Boolean).join(', '),
+      emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : beb || /refri|bebida/.test(n) ? '🥤' :
+        /sobremes|doce|pudim|bolo|sorvete|mousse/.test(n) ? '🍰' : /porc|petisc|frit/.test(n) ? '🍟' : '🍽️' };
   }).filter(d => d.tamanhos.length);
 }
 (async function carregarCardapio() {
