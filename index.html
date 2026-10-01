@@ -448,6 +448,13 @@ a.pill:hover { background: rgba(242, 196, 109, .12); }
 .hr-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
 .hr-row b { color: var(--cream); font-weight: 600; }
 
+#lojaBar{position:fixed;left:0;right:0;bottom:0;z-index:9998;background:#7a1f1f;color:#fff;text-align:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));font-weight:600;font-size:15px;box-shadow:0 -6px 20px #0006}
+#lojaBar[hidden],#lojaModal[hidden]{display:none}
+body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
+#lojaModal{position:fixed;inset:0;z-index:9999;background:#000a;display:grid;place-items:center;padding:24px}
+#lojaModal>div{background:#341d0f;color:#f7ecd8;border:1px solid rgba(242,196,109,.4);border-radius:22px;padding:24px;max-width:340px;text-align:center;line-height:1.4}
+#lojaModal b{display:block;font-size:22px;margin-bottom:8px;color:#f2c46d}
+#lojaModal button{margin-top:16px;width:100%;min-height:50px;border:0;border-radius:99px;background:#f2c46d;color:#2a1509;font-weight:700;font-size:16px}
 </style>
 </head>
 <body class="lock">
@@ -585,6 +592,8 @@ const IMG = {
 /* Segurança: se algo falhar no script principal, o splash some do mesmo jeito */
 setTimeout(function () { var s = document.getElementById('splash'); if (s) s.classList.add('done'); document.body.classList.add('ready'); document.body.classList.remove('lock'); }, 2500);
 </script>
+<div id="lojaBar" hidden>🔒 Loja fechada no momento — você pode ver o cardápio, mas os pedidos estão pausados.</div>
+<div id="lojaModal" hidden><div><b>Loja fechada</b>No momento não estamos aceitando pedidos. Volte em breve!<button type="button" id="lojaOk">Entendi</button></div></div>
 <script>
 'use strict';
 /* =====================================================
@@ -1233,8 +1242,15 @@ function aplicarCardapio(cats, prods) {
     const old = CONFIG.planos.find(o => norm(o.titulo2) === norm(x.nome)), k = norm(x.nome);
     return { id: old ? old.id : 'p' + x.id, titulo1: x.descricao || 'Com uma proteína', titulo2: x.nome,
       preco: Number(x.preco), escolhe: /duas|2/i.test(x.descricao || '') ? 2 : 1,
-      proteinas: pro ? por(pro).filter(q => listar(norm(q.descricao)).includes(k)).map(q => q.nome) : (old ? old.proteinas : []),
+      proteinas: pro ? por(pro).filter(q => (q.descricao || '').split(',').map(z => z.trim()).some(z => z === '@' + x.id || norm(z) === k)).map(q => q.nome) : (old ? old.proteinas : []),
       img: old ? old.img : FOTO('premium') };
+  });
+  const PL = 'Valor do prato', pcs = cats.filter(c => por(c).some(x => x.nome === PL)), base = CONFIG.planos.slice();
+  if (pcs.length) CONFIG.planos = pcs.map((c, i) => {
+    const v = por(c).find(x => x.nome === PL), old = base.find(o => norm(o.titulo2) === norm(c.nome)) || base[i] || base[1];
+    return { id: old && base.includes(old) && !pcs.slice(0, i).some(z => norm(z.nome) === norm(old.titulo2)) ? old.id : 'p' + c.id,
+      titulo1: v.descricao || 'Com uma proteína', titulo2: c.nome, preco: Number(v.preco),
+      escolhe: /duas|2/i.test(v.descricao || '') ? 2 : 1, proteinas: por(c).filter(x => x !== v).map(x => x.nome), img: old.img };
   });
   if (gar) CONFIG.guarnicoes = por(gar).map(x => x.nome);
   if (sal) CONFIG.saladaItens = por(sal).map(x => x.nome);
@@ -1263,6 +1279,34 @@ function aplicarCardapio(cats, prods) {
   } catch (e) { console.warn('Cardápio do painel indisponível; usando o padrão', e); }
 })();
 
+
+/* ---------- Loja aberta/fechada (controlada pelo painel) ---------- */
+function setLoja(f) {
+  const era = document.body.classList.contains('fechada');
+  document.body.classList.toggle('fechada', f);
+  $('#lojaBar').hidden = !f;
+  if (f && !era) { try { closeSheet($('#cart')); closeSheet($('#builder')); } catch (e) {} }
+}
+function avisoLoja() { $('#lojaModal').hidden = false; }
+$('#lojaOk').addEventListener('click', () => { $('#lojaModal').hidden = true; });
+document.addEventListener('click', e => {
+  if (!document.body.classList.contains('fechada') || e.target.closest('#lojaModal')) return;
+  if (e.target.closest('[data-plano], #cartBar, [data-a="checkout"], [data-a="send"]')) {
+    e.preventDefault(); e.stopImmediatePropagation(); avisoLoja();
+  }
+}, true);
+const guardaLoja = f => function () { if (document.body.classList.contains('fechada')) return avisoLoja(); return f.apply(this, arguments); };
+openBuilder = guardaLoja(openBuilder); openCart = guardaLoja(openCart);
+goCheckout = guardaLoja(goCheckout); sendOrder = guardaLoja(sendOrder); addToCart = guardaLoja(addToCart);
+async function checarLoja() {
+  try {
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/categorias?select=id&nome=eq.__loja_fechada`, { headers: { apikey: SUPABASE_KEY } });
+    if (!r.ok) return;
+    setLoja((await r.json()).length > 0);
+  } catch (e) { /* sem rede: mantém o estado atual */ }
+}
+checarLoja(); setInterval(checarLoja, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checarLoja(); });
 </script>
 </body>
 </html>
