@@ -455,6 +455,13 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
 #lojaModal>div{background:#341d0f;color:#f7ecd8;border:1px solid rgba(242,196,109,.4);border-radius:22px;padding:24px;max-width:340px;text-align:center;line-height:1.4}
 #lojaModal b{display:block;font-size:22px;margin-bottom:8px;color:#f2c46d}
 #lojaModal button{margin-top:16px;width:100%;min-height:50px;border:0;border-radius:99px;background:#f2c46d;color:#2a1509;font-weight:700;font-size:16px}
+.xcard { background: linear-gradient(160deg, #402617, var(--card) 55%); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; margin-top: 14px; }
+.xcard h3 { font-size: 20px; font-weight: 800; color: var(--gold); text-transform: uppercase; margin-bottom: 4px; }
+.xs { margin-top: 10px; font-weight: 700; color: var(--cream); display: flex; justify-content: space-between; gap: 12px; }
+.xs span { color: var(--gold); }
+.xr { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px dashed var(--line); color: var(--cream); }
+.xr span { color: var(--muted); }
+#extras[hidden] { display: none; }
 </style>
 </head>
 <body class="lock">
@@ -489,6 +496,15 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
   <section id="pratos">
     <div class="wrap">
       <div class="plates" id="plates"></div>
+    </div>
+  </section>
+
+  <!-- BEBIDAS E OUTRAS CATEGORIAS (vem do painel) -->
+  <section id="extras" hidden>
+    <div class="wrap">
+      <h2 class="sec-title">Bebidas e <em>extras</em></h2>
+      <p class="sec-sub">Peça junto com o prato, na hora de finalizar.</p>
+      <div id="extrasList"></div>
     </div>
   </section>
 
@@ -1229,6 +1245,7 @@ $('#heroBrand').addEventListener('click', () => { if (document.body.classList.co
 
 /* ---------- Início ---------- */
 renderPlates();
+renderExtras();
 initReveal();
 updateBar();
 
@@ -1279,11 +1296,20 @@ function aplicarCardapio(cats, prods) {
     const [c, p] = await Promise.race([Promise.all([get('categorias?select=*&order=ordem.asc,id.asc'), get('produtos?select=*&order=id.asc')]), limite]);
     if (!c.length || !p.length) return;          // painel ainda sem cardápio: mantém o padrão
     aplicarCardapio(c, p.filter(x => !x.pausado));
-    renderPlates(); initReveal(); updateBar();
+    renderPlates(); renderExtras(); initReveal(); updateBar();
   } catch (e) { console.warn('Cardápio do painel indisponível; usando o padrão', e); }
 })();
 
 
+
+/* ---------- Lista de bebidas e extras na página ---------- */
+function renderExtras() {
+  const L = (CONFIG.bebidas || []).filter(d => d.tamanhos && d.tamanhos.length);
+  $('#extras').hidden = !L.length;
+  $('#extrasList').innerHTML = L.map(d => `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3>` +
+    d.tamanhos.map(t => `<div class="xs"><b>${esc(t.nome || '')}</b><span>${brl(t.preco)}</span></div>` +
+      t.itens.map(i => `<div class="xr">${esc(i)}</div>`).join('')).join('') + `</div>`).join('');
+}
 /* ---------- Loja aberta/fechada (controlada pelo painel) ---------- */
 function setLoja(f) {
   const era = document.body.classList.contains('fechada');
