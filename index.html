@@ -355,7 +355,10 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .d-sub b { color: var(--cream); font-weight: 800; font-size: 19px; }
 .d-sub span { color: var(--gold); font-weight: 700; font-size: 13px; }
 .d-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0 0 6px; }
-.d-row b { font-weight: 500; font-size: 15px; }
+.d-row { padding: 12px 0 12px 6px; border-top: 1px solid var(--line); }
+.d-row:first-child { border-top: 0; padding-top: 2px; }
+.d-row b { font-weight: 500; font-size: 15px; flex: 1; min-width: 0; }
+.d-pr { color: var(--gold); font-weight: 700; font-size: 14px; white-space: nowrap; }
 .qty button.off { opacity: .35; }
 
 /* Toast */
@@ -969,13 +972,14 @@ function drinkHTML(d) {
       const q = drinkQty(drinkName(d, t, item));
       return `<div class="d-row">
         <b>${esc(item)}</b>
+        <span class="d-pr">${brl(t.preco)}</span>
         <div class="qty">
           <button type="button" class="${q ? '' : 'off'}" data-a="ddec" data-d="${d.id}" data-t="${ti}" data-i="${ii}" aria-label="Menos um ${esc(drinkName(d, t, item))}">−</button>
           <output>${q}</output>
           <button type="button" data-a="dinc" data-d="${d.id}" data-t="${ti}" data-i="${ii}" aria-label="Mais um ${esc(drinkName(d, t, item))}">+</button>
         </div></div>`;
     }).join('');
-    return `<div class="d-sub">${t.nome ? `<b>${esc(t.nome)}</b>` : ''}<span>${brl(t.preco)}</span></div>${rows}`;
+    return rows;
   }).join('');
   return `<div class="drink ${open ? 'open' : ''}">
     <button type="button" class="drink-h" data-a="dtoggle" data-d="${d.id}" aria-expanded="${open}">
