@@ -1299,7 +1299,7 @@ function aplicarCardapio(cats, prods) {
       t.itens.push(x.nome);
     });
     const n = norm(c.nome), beb = /^bebidas/.test(n);
-    return { id: 'b' + c.id, tipo: tipoDe(c), nome, tamanhos: tam, desc: tam.map(t => t.nome).filter(Boolean).join(', '),
+    return { id: 'b' + c.id, tipo: tipoDe(c), nome, tamanhos: tam, desc: [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
       emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : beb || /refri|bebida/.test(n) ? '🥤' :
         /sobremes|doce|pudim|bolo|sorvete|mousse/.test(n) ? '🍰' : /porc|petisc|frit/.test(n) ? '🍟' : '🍽️' };
   }).filter(d => d.tamanhos.length);
