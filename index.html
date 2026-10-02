@@ -403,7 +403,8 @@ body.print-mode .plate ul { font-size: 10px; }
 body.print-mode .plate .photo { margin-top: 6px; }
 body.print-mode .plate .photo img { width: 100%; }
 body.print-mode .plate .btn { display: none; }
-body.print-mode .final, body.print-mode footer, body.print-mode #cartBar { display: none !important; }
+body.print-mode .final, body.print-mode footer, body.print-mode #cartBar, body.print-mode #extras, body.print-mode #avisos { display: none !important; }
+body.print-mode .plates .plate:nth-child(n+5):not(.print-salad) { display: none !important; }
 .print-salad { display: none; }
 body.print-mode .print-salad {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
