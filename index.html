@@ -462,6 +462,12 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
 .xr { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px dashed var(--line); color: var(--cream); }
 .xr span { color: var(--muted); }
 #extras[hidden] { display: none; }
+.aviso { margin-bottom: 14px; padding: 14px 18px; border-radius: var(--radius); background: rgba(242, 196, 109, .12); border: 1.5px solid var(--gold); }
+.aviso h3 { font-size: 18px; font-weight: 800; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }
+.aviso p { margin-top: 4px; color: var(--cream); }.aviso small { display: block; color: var(--muted); font-size: 13px; }
+#extrasList .drink { margin-top: 12px; }
+.xcard .d-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px dashed var(--line); }
+.xn { display: grid; gap: 1px; }.xn b { font-weight: 700; }.xn i { font-style: normal; color: var(--gold); font-weight: 800; }.xn small { color: var(--muted); }
 </style>
 </head>
 <body class="lock">
@@ -495,6 +501,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
   <!-- PRATOS (renderizado pelo script.js a partir do CONFIG) -->
   <section id="pratos">
     <div class="wrap">
+      <div id="avisos"></div>
       <div class="plates" id="plates"></div>
     </div>
   </section>
@@ -503,7 +510,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
   <section id="extras" hidden>
     <div class="wrap">
       <h2 class="sec-title">Bebidas e <em>extras</em></h2>
-      <p class="sec-sub">Peça junto com o prato, na hora de finalizar.</p>
+      <p class="sec-sub">Toque para abrir e escolha as quantidades.</p>
       <div id="extrasList"></div>
     </div>
   </section>
@@ -738,7 +745,7 @@ function toast(msg) {
 /* ---------- 3) Renderização da página ---------- */
 function renderPlates() {
   $('#plates').innerHTML = CONFIG.planos.map((p, i) => `
-    <article class="plate ${i < 2 ? 'first-card' : 'reveal'}">
+    <article class="plate ${i < 2 ? 'first-card' + (splashDone ? ' in' : '') : 'reveal'}">
       <span class="price"><small>R$</small>${String(p.preco.toFixed(2)).replace('.', ',')}</span>
       <div class="row">
         <div>
@@ -1245,6 +1252,7 @@ $('#heroBrand').addEventListener('click', () => { if (document.body.classList.co
 
 /* ---------- Início ---------- */
 renderPlates();
+renderAvisos();
 renderExtras();
 initReveal();
 updateBar();
@@ -1271,19 +1279,23 @@ function aplicarCardapio(cats, prods) {
   });
   if (gar) CONFIG.guarnicoes = por(gar).map(x => x.nome);
   if (sal) CONFIG.saladaItens = por(sal).map(x => x.nome);
-  /* Bebidas e QUALQUER outra categoria nova (sobremesas, porções...) viram grupos na etapa "algo para acompanhar" */
+  /* Categorias novas: o tipo vem de um item marcador "__tipo" (min = minimizado, csc = card sem categoria, aviso) */
   const fixas = ['pratos', 'proteinas'], bs = cats.filter(c => !/^__/.test(c.nome) && !fixas.includes(norm(c.nome)) &&
     !pcs.includes(c) && c !== gar && c !== sal);
-  CONFIG.temExtras = bs.some(c => !/^bebidas/.test(norm(c.nome)));
-  if (bs.length) CONFIG.bebidas = bs.map(c => {
+  const tipoDe = c => { const m = por(c).find(x => x.nome === '__tipo'); return m && m.descricao ? m.descricao : 'min'; };
+  const itens = c => por(c).filter(x => x.nome !== '__tipo');
+  CONFIG.avisos = bs.filter(c => tipoDe(c) === 'aviso' && itens(c).length)
+    .map(c => ({ id: 'a' + c.id, nome: c.nome, linhas: itens(c).map(x => ({ t: x.nome, d: x.descricao || '' })) }));
+  CONFIG.temExtras = bs.some(c => tipoDe(c) !== 'aviso' && !/^bebidas/.test(norm(c.nome)));
+  CONFIG.bebidas = bs.filter(c => tipoDe(c) !== 'aviso').map(c => {
     const nome = c.nome.replace(/^bebidas\s*[·\-–:]?\s*/i, '') || c.nome, tam = [];
-    por(c).forEach(x => {
+    itens(c).forEach(x => {
       const k = (x.descricao || '') + '|' + Number(x.preco); let t = tam.find(z => z.k === k);
       if (!t) tam.push(t = { k, nome: x.descricao || '', preco: Number(x.preco), itens: [] });
       t.itens.push(x.nome);
     });
     const n = norm(c.nome), beb = /^bebidas/.test(n);
-    return { id: 'b' + c.id, nome, tamanhos: tam, desc: tam.map(t => t.nome).filter(Boolean).join(', '),
+    return { id: 'b' + c.id, tipo: tipoDe(c), nome, tamanhos: tam, desc: tam.map(t => t.nome).filter(Boolean).join(', '),
       emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : beb || /refri|bebida/.test(n) ? '🥤' :
         /sobremes|doce|pudim|bolo|sorvete|mousse/.test(n) ? '🍰' : /porc|petisc|frit/.test(n) ? '🍟' : '🍽️' };
   }).filter(d => d.tamanhos.length);
@@ -1296,20 +1308,42 @@ function aplicarCardapio(cats, prods) {
     const [c, p] = await Promise.race([Promise.all([get('categorias?select=*&order=ordem.asc,id.asc'), get('produtos?select=*&order=id.asc')]), limite]);
     if (!c.length || !p.length) return;          // painel ainda sem cardápio: mantém o padrão
     aplicarCardapio(c, p.filter(x => !x.pausado));
-    renderPlates(); renderExtras(); initReveal(); updateBar();
+    renderPlates(); renderAvisos(); renderExtras(); initReveal(); updateBar();
   } catch (e) { console.warn('Cardápio do painel indisponível; usando o padrão', e); }
 })();
 
 
 
 /* ---------- Lista de bebidas e extras na página ---------- */
+function qtyBtns(d, ti, ii, nome) {
+  const q = drinkQty(nome);
+  return `<div class="qty"><button type="button" class="${q ? '' : 'off'}" data-a="ddec" data-d="${d.id}" data-t="${ti}" data-i="${ii}" aria-label="Menos um ${esc(nome)}">−</button><output>${q}</output><button type="button" data-a="dinc" data-d="${d.id}" data-t="${ti}" data-i="${ii}" aria-label="Mais um ${esc(nome)}">+</button></div>`;
+}
+function cscHTML(d) {                                       // card sem categoria: itens com contador, direto na página
+  return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3>` + d.tamanhos.map((t, ti) => t.itens.map((item, ii) =>
+    `<div class="d-row"><span class="xn"><b>${esc(item)}</b>${t.nome ? `<small>${esc(t.nome)}</small>` : ''}<i>${brl(t.preco)}</i></span>${qtyBtns(d, ti, ii, drinkName(d, t, item))}</div>`).join('')).join('') + `</div>`;
+}
 function renderExtras() {
   const L = (CONFIG.bebidas || []).filter(d => d.tamanhos && d.tamanhos.length);
   $('#extras').hidden = !L.length;
-  $('#extrasList').innerHTML = L.map(d => `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3>` +
-    d.tamanhos.map(t => `<div class="xs"><b>${esc(t.nome || '')}</b><span>${brl(t.preco)}</span></div>` +
-      t.itens.map(i => `<div class="xr">${esc(i)}</div>`).join('')).join('') + `</div>`).join('');
+  $('#extrasList').innerHTML = L.map(d => d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d)).join('');
 }
+function renderAvisos() {
+  $('#avisos').innerHTML = (CONFIG.avisos || []).map(a => `<div class="aviso"><h3>📢 ${esc(a.nome)}</h3>` +
+    a.linhas.map(l => `<p>${esc(l.t)}${l.d ? `<small>${esc(l.d)}</small>` : ''}</p>`).join('') + `</div>`).join('');
+}
+$('#extrasList').addEventListener('click', e => {
+  const t = e.target.closest('[data-a]'); if (!t) return;
+  const a = t.dataset.a;
+  if (a === 'dtoggle') { openDrink = openDrink === t.dataset.d ? null : t.dataset.d; renderExtras(); return; }
+  if (a === 'dinc' || a === 'ddec') {
+    changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
+    const f = $(`#extrasList [data-a="${a}"][data-d="${t.dataset.d}"][data-t="${t.dataset.t}"][data-i="${t.dataset.i}"]`); if (f) f.focus({ preventScroll: true });
+  }
+});
+const _updateBar = updateBar;
+updateBar = function (b) { _updateBar(b); renderExtras(); };
+
 /* ---------- Loja aberta/fechada (controlada pelo painel) ---------- */
 function setLoja(f) {
   const era = document.body.classList.contains('fechada');
@@ -1321,7 +1355,7 @@ function avisoLoja() { $('#lojaModal').hidden = false; }
 $('#lojaOk').addEventListener('click', () => { $('#lojaModal').hidden = true; });
 document.addEventListener('click', e => {
   if (!document.body.classList.contains('fechada') || e.target.closest('#lojaModal')) return;
-  if (e.target.closest('[data-plano], #cartBar, [data-a="checkout"], [data-a="send"]')) {
+  if (e.target.closest('[data-plano], #cartBar, [data-a="checkout"], [data-a="send"], [data-a="dinc"]')) {
     e.preventDefault(); e.stopImmediatePropagation(); avisoLoja();
   }
 }, true);
