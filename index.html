@@ -1276,7 +1276,12 @@ updateBar();
 /* ---------- Cardápio vindo do painel (Supabase). Se falhar, fica o cardápio acima ---------- */
 function aplicarCardapio(cats, prods) {
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-  const por = c => prods.filter(x => x.categoria_id === c.id);
+  const por = c => {                                          // itens da categoria, na ordem definida no painel (marcador __ordem)
+    const L = prods.filter(x => x.categoria_id === c.id), m = L.find(x => x.nome === '__ordem'), R = L.filter(x => x.nome !== '__ordem');
+    if (!m || !m.descricao) return R;
+    const ids = String(m.descricao).split(',').map(Number), pos = x => { const i = ids.indexOf(x.id); return i < 0 ? 1e9 : i; };
+    return R.map((x, i) => [x, i]).sort((u, v) => pos(u[0]) - pos(v[0]) || u[1] - v[1]).map(z => z[0]);
+  };
   const achar = n => cats.find(c => norm(c.nome) === n);
   const pr = achar('pratos'), pro = achar('proteinas'), gar = achar('guarnicoes'), sal = achar('salada');
   if (pr) CONFIG.planos = por(pr).map(x => {
