@@ -404,7 +404,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
     </div>
   </section>
 
-  <!-- Seção de Acompanhamentos/Bebidas do ecrã inicial (apenas não-pratos principais) -->
+  <!-- Seção de Acompanhamentos/Bebidas do ecrã inicial -->
   <section id="extras" hidden>
     <div class="wrap">
       <h2 class="sec-title">Acompanhamentos e <em>Bebidas</em></h2>
@@ -761,7 +761,7 @@ function tryAdd() {
 function askMoreG(faltaG, faltaS) {
   const partes = [];
   if (faltaG > 0) partes.push(`${faltaG} ${faltaG > 1 ? 'guarnições' : 'guarnição'}`);
-  if (faltaS > 0) partes.push(`${faltaG > 1 ? 'itens de salada' : 'item de salada'}`);
+  if (faltaS > 0) partes.push(`${faltaS} ${faltaS > 1 ? 'itens de salada' : 'item de salada'}`);
   $('#mgTitle').innerHTML = `Você pode escolher mais <em>${partes.join(' e ')}</em>`;
   $('#mgText').textContent = `Seu prato leva até ${CONFIG.maxGuarnicoes} guarnições e ${CONFIG.maxSalada} itens de salada.`;
   const m = $('#moreG');
@@ -917,7 +917,7 @@ function renderCart() {
       <button class="btn btn--block" data-a="checkout">Finalizar pedido</button>
       ${temBump ? `<button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Ver ofertas adicionais</button>` : ''}`;
   } else if (step === 'drinks') {
-    // 1 ÚNICA VEZ NO ECRÃ DE ORDER BUMP: Apenas itens configurados com Order Bump ou Ambos
+    // Exibe todos os itens definidos como Order Bump ou Ambos (inclusive Pratos)
     const bumpItems = CONFIG.bebidas.filter(d => d.lugar === 'bump' || d.lugar === 'ambos');
     body.innerHTML = `<p class="drinks-intro">Deseja adicionar mais alguma coisa antes de finalizar?</p>` + 
       (bumpItems.length ? bumpItems.map(cardDe).join('') : '<p class="drinks-intro">Nenhuma oferta adicional no momento.</p>');
@@ -955,7 +955,11 @@ function renderCart() {
 
 function openCart() { step = 'list'; renderCart(); openSheet($('#cart')); }
 
-$('#cart').addEventListener('click', e => {   const t = e.target.closest('[data-a], [data-seg]');   if (!t) return;   if (t.dataset.seg) {     form[t.dataset.seg] = t.dataset.v;     $$(`[data-seg="${t.dataset.seg}"]`).forEach(b => b.classList.toggle('on', b === t));
+$('#cart').addEventListener('click', e => {
+  const t = e.target.closest('[data-a], [data-seg], [data-bump-plano]');
+  if (!t) return;
+  if (t.dataset.bumpPlano) {
+    closeSheet($('#cart'), false);     openBuilder(t.dataset.bumpPlano);     return;   }   if (t.dataset.seg) {     form[t.dataset.seg] = t.dataset.v;     $$(`[data-seg="${t.dataset.seg}"]`).forEach(b => b.classList.toggle('on', b === t));
     $('#fMesaW').hidden = form.modo !== 'local';
     $('#fEndW').hidden = form.modo !== 'entregar';
     $('#fPagW').hidden = form.modo !== 'entregar';
@@ -1093,13 +1097,13 @@ initReveal();
 updateBar();
 
 /* ==========================================================================
-   SINCRONIZAÇÃO TOTAL COM O PAINEL DE CONTROLE (SEM DUPLICAÇÃO DE CARDS)
+   SINCRONIZAÇÃO TOTAL COM O PAINEL DE CONTROLE (ORDEM, PRATO E ORDER BUMP)
    ========================================================================== */
 function aplicarCardapio(cats, prods) {
   const todos = prods;
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
-  // 1. Extrair configurações personalizadas de cada categoria guardadas no __config
+  // 1. Extrair configurações personalizadas de cada categoria salvas no __config
   cats.forEach(c => {
     const m = todos.find(x => x.categoria_id === c.id && x.nome === '__config');
     let j = {};
@@ -1133,7 +1137,7 @@ function aplicarCardapio(cats, prods) {
 
   const PL = 'valor do prato';
 
-  // 1. Categorias exibidas no topo como "Prato" montável (Aparece 1 vez no ecrã inicial)
+  // 1. Categorias de "Prato" montável exibidas no ecrã inicial
   const catsPrato = cats.filter(c => c.exibicao === 'prato' && c.tipo !== 'item' && c.tipo !== 'bump');
   if (catsPrato.length) {
     CONFIG.planos = catsPrato.map(c => {
@@ -1153,7 +1157,7 @@ function aplicarCardapio(cats, prods) {
     });
   }
 
-  // 2. Categorias exibidas no feed inicial como "Cards (sem foto)" (Aparece 1 vez no ecrã inicial)
+  // 2. Categorias exibidas no feed inicial como "Cards (sem foto)"
   const catsCards = cats.filter(c => c.exibicao === 'cards' && (c.tipo === 'principal' || c.tipo === 'ambos'));
   CONFIG.cardsAvulsos = catsCards.map(c => ({
     id: c.id,
@@ -1161,12 +1165,47 @@ function aplicarCardapio(cats, prods) {
     itens: por(c).filter(x => norm(x.nome) !== PL)
   })).filter(c => c.itens.length > 0);
 
-  // 3. Categorias de acompanhamentos/bebidas/order bump
-  // NÃO duplica no #extras se a categoria já for um prato montável
-  const catsExtras = cats.filter(c => c.tipo !== 'item' && c.exibicao !== 'prato');
+  // 3. Todas as categorias que devem aparecer no Order Bump (bump ou ambos) ou nos Extras do ecrã inicial
+  const catsExtras = cats.filter(c => c.tipo !== 'item' && (c.tipo === 'bump' || c.tipo === 'ambos' || c.exibicao === 'min' || c.exibicao === 'checklist'));
   
   CONFIG.bebidas = catsExtras.map(c => {
     const nome = c.nome.replace(/^bebidas\s*[·\-–:]?\s*/i, '') || c.nome;
+    const planItem = todos.find(x => x.categoria_id === c.id && norm(x.nome) === PL);
+    const precoBase = planItem ? Number(planItem.preco) : 15;
+    const n = norm(c.nome);
+
+    // Se for do tipo Prato, prepara para renderizar com botão de montar no Order Bump
+    if (c.exibicao === 'prato') {
+      const proteinas = por(c).filter(x => norm(x.nome) !== PL);
+      const idKey = norm(c.nome).includes('classica') ? 'classica' : norm(c.nome).includes('gourmet') ? 'duas' : norm(c.nome).includes('executivo') ? 'pf' : 'premium';
+      
+      // Garante que o plano exista na lista global de planos
+      const planoExistente = CONFIG.planos.find(p => p.id === 'c' + c.id);
+      if (!planoExistente) {
+        CONFIG.planos.push({
+          id: 'c' + c.id,
+          titulo1: planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
+          titulo2: c.nome,
+          preco: precoBase,
+          escolhe: /duas|gourmet/i.test(c.nome) ? 2 : 1,
+          proteinas: proteinas.map(x => x.nome),
+          img: FOTO(idKey)
+        });
+      }
+
+      return {
+        id: 'b' + c.id,
+        tipo: 'prato',
+        lugar: c.tipo,
+        nome: c.nome,
+        planoId: 'c' + c.id,
+        preco: precoBase,
+        tamanhos: [{ nome: '', preco: precoBase, itens: [c.nome] }],
+        desc: proteinas.map(x => x.nome).join(', '),
+        emoji: '🍽️'
+      };
+    }
+
     const tam = [];
     por(c).filter(x => norm(x.nome) !== PL).forEach(x => {
       const k = (x.descricao || '') + '|' + Number(x.preco);
@@ -1174,7 +1213,7 @@ function aplicarCardapio(cats, prods) {
       if (!t) tam.push(t = { k, nome: x.descricao || '', preco: Number(x.preco), itens: [] });
       t.itens.push(x.nome);
     });
-    const n = norm(c.nome);
+
     return {
       id: 'b' + c.id,
       tipo: c.exibicao === 'checklist' ? 'ck' : (c.exibicao === 'cards' ? 'csc' : 'min'),
@@ -1184,7 +1223,7 @@ function aplicarCardapio(cats, prods) {
       desc: [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
       emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : /refri|bebida/.test(n) ? '🥤' : /sobremes|doce/.test(n) ? '🍰' : /porc|frit|batata/.test(n) ? '🍟' : '✨'
     };
-  }).filter(d => d.tamanhos.length > 0);
+  }).filter(d => d.tamanhos.length > 0 || d.tipo === 'prato');
 }
 
 (async function carregarCardapio() {
@@ -1216,21 +1255,38 @@ function ckHTML(d) {
     `<button type="button" class="opt ${drinkQty(drinkName(d, t, item)) ? 'on' : ''}" data-a="dtog" data-d="${d.id}" data-t="${ti}" data-i="${ii}"><span class="tick"></span>${esc(item)}<span style="margin-left:auto">${brl(t.preco)}</span></button>`).join('')).join('') + `</div></div>`;
 }
 
+function bumpPratoHTML(d) {
+  return `
+  <div class="xcard" style="margin-top:12px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+      <div>
+        <h3 style="margin-bottom:2px">${d.emoji} ${esc(d.nome)}</h3>
+        ${d.desc ? `<small style="color:var(--muted);display:block">${esc(d.desc)}</small>` : ''}
+      </div>
+      <b style="color:var(--gold);font-size:18px">${brl(d.preco)}</b>
+    </div>
+    <button type="button" class="btn btn--block" data-bump-plano="${d.planoId}" style="margin-top:10px;min-height:44px;font-size:15px">Montar este prato</button>
+  </div>`;
+}
+
 function qtyBtns(d, ti, ii, nome) {
   const q = drinkQty(nome);
   return `<div class="qty"><button type="button" class="${q ? '' : 'off'}" data-a="ddec" data-d="${d.id}" data-t="${ti}" data-i="${ii}">−</button><output>${q}</output><button type="button" data-a="dinc" data-d="${d.id}" data-t="${ti}" data-i="${ii}">+</button></div>`;
 }
 
-function cardDe(d) { return d.tipo === 'ck' ? ckHTML(d) : (d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d)); }
+function cardDe(d) { 
+  if (d.tipo === 'prato') return bumpPratoHTML(d);
+  return d.tipo === 'ck' ? ckHTML(d) : (d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d)); 
+}
 
 function toggleDrink(id, ti, ii) {
   const d = CONFIG.bebidas.find(x => x.id === id), t = d.tamanhos[ti], q = drinkQty(drinkName(d, t, d.tamanhos[ti].itens[ii]));
   changeDrink(id, ti, ii, q ? -q : 1);
 }
 
-// No ecrã inicial, mostra em #extras apenas as categorias que não sejam exclusivamente bump nem cards já listados
+// No ecrã inicial, mostra em #extras apenas as categorias que não sejam exclusivamente bump, nem pratos, nem cards já listados
 function renderExtras() {
-  const L = (CONFIG.bebidas || []).filter(d => d.tamanhos && d.tamanhos.length && (d.lugar === 'principal' || d.lugar === 'ambos') && d.tipo !== 'csc');
+  const L = (CONFIG.bebidas || []).filter(d => d.tipo !== 'prato' && d.tipo !== 'csc' && (d.lugar === 'principal' || d.lugar === 'ambos'));
   $('#extras').hidden = !L.length;
   $('#extrasList').innerHTML = L.map(cardDe).join('');
 }
@@ -1259,7 +1315,7 @@ $('#lojaOk').addEventListener('click', () => { $('#lojaModal').hidden = true; })
 
 document.addEventListener('click', e => {
   if (!document.body.classList.contains('fechada') || e.target.closest('#lojaModal')) return;
-  if (e.target.closest('[data-plano], #cartBar, [data-a="checkout"], [data-a="send"], [data-a="dinc"], [data-a="dtog"], [data-a="cinc"]')) {
+  if (e.target.closest('[data-plano], #cartBar, [data-a="checkout"], [data-a="send"], [data-a="dinc"], [data-a="dtog"], [data-a="cinc"], [data-bump-plano]')) {
     e.preventDefault(); e.stopImmediatePropagation(); avisoLoja();
   }
 }, true);
