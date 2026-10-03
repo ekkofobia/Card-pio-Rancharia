@@ -1289,12 +1289,14 @@ function aplicarCardapio(cats, prods) {
   /* Categorias novas: o tipo vem de um item marcador "__tipo" (min = minimizado, csc = card sem categoria, aviso) */
   const fixas = ['pratos', 'proteinas'], bs = cats.filter(c => !/^__/.test(c.nome) && !fixas.includes(norm(c.nome)) &&
     !pcs.includes(c) && c !== gar && c !== sal && c.tipo !== 'item');
+  /* Onde a categoria aparece: principal (só na página), bump (só na tela de bebidas), ambos. Igual ao painel: sem tipo salvo, só bebida conta como ambos */
+  const lugarDe = c => c.tipo || (/bebida|refri|suco|cerveja/.test(norm(c.nome)) ? 'ambos' : 'principal');
   const tipoDe = c => { const m = todos.find(x => x.categoria_id === c.id && x.nome === '__tipo'); if (m && m.descricao) return m.descricao;
     return c.exibicao ? (c.exibicao === 'cards' ? 'csc' : 'min') : 'min'; };   // novo painel: coluna exibicao
   const itens = c => por(c).filter(x => x.nome !== '__tipo');
   CONFIG.avisos = bs.filter(c => tipoDe(c) === 'aviso' && itens(c).length)
     .map(c => ({ id: 'a' + c.id, nome: c.nome, linhas: itens(c).map(x => ({ t: x.nome, d: x.descricao || '' })) }));
-  CONFIG.temExtras = bs.some(c => tipoDe(c) !== 'aviso' && !/^bebidas/.test(norm(c.nome)));
+  CONFIG.temExtras = bs.some(c => tipoDe(c) !== 'aviso' && lugarDe(c) !== 'principal' && !/^bebidas/.test(norm(c.nome)));
   CONFIG.bebidas = bs.filter(c => tipoDe(c) !== 'aviso').map(c => {
     const nome = c.nome.replace(/^bebidas\s*[·\-–:]?\s*/i, '') || c.nome, tam = [];
     itens(c).forEach(x => {
@@ -1303,7 +1305,7 @@ function aplicarCardapio(cats, prods) {
       t.itens.push(x.nome);
     });
     const n = norm(c.nome), beb = /^bebidas/.test(n);
-    return { id: 'b' + c.id, tipo: tipoDe(c), lugar: c.tipo || 'ambos', nome, tamanhos: tam, desc: [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
+    return { id: 'b' + c.id, tipo: tipoDe(c), lugar: lugarDe(c), nome, tamanhos: tam, desc: [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
       emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : beb || /refri|bebida/.test(n) ? '🥤' :
         /sobremes|doce|pudim|bolo|sorvete|mousse/.test(n) ? '🍰' : /porc|petisc|frit/.test(n) ? '🍟' : '🍽️' };
   }).filter(d => d.tamanhos.length);
