@@ -371,7 +371,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
 .xn i { font-style: normal; color: var(--gold); font-weight: 800; font-size: 15px; }
 .xn small { color: var(--muted); }
 
-/* ---------- MODO PRINT (5 cliques na logo) ---------- */
+/* ---------- MODO PRINT (5 cliques na logo): Só os 4 primeiros cards e a salada ---------- */
 .brand { cursor: pointer; }
 body.print-mode #heroBrand { cursor: pointer; }
 body.print-mode { overflow: hidden; height: 100dvh; }
@@ -386,6 +386,12 @@ body.print-mode .hero h1 { font-size: clamp(28px, 8vw, 56px); }
 body.print-mode .hero .script { font-size: clamp(24px, 7vw, 44px); margin-top: -.12em; }
 body.print-mode #pratos { padding: 0; }
 body.print-mode .plates { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+
+/* Oculta tudo que não seja prato montável nem salada */
+body.print-mode .plates > *:not(.plate-prato):not(.print-salad) { display: none !important; }
+/* Exibe somente os 4 primeiros pratos */
+body.print-mode .plates .plate-prato:nth-of-type(n+5) { display: none !important; }
+
 body.print-mode .plate { padding: 20px 8px 8px; }
 body.print-mode .plate .price { top: 6px; right: 6px; font-size: 11px; padding: 1px 7px; line-height: 1.3; }
 body.print-mode .plate .price small { font-size: 9px; }
@@ -397,10 +403,10 @@ body.print-mode .plate .photo { margin-top: 6px; }
 body.print-mode .plate .photo img { width: 100%; }
 body.print-mode .plate .btn { display: none; }
 body.print-mode .final, body.print-mode footer, body.print-mode #cartBar, body.print-mode #extras, body.print-mode #avisos { display: none !important; }
-body.print-mode .plates .plate:nth-child(n+5):not(.print-salad) { display: none !important; }
+
 .print-salad { display: none; }
 body.print-mode .print-salad {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  display: flex !important; flex-direction: column; align-items: center; justify-content: center;
   grid-column: 1 / -1; height: auto; min-height: 44px; padding: 10px 8px; text-align: center;
 }
 body.print-mode .print-salad b { font-size: 15px; color: var(--gold); text-transform: uppercase; }
@@ -636,9 +642,9 @@ function renderPlates() {
   const container = $('#plates');
   let html = '';
 
-  // 1. Pratos montáveis (Prato)
+  // 1. Pratos montáveis (Prato) — adicionada a classe identificadora 'plate-prato'
   html += (CONFIG.planos || []).map((p, i) => `
-    <article class="plate ${!p.img ? 'nofoto' : ''} ${i < 2 ? 'first-card' + (splashDone ? ' in' : '') : 'reveal'}">
+    <article class="plate plate-prato ${!p.img ? 'nofoto' : ''} ${i < 2 ? 'first-card' + (splashDone ? ' in' : '') : 'reveal'}">
       <span class="price"><small>R$</small>${String(p.preco.toFixed(2)).replace('.', ',')}</span>
       <div class="row">
         <div>
@@ -679,10 +685,16 @@ function renderPlates() {
     });
   });
 
+  // Identifica a salada (estática ou da subcategoria dinâmica) para o modo print
+  const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const subSalad = (CONFIG.subcategorias || []).find(s => norm(s.nome).includes('salada'));
+  const saladNome = subSalad ? subSalad.nome : CONFIG.salada;
+  const saladItens = subSalad ? subSalad.itens.map(x => x.nome).join(', ') : CONFIG.saladaItens.join(', ');
+
   html += `
     <article class="plate print-salad">
-      <b>${esc(CONFIG.salada)}</b>
-      <small>${esc(CONFIG.saladaItens.join(', '))}</small>
+      <b>${esc(saladNome)}</b>
+      <small>${esc(saladItens)}</small>
     </article>`;
 
   container.innerHTML = html;
@@ -716,7 +728,7 @@ $$('[data-close]').forEach(b => b.addEventListener('click', () => closeSheet(b.c
 
 const optBtn = (k, v, sid) => `<button type="button" class="opt" data-k="${k}" ${sid ? `data-sid="${sid}"` : ''} data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${esc(v)}</button>`;
 
-/* ABERTURA DO BUILDER RESPEITANDO OS TIPOS DE EXIBIÇÃO DE CADA SUBCATEGORIA */
+/* ABERTURA DO BUILDER */
 function openBuilder(id) {
   const p = CONFIG.planos.find(x => x.id === id);
   if (!p) return;
@@ -780,7 +792,7 @@ function openBuilder(id) {
             </div>`).join('')}
         </div>
       </div>`;
-    } else { // Exibição 'cards'
+    } else {
       bodyHTML += `
       <div style="display:grid;gap:6px">
         ${sub.itens.map(it => `
@@ -1368,7 +1380,7 @@ $('#sobre').textContent = CONFIG.sobre;
 $('#horas').innerHTML = CONFIG.horarios.map(([d, h]) => `<div class="hr-row"><span>${esc(d)}</span><b>${esc(h)}</b></div>`).join('');
 $('#faq').innerHTML = CONFIG.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
 
-/* MODO PRINT: 5 CLIQUES NA LOGO RESTAURADOS */
+/* MODO PRINT RESTAURADO: 5 CLIQUES NA LOGO */
 let logoClicks = 0;
 $('.brand').addEventListener('click', () => {
   if (document.body.classList.contains('print-mode')) {
