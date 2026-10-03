@@ -677,14 +677,12 @@ function openBuilder(id) {
   const p = CONFIG.planos.find(x => x.id === id);
   if (!p) return;
 
-  // Filtra as subcategorias verificando se o ID da categoria do prato está marcado em "parents"
   const subcatsDoPrato = (CONFIG.subcategorias || []).filter(sub => {
-    if (!sub.parents || !sub.parents.length) return true; // se não houver restrição, permite
+    if (!sub.parents || !sub.parents.length) return true;
     if (!p.catId) return true;
     return sub.parents.map(String).includes(String(p.catId));
   });
 
-  // Identifica guarnições e saladas atribuídas exclusivamente a este prato
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   const subGuarn = subcatsDoPrato.find(s => norm(s.nome).includes('guarni'));
   const subSalad = subcatsDoPrato.find(s => norm(s.nome).includes('salada'));
@@ -767,7 +765,16 @@ function syncBuilder() {
     : `Adicionar · ${brl(p.preco * d.qty)}`;
 }
 
-function shake(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
+/* Vibração e tremor do container ao tentar ultrapassar o limite */
+function shake(el) { 
+  if (!el) return;
+  el.classList.remove('shake'); 
+  void el.offsetWidth; 
+  el.classList.add('shake'); 
+  if (navigator && typeof navigator.vibrate === 'function') {
+    navigator.vibrate([35, 30, 35]);
+  }
+}
 
 $('#bBody').addEventListener('click', e => {
   const d = draft, p = d.plano;
@@ -778,10 +785,17 @@ $('#bBody').addEventListener('click', e => {
     const max = isP ? p.escolhe : k === 'g' ? CONFIG.maxGuarnicoes : CONFIG.maxSalada;
     const v = b.dataset.v;
     const i = arr.indexOf(v);
-    if (i > -1) arr.splice(i, 1);
-    else if (arr.length < max) arr.push(v);
-    else if (isP && max === 1) { arr.length = 0; arr.push(v); }
-    else { shake(b.parentElement); return; }
+    if (i > -1) {
+      arr.splice(i, 1);
+    } else if (arr.length < max) {
+      arr.push(v);
+    } else if (isP && max === 1) { 
+      arr.length = 0; 
+      arr.push(v); 
+    } else { 
+      shake(b.parentElement); 
+      return; 
+    }
     syncBuilder();
   }
 });
@@ -809,7 +823,7 @@ function tryAdd() {
 function askMoreG(faltaG, faltaS) {
   const partes = [];
   if (faltaG > 0) partes.push(`${faltaG} ${faltaG > 1 ? 'guarnições' : 'guarnição'}`);
-  if (faltaS > 0) partes.push(`${faltaS} ${faltaS > 1 ? 'itens de salada' : 'item de salada'}`);
+  if (faltaS > 0) partes.push(`${faltaG > 1 ? 'itens de salada' : 'item de salada'}`);
   $('#mgTitle').innerHTML = `Você pode escolher mais <em>${partes.join(' e ')}</em>`;
   $('#mgText').textContent = `Seu prato leva até ${CONFIG.maxGuarnicoes} guarnições e ${CONFIG.maxSalada} itens de salada.`;
   const m = $('#moreG');
@@ -966,7 +980,6 @@ function renderCart() {
       <button class="btn btn--block" data-a="checkout">Finalizar pedido</button>
       ${temBump ? `<button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Ver ofertas adicionais</button>` : ''}`;
   } else if (step === 'drinks') {
-    // Exibe todos os itens definidos como Order Bump ou Ambos
     const bumpItems = CONFIG.bebidas.filter(d => d.lugar === 'bump' || d.lugar === 'ambos');
     body.innerHTML = `<p class="drinks-intro">Deseja adicionar mais alguma coisa antes de finalizar?</p>` + 
       (bumpItems.length ? bumpItems.map(cardDe).join('') : '<p class="drinks-intro">Nenhuma oferta adicional no momento.</p>');
