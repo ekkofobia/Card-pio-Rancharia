@@ -819,7 +819,6 @@ function openBuilder(id) {
       <div class="grp-h"><h3>${esc(CONFIG.salada)}</h3><span id="cntS"></span></div>
       <div class="opts" id="optS">${CONFIG.saladaItens.map(n => optBtn('s', n)).join('')}</div>
     </div>
-    <div id="bExtras"></div>
     <div class="grp">
       <label class="lbl" for="bObs">Alguma observação?</label>
       <textarea id="bObs" maxlength="140" placeholder="Ex.: sem cebola, pouco sal..."></textarea>
@@ -829,7 +828,6 @@ function openBuilder(id) {
       <div class="qty"><button type="button" data-q="-1" aria-label="Menos um">−</button><output id="bQty">1</output><button type="button" data-q="1" aria-label="Mais um">+</button></div>
       <button type="button" class="btn" id="addBtn"></button>
     </div>`;
-  renderSubExtras();
   syncBuilder();
   openSheet($('#builder'));
   $('#bBody').scrollTop = 0;
@@ -873,15 +871,6 @@ $('#bBody').addEventListener('click', e => {
   }
 });
 $('#bBody').addEventListener('input', e => { if (e.target.id === 'bObs') draft.obs = e.target.value; });
-$('#bBody').addEventListener('click', e => {               // cards da sub categoria (contadores / abrir-fechar)
-  const t = e.target.closest('#bExtras [data-a]'); if (!t) return;
-  const a = t.dataset.a;
-  if (a === 'dtoggle') { openDrink = openDrink === t.dataset.d ? null : t.dataset.d; renderSubExtras(); return; }
-  if (a === 'dinc' || a === 'ddec') {
-    changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
-    const f = $(`#bExtras [data-a="${a}"][data-d="${t.dataset.d}"][data-t="${t.dataset.t}"][data-i="${t.dataset.i}"]`); if (f) f.focus({ preventScroll: true });
-  }
-});
 $('#bFoot').addEventListener('click', e => {
   const q = e.target.closest('[data-q]');
   if (q) { draft.qty = Math.min(20, Math.max(1, draft.qty + +q.dataset.q)); syncBuilder(); }
@@ -1050,7 +1039,7 @@ function renderCart() {
       <button class="btn btn--block" data-a="checkout">Finalizar pedido</button>
       <button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Adicionar bebida</button>`;
   } else if (step === 'drinks') {
-    body.innerHTML = `<p class="drinks-intro">${CONFIG.temExtras ? 'Quer uma bebida ou algo mais para acompanhar?' : 'Quer uma bebida para acompanhar?'}</p>` + avisosDoLugar('bump').map(avisoHTML).join('') + doLugar('bump').map(d => d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d)).join('');
+    body.innerHTML = `<p class="drinks-intro">${CONFIG.temExtras ? 'Quer uma bebida ou algo mais para acompanhar?' : 'Quer uma bebida para acompanhar?'}</p>` + CONFIG.bebidas.filter(d => d.lugar !== 'principal').map(drinkHTML).join('');
     const bebNow = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0);
     const bebLabel = bebNow > drinksBaseline ? 'Continuar' : (drinksBaseline > 0 ? 'Não obrigado, já escolhi.' : 'Continuar sem bebida');
     foot.innerHTML = `<button class="btn btn--block" data-a="toform">${bebLabel}</button>
@@ -1275,13 +1264,10 @@ updateBar();
 
 /* ---------- Cardápio vindo do painel (Supabase). Se falhar, fica o cardápio acima ---------- */
 function aplicarCardapio(cats, prods) {
+  const todos = prods;                                   // inclui marcadores técnicos (__tipo, __lugar, __parent...)
+  prods = prods.filter(x => !/^__/.test(String(x.nome || '')));   // itens técnicos nunca aparecem no site
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-  const por = c => {                                          // itens da categoria, na ordem definida no painel (marcador __ordem)
-    const L = prods.filter(x => x.categoria_id === c.id), m = L.find(x => x.nome === '__ordem'), R = L.filter(x => x.nome !== '__ordem');
-    if (!m || !m.descricao) return R;
-    const ids = String(m.descricao).split(',').map(Number), pos = x => { const i = ids.indexOf(x.id); return i < 0 ? 1e9 : i; };
-    return R.map((x, i) => [x, i]).sort((u, v) => pos(u[0]) - pos(v[0]) || u[1] - v[1]).map(z => z[0]);
-  };
+  const por = c => prods.filter(x => x.categoria_id === c.id);
   const achar = n => cats.find(c => norm(c.nome) === n);
   const pr = achar('pratos'), pro = achar('proteinas'), gar = achar('guarnicoes'), sal = achar('salada');
   if (pr) CONFIG.planos = por(pr).map(x => {
@@ -1302,13 +1288,13 @@ function aplicarCardapio(cats, prods) {
   if (sal) CONFIG.saladaItens = por(sal).map(x => x.nome);
   /* Categorias novas: o tipo vem de um item marcador "__tipo" (min = minimizado, csc = card sem categoria, aviso) */
   const fixas = ['pratos', 'proteinas'], bs = cats.filter(c => !/^__/.test(c.nome) && !fixas.includes(norm(c.nome)) &&
-    !pcs.includes(c) && c !== gar && c !== sal);
-  const tipoDe = c => { const m = por(c).find(x => x.nome === '__tipo'); return m && m.descricao ? m.descricao : 'min'; };
-  const itens = c => por(c).filter(x => x.nome !== '__tipo' && x.nome !== '__lugar');
-  const lugarDe = c => { const m = por(c).find(x => x.nome === '__lugar'); return m && m.descricao ? m.descricao : 'ambos'; };   // sem marcador = como era antes (principal + order bump)
+    !pcs.includes(c) && c !== gar && c !== sal && c.tipo !== 'item');
+  const tipoDe = c => { const m = todos.find(x => x.categoria_id === c.id && x.nome === '__tipo'); if (m && m.descricao) return m.descricao;
+    return c.exibicao ? (c.exibicao === 'cards' ? 'csc' : 'min') : 'min'; };   // novo painel: coluna exibicao
+  const itens = c => por(c).filter(x => x.nome !== '__tipo');
   CONFIG.avisos = bs.filter(c => tipoDe(c) === 'aviso' && itens(c).length)
-    .map(c => ({ id: 'a' + c.id, nome: c.nome, lugar: lugarDe(c), linhas: itens(c).map(x => ({ t: x.nome, d: x.descricao || '' })) }));
-  CONFIG.temExtras = bs.some(c => tipoDe(c) !== 'aviso' && lugarDe(c) !== 'principal' && lugarDe(c) !== 'sub' && !/^bebidas/.test(norm(c.nome)));
+    .map(c => ({ id: 'a' + c.id, nome: c.nome, linhas: itens(c).map(x => ({ t: x.nome, d: x.descricao || '' })) }));
+  CONFIG.temExtras = bs.some(c => tipoDe(c) !== 'aviso' && !/^bebidas/.test(norm(c.nome)));
   CONFIG.bebidas = bs.filter(c => tipoDe(c) !== 'aviso').map(c => {
     const nome = c.nome.replace(/^bebidas\s*[·\-–:]?\s*/i, '') || c.nome, tam = [];
     itens(c).forEach(x => {
@@ -1317,7 +1303,7 @@ function aplicarCardapio(cats, prods) {
       t.itens.push(x.nome);
     });
     const n = norm(c.nome), beb = /^bebidas/.test(n);
-    return { id: 'b' + c.id, tipo: tipoDe(c), lugar: lugarDe(c), nome, tamanhos: tam, desc: [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
+    return { id: 'b' + c.id, tipo: tipoDe(c), lugar: c.tipo || 'ambos', nome, tamanhos: tam, desc: [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
       emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : beb || /refri|bebida/.test(n) ? '🥤' :
         /sobremes|doce|pudim|bolo|sorvete|mousse/.test(n) ? '🍰' : /porc|petisc|frit/.test(n) ? '🍟' : '🍽️' };
   }).filter(d => d.tamanhos.length);
@@ -1345,24 +1331,14 @@ function cscHTML(d) {                                       // card sem categori
   return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3>` + d.tamanhos.map((t, ti) => t.itens.map((item, ii) =>
     `<div class="d-row"><span class="xn"><b>${esc(item)}</b>${t.nome ? `<small>${esc(t.nome)}</small>` : ''}<i>${brl(t.preco)}</i></span>${qtyBtns(d, ti, ii, drinkName(d, t, item))}</div>`).join('')).join('') + `</div>`;
 }
-/* Lugar de cada card (vem do painel): principal | bump | sub. Sem lugar = principal + order bump */
-function noLugar(d, l) { const x = d.lugar || 'ambos'; return x === l || (x === 'ambos' && (l === 'principal' || l === 'bump')); }
-function doLugar(l) { return (CONFIG.bebidas || []).filter(d => d.tamanhos && d.tamanhos.length && noLugar(d, l)); }
-function avisosDoLugar(l) { return (CONFIG.avisos || []).filter(a => { const x = a.lugar || 'ambos'; return x === l || (x === 'ambos' && l === 'principal'); }); }
-function avisoHTML(a) { return `<div class="aviso"><h3>📢 ${esc(a.nome)}</h3>` +
-  a.linhas.map(l => `<p>${esc(l.t)}${l.d ? `<small>${esc(l.d)}</small>` : ''}</p>`).join('') + `</div>`; }
-function renderSubExtras() {                               // cards da "Sub categoria" dentro de Montar prato
-  const box = $('#bExtras'); if (!box) return;
-  box.innerHTML = avisosDoLugar('sub').map(avisoHTML).join('') +
-    doLugar('sub').map(d => d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d)).join('');
-}
 function renderExtras() {
-  const L = doLugar('principal');
+  const L = (CONFIG.bebidas || []).filter(d => d.tamanhos && d.tamanhos.length && d.lugar !== 'bump');
   $('#extras').hidden = !L.length;
   $('#extrasList').innerHTML = L.map(d => d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d)).join('');
 }
 function renderAvisos() {
-  $('#avisos').innerHTML = avisosDoLugar('principal').map(avisoHTML).join('');
+  $('#avisos').innerHTML = (CONFIG.avisos || []).map(a => `<div class="aviso"><h3>📢 ${esc(a.nome)}</h3>` +
+    a.linhas.map(l => `<p>${esc(l.t)}${l.d ? `<small>${esc(l.d)}</small>` : ''}</p>`).join('') + `</div>`).join('');
 }
 $('#extrasList').addEventListener('click', e => {
   const t = e.target.closest('[data-a]'); if (!t) return;
@@ -1374,7 +1350,7 @@ $('#extrasList').addEventListener('click', e => {
   }
 });
 const _updateBar = updateBar;
-updateBar = function (b) { _updateBar(b); renderExtras(); renderSubExtras(); };
+updateBar = function (b) { _updateBar(b); renderExtras(); };
 
 /* ---------- Loja aberta/fechada (controlada pelo painel) ---------- */
 function setLoja(f) {
