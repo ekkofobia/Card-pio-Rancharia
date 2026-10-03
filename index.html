@@ -530,12 +530,13 @@ const CONFIG = {
   saladaItens: listar(EDIT.saladaItens),
   maxSalada: Number(EDIT.maxSalada) || 4,
   planos: [
-    { id: 'classica', titulo1: 'Com uma proteína', titulo2: 'Clássica', preco: 15, escolhe: 1, proteinas: listar(EDIT.classica), img: FOTO('classica') },
-    { id: 'premium', titulo1: 'Com uma proteína', titulo2: 'Premium', preco: 18, escolhe: 1, proteinas: listar(EDIT.premium), img: FOTO('premium') },
-    { id: 'duas', titulo1: 'Com duas Proteínas', titulo2: 'Gourmet', preco: 22, escolhe: 2, proteinas: listar(EDIT.gourmet), img: FOTO('duas') },
-    { id: 'pf', titulo1: 'Com uma proteína', titulo2: 'Executivo', preco: 25, escolhe: 1, proteinas: listar(EDIT.executivo), img: FOTO('premium') }
+    { id: 'classica', catId: null, titulo1: 'Com uma proteína', titulo2: 'Clássica', preco: 15, escolhe: 1, proteinas: listar(EDIT.classica), img: FOTO('classica') },
+    { id: 'premium', catId: null, titulo1: 'Com uma proteína', titulo2: 'Premium', preco: 18, escolhe: 1, proteinas: listar(EDIT.premium), img: FOTO('premium') },
+    { id: 'duas', catId: null, titulo1: 'Com duas Proteínas', titulo2: 'Gourmet', preco: 22, escolhe: 2, proteinas: listar(EDIT.gourmet), img: FOTO('duas') },
+    { id: 'pf', catId: null, titulo1: 'Com uma proteína', titulo2: 'Executivo', preco: 25, escolhe: 1, proteinas: listar(EDIT.executivo), img: FOTO('premium') }
   ],
   guarnicoes: listar(EDIT.guarnicoes),
+  subcategorias: [],
   bebidas: [],
   cardsAvulsos: [],
   sobre: 'A Rancharia serve pratos montados por você: escolha a proteína, capriche nas guarnições e leve a Salada Tropical incluída. Tudo em poucos toques, direto pelo WhatsApp.',
@@ -675,25 +676,66 @@ const optBtn = (k, v) => `<button type="button" class="opt" data-k="${k}" data-v
 function openBuilder(id) {
   const p = CONFIG.planos.find(x => x.id === id);
   if (!p) return;
-  draft = { plano: p, proteinas: [], guarnicoes: [], salada: [], obs: '', qty: 1 };
+
+  // Filtra as subcategorias verificando se o ID da categoria do prato está marcado em "parents"
+  const subcatsDoPrato = (CONFIG.subcategorias || []).filter(sub => {
+    if (!sub.parents || !sub.parents.length) return true; // se não houver restrição, permite
+    if (!p.catId) return true;
+    return sub.parents.map(String).includes(String(p.catId));
+  });
+
+  // Identifica guarnições e saladas atribuídas exclusivamente a este prato
+  const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const subGuarn = subcatsDoPrato.find(s => norm(s.nome).includes('guarni'));
+  const subSalad = subcatsDoPrato.find(s => norm(s.nome).includes('salada'));
+
+  const listaGuarnicoes = subGuarn ? subGuarn.itens : (CONFIG.subcategorias.length ? [] : CONFIG.guarnicoes);
+  const listaSaladas = subSalad ? subSalad.itens : (CONFIG.subcategorias.length ? [] : CONFIG.saladaItens);
+  const nomeSalada = subSalad ? subSalad.nome : CONFIG.salada;
+
+  draft = { 
+    plano: p, 
+    proteinas: [], 
+    guarnicoes: [], 
+    salada: [], 
+    obs: '', 
+    qty: 1,
+    temGuarnicoes: listaGuarnicoes.length > 0,
+    temSalada: listaSaladas.length > 0,
+    nomeSalada: nomeSalada
+  };
+
   $('#bTitle').innerHTML = `${esc(p.titulo2)}<small>${esc(p.titulo1)} · ${brl(p.preco)}</small>`;
-  $('#bBody').innerHTML = `
+  
+  let bodyHTML = `
     <div class="grp">
       <div class="grp-h"><h3>${p.escolhe === 1 ? 'Escolha 1 proteína' : 'Escolha 2 proteínas'}</h3><span id="cntP"></span></div>
       <div class="opts one" id="optP">${p.proteinas.map(n => optBtn('p', n)).join('')}</div>
-    </div>
+    </div>`;
+
+  if (listaGuarnicoes.length) {
+    bodyHTML += `
     <div class="grp">
       <div class="grp-h"><h3 id="guarnicoesTitle">Guarnições</h3><span id="cntG"></span></div>
-      <div class="opts" id="optG">${CONFIG.guarnicoes.map(n => optBtn('g', n)).join('')}</div>
-    </div>
+      <div class="opts" id="optG">${listaGuarnicoes.map(n => optBtn('g', n)).join('')}</div>
+    </div>`;
+  }
+
+  if (listaSaladas.length) {
+    bodyHTML += `
     <div class="grp">
-      <div class="grp-h"><h3>${esc(CONFIG.salada)}</h3><span id="cntS"></span></div>
-      <div class="opts" id="optS">${CONFIG.saladaItens.map(n => optBtn('s', n)).join('')}</div>
-    </div>
+      <div class="grp-h"><h3>${esc(nomeSalada)}</h3><span id="cntS"></span></div>
+      <div class="opts" id="optS">${listaSaladas.map(n => optBtn('s', n)).join('')}</div>
+    </div>`;
+  }
+
+  bodyHTML += `
     <div class="grp">
       <label class="lbl" for="bObs">Alguma observação?</label>
       <textarea id="bObs" maxlength="140" placeholder="Ex.: sem cebola, pouco sal..."></textarea>
     </div>`;
+
+  $('#bBody').innerHTML = bodyHTML;
   $('#bFoot').innerHTML = `
     <div class="foot-row">
       <div class="qty"><button type="button" data-q="-1" aria-label="Menos um">−</button><output id="bQty">1</output><button type="button" data-q="1" aria-label="Mais um">+</button></div>
@@ -712,11 +754,13 @@ function syncBuilder() {
     b.classList.toggle('on', on); b.setAttribute('aria-pressed', on);
   });
   const cp = $('#cntP'), cg = $('#cntG'), cs = $('#cntS');
-  cp.textContent = `${d.proteinas.length}/${p.escolhe}`; cp.classList.toggle('full', d.proteinas.length === p.escolhe);
-  cg.textContent = `${d.guarnicoes.length}/${CONFIG.maxGuarnicoes}`; cg.classList.toggle('full', d.guarnicoes.length === CONFIG.maxGuarnicoes);
-  cs.textContent = `${d.salada.length}/${CONFIG.maxSalada}`; cs.classList.toggle('full', d.salada.length === CONFIG.maxSalada);
+  if (cp) { cp.textContent = `${d.proteinas.length}/${p.escolhe}`; cp.classList.toggle('full', d.proteinas.length === p.escolhe); }
+  if (cg) { cg.textContent = `${d.guarnicoes.length}/${CONFIG.maxGuarnicoes}`; cg.classList.toggle('full', d.guarnicoes.length === CONFIG.maxGuarnicoes); }
+  if (cs) { cs.textContent = `${d.salada.length}/${CONFIG.maxSalada}`; cs.classList.toggle('full', d.salada.length === CONFIG.maxSalada); }
   $('#bQty').textContent = d.qty;
-  const add = $('#addBtn'), falta = p.escolhe - d.proteinas.length, semG = d.guarnicoes.length === 0;
+  const add = $('#addBtn'), falta = p.escolhe - d.proteinas.length;
+  const semG = d.temGuarnicoes && d.guarnicoes.length === 0;
+
   add.disabled = falta > 0 || semG;
   add.textContent = falta > 0 ? `Escolha ${falta} proteína${falta > 1 ? 's' : ''}`
     : semG ? 'Escolha 1 guarnição'
@@ -752,9 +796,13 @@ $('#bFoot').addEventListener('click', e => {
 function tryAdd() {
   const d = draft;
   if (d.proteinas.length < d.plano.escolhe) return;
-  if (!d.guarnicoes.length) { shake($('#optG')); return; }
-  const faltaG = CONFIG.maxGuarnicoes - d.guarnicoes.length;
-  const faltaS = CONFIG.maxSalada - d.salada.length;
+  if (d.temGuarnicoes && !d.guarnicoes.length) { 
+    const elG = $('#optG');
+    if (elG) shake(elG); 
+    return; 
+  }
+  const faltaG = d.temGuarnicoes ? (CONFIG.maxGuarnicoes - d.guarnicoes.length) : 0;
+  const faltaS = d.temSalada ? (CONFIG.maxSalada - d.salada.length) : 0;
   if (faltaG > 0 || faltaS > 0) askMoreG(faltaG, faltaS); else addToCart();
 }
 
@@ -788,7 +836,7 @@ $('#moreG').addEventListener('click', e => { if (e.target === e.currentTarget) c
 function addToCart() {
   const d = draft, p = d.plano;
   cart.push({ uid: ++uid, kind: 'prato', nome: p.titulo2, preco: p.preco, qty: d.qty, img: p.img,
-    proteinas: [...d.proteinas], guarnicoes: [...d.guarnicoes], salada: [...d.salada], obs: d.obs.trim() });
+    proteinas: [...d.proteinas], guarnicoes: [...d.guarnicoes], salada: [...d.salada], nomeSalada: d.nomeSalada, obs: d.obs.trim() });
   save();
   closeSheet($('#builder'), false);
   updateBar();
@@ -815,11 +863,12 @@ function updateBar(bump) {
 }
 
 function lineHTML(it) {
+  const saladaLabel = it.nomeSalada || CONFIG.salada;
   const det = it.kind === 'prato'
     ? `<ul>
         <li>${esc(it.proteinas.join(' + '))}</li>
-        <li>${it.guarnicoes.length ? esc(it.guarnicoes.join(', ')) : 'Sem guarnições'}</li>
-        ${it.salada && it.salada.length ? `<li>${esc(CONFIG.salada)}: ${esc(it.salada.join(', '))}</li>` : ''}
+        ${it.guarnicoes && it.guarnicoes.length ? `<li>${esc(it.guarnicoes.join(', '))}</li>` : ''}
+        ${it.salada && it.salada.length ? `<li>${esc(saladaLabel)}: ${esc(it.salada.join(', '))}</li>` : ''}
         ${it.obs ? `<li>Obs.: ${esc(it.obs)}</li>` : ''}
       </ul>` : '<ul></ul>';
   return `<div class="line">
@@ -917,7 +966,7 @@ function renderCart() {
       <button class="btn btn--block" data-a="checkout">Finalizar pedido</button>
       ${temBump ? `<button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Ver ofertas adicionais</button>` : ''}`;
   } else if (step === 'drinks') {
-    // Exibe todos os itens definidos como Order Bump ou Ambos (inclusive Pratos)
+    // Exibe todos os itens definidos como Order Bump ou Ambos
     const bumpItems = CONFIG.bebidas.filter(d => d.lugar === 'bump' || d.lugar === 'ambos');
     body.innerHTML = `<p class="drinks-intro">Deseja adicionar mais alguma coisa antes de finalizar?</p>` + 
       (bumpItems.length ? bumpItems.map(cardDe).join('') : '<p class="drinks-intro">Nenhuma oferta adicional no momento.</p>');
@@ -1037,9 +1086,10 @@ function sendOrder() {
   cart.forEach(it => {
     msg += `\n${it.qty}x ${it.nome} — ${brl(itemTotal(it))}\n`;
     if (it.kind === 'prato') {
+      const saladaLabel = it.nomeSalada || CONFIG.salada;
       msg += `  • Proteína: ${it.proteinas.join(' + ')}\n`;
-      msg += `  • Guarnições: ${it.guarnicoes.length ? it.guarnicoes.join(', ') : 'nenhuma'}\n`;
-      if (it.salada && it.salada.length) msg += `  • ${CONFIG.salada}: ${it.salada.join(', ')}\n`;
+      if (it.guarnicoes && it.guarnicoes.length) msg += `  • Guarnições: ${it.guarnicoes.join(', ')}\n`;
+      if (it.salada && it.salada.length) msg += `  • ${saladaLabel}: ${it.salada.join(', ')}\n`;
       if (it.obs) msg += `  • Obs.: ${it.obs}\n`;
     }
   });
@@ -1097,7 +1147,7 @@ initReveal();
 updateBar();
 
 /* ==========================================================================
-   SINCRONIZAÇÃO TOTAL COM O PAINEL DE CONTROLE (ORDEM, PRATO E ORDER BUMP)
+   SINCRONIZAÇÃO TOTAL COM O PAINEL DE CONTROLE (RESPEITANDO AS SUBCATEGORIAS)
    ========================================================================== */
 function aplicarCardapio(cats, prods) {
   const todos = prods;
@@ -1112,6 +1162,7 @@ function aplicarCardapio(cats, prods) {
     }
     c.tipo = j.tipo || c.tipo || (norm(c.nome).includes('guarni') || norm(c.nome).includes('salada') ? 'item' : /bebida|refri|suco|cerveja/.test(norm(c.nome)) ? 'ambos' : 'principal');
     c.exibicao = j.exibicao || c.exibicao || (norm(c.nome).includes('guarni') ? 'checklist' : /bebida|refri|suco|cerveja/.test(norm(c.nome)) ? 'min' : 'prato');
+    c.parents = j.parents || c.parents || [];
     c.item_order = j.item_order || [];
   });
 
@@ -1129,15 +1180,18 @@ function aplicarCardapio(cats, prods) {
     return items;
   };
 
-  const achar = n => cats.find(c => norm(c.nome) === n);
-  const gar = achar('guarnicoes');
-  const sal = achar('salada');
-  if (gar) CONFIG.guarnicoes = por(gar).map(x => x.nome);
-  if (sal) CONFIG.saladaItens = por(sal).map(x => x.nome);
-
   const PL = 'valor do prato';
 
-  // 1. Categorias de "Prato" montável exibidas no ecrã inicial
+  // 1. Guarda todas as subcategorias dinâmicas com os respetivos pais vinculados
+  const catsSub = cats.filter(c => c.tipo === 'item');
+  CONFIG.subcategorias = catsSub.map(c => ({
+    id: c.id,
+    nome: c.nome,
+    parents: c.parents,
+    itens: por(c).filter(x => norm(x.nome) !== PL).map(x => x.nome)
+  }));
+
+  // 2. Categorias de "Prato" montável exibidas no ecrã inicial
   const catsPrato = cats.filter(c => c.exibicao === 'prato' && c.tipo !== 'item' && c.tipo !== 'bump');
   if (catsPrato.length) {
     CONFIG.planos = catsPrato.map(c => {
@@ -1147,6 +1201,7 @@ function aplicarCardapio(cats, prods) {
       const idKey = norm(c.nome).includes('classica') ? 'classica' : norm(c.nome).includes('gourmet') ? 'duas' : norm(c.nome).includes('executivo') ? 'pf' : 'premium';
       return {
         id: 'c' + c.id,
+        catId: c.id,
         titulo1: planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
         titulo2: c.nome,
         preco: preco,
@@ -1157,7 +1212,7 @@ function aplicarCardapio(cats, prods) {
     });
   }
 
-  // 2. Categorias exibidas no feed inicial como "Cards (sem foto)"
+  // 3. Categorias exibidas no feed inicial como "Cards (sem foto)"
   const catsCards = cats.filter(c => c.exibicao === 'cards' && (c.tipo === 'principal' || c.tipo === 'ambos'));
   CONFIG.cardsAvulsos = catsCards.map(c => ({
     id: c.id,
@@ -1165,7 +1220,7 @@ function aplicarCardapio(cats, prods) {
     itens: por(c).filter(x => norm(x.nome) !== PL)
   })).filter(c => c.itens.length > 0);
 
-  // 3. Todas as categorias que devem aparecer no Order Bump (bump ou ambos) ou nos Extras do ecrã inicial
+  // 4. Todas as categorias que devem aparecer no Order Bump (bump ou ambos) ou nos Extras do ecrã inicial
   const catsExtras = cats.filter(c => c.tipo !== 'item' && (c.tipo === 'bump' || c.tipo === 'ambos' || c.exibicao === 'min' || c.exibicao === 'checklist'));
   
   CONFIG.bebidas = catsExtras.map(c => {
@@ -1174,16 +1229,15 @@ function aplicarCardapio(cats, prods) {
     const precoBase = planItem ? Number(planItem.preco) : 15;
     const n = norm(c.nome);
 
-    // Se for do tipo Prato, prepara para renderizar com botão de montar no Order Bump
     if (c.exibicao === 'prato') {
       const proteinas = por(c).filter(x => norm(x.nome) !== PL);
       const idKey = norm(c.nome).includes('classica') ? 'classica' : norm(c.nome).includes('gourmet') ? 'duas' : norm(c.nome).includes('executivo') ? 'pf' : 'premium';
       
-      // Garante que o plano exista na lista global de planos
       const planoExistente = CONFIG.planos.find(p => p.id === 'c' + c.id);
       if (!planoExistente) {
         CONFIG.planos.push({
           id: 'c' + c.id,
+          catId: c.id,
           titulo1: planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
           titulo2: c.nome,
           preco: precoBase,
@@ -1284,7 +1338,6 @@ function toggleDrink(id, ti, ii) {
   changeDrink(id, ti, ii, q ? -q : 1);
 }
 
-// No ecrã inicial, mostra em #extras apenas as categorias que não sejam exclusivamente bump, nem pratos, nem cards já listados
 function renderExtras() {
   const L = (CONFIG.bebidas || []).filter(d => d.tipo !== 'prato' && d.tipo !== 'csc' && (d.lugar === 'principal' || d.lugar === 'ambos'));
   $('#extras').hidden = !L.length;
