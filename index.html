@@ -370,7 +370,41 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
 .xn b { font-weight: 700; font-size: 16px; }
 .xn i { font-style: normal; color: var(--gold); font-weight: 800; font-size: 15px; }
 .xn small { color: var(--muted); }
+
+/* ---------- MODO PRINT (5 cliques na logo) ---------- */
+.brand { cursor: pointer; }
+body.print-mode #heroBrand { cursor: pointer; }
+body.print-mode { overflow: hidden; height: 100dvh; }
+body.print-mode .top { display: none; }
+body.print-mode main {
+  height: 100dvh; overflow: hidden; padding-top: 0 !important;
+  display: flex; flex-direction: column; justify-content: center; gap: 8px;
+}
+body.print-mode .hero { padding: 4px 0; overflow: visible; }
+body.print-mode .hero .lead, body.print-mode .hero .cta { display: none; }
+body.print-mode .hero h1 { font-size: clamp(28px, 8vw, 56px); }
+body.print-mode .hero .script { font-size: clamp(24px, 7vw, 44px); margin-top: -.12em; }
+body.print-mode #pratos { padding: 0; }
+body.print-mode .plates { grid-template-columns: 1fr 1fr !important; gap: 8px; }
+body.print-mode .plate { padding: 20px 8px 8px; }
+body.print-mode .plate .price { top: 6px; right: 6px; font-size: 11px; padding: 1px 7px; line-height: 1.3; }
+body.print-mode .plate .price small { font-size: 9px; }
+body.print-mode .plate .row { grid-template-columns: 1fr; }
+body.print-mode .plate .t1 { font-size: 10px; }
+body.print-mode .plate .t2 { font-size: 14px; }
+body.print-mode .plate ul { font-size: 10px; }
+body.print-mode .plate .photo { margin-top: 6px; }
+body.print-mode .plate .photo img { width: 100%; }
+body.print-mode .plate .btn { display: none; }
+body.print-mode .final, body.print-mode footer, body.print-mode #cartBar, body.print-mode #extras, body.print-mode #avisos { display: none !important; }
+body.print-mode .plates .plate:nth-child(n+5):not(.print-salad) { display: none !important; }
 .print-salad { display: none; }
+body.print-mode .print-salad {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  grid-column: 1 / -1; height: auto; min-height: 44px; padding: 10px 8px; text-align: center;
+}
+body.print-mode .print-salad b { font-size: 15px; color: var(--gold); text-transform: uppercase; }
+body.print-mode .print-salad small { display: block; margin-top: 4px; font-size: 11px; color: var(--muted); line-height: 1.3; }
 
 @media (min-width: 760px) {
   .wrap { padding: 0 32px; }
@@ -687,18 +721,16 @@ function openBuilder(id) {
   const p = CONFIG.planos.find(x => x.id === id);
   if (!p) return;
 
-  // Filtra as subcategorias vinculadas especificamente ao ID deste prato
   const subcatsDoPrato = (CONFIG.subcategorias || []).filter(sub => {
     if (!sub.parents || !sub.parents.length) return true;
     if (!p.catId) return true;
     return sub.parents.map(String).includes(String(p.catId));
   });
 
-  // Estado inicial de seleções do rascunho
   draft = { 
     plano: p, 
     proteinas: [], 
-    subSelections: {}, // guarda as escolhas de cada subcategoria { [subId]: { [itemNome]: qty } }
+    subSelections: {},
     obs: '', 
     qty: 1,
     subcategorias: subcatsDoPrato
@@ -716,7 +748,6 @@ function openBuilder(id) {
       <div class="opts one" id="optP">${p.proteinas.map(n => optBtn('p', n)).join('')}</div>
     </div>`;
 
-  // Renderiza cada subcategoria respeitando a sua exibição: checklist, cards ou minimizado
   subcatsDoPrato.forEach(sub => {
     const isChecklist = sub.exibicao === 'checklist';
     const isMin = sub.exibicao === 'min';
@@ -791,7 +822,6 @@ function openBuilder(id) {
 function syncBuilder() {
   const d = draft, p = d.plano;
 
-  // 1. Sincroniza botões de proteínas
   $$('#bBody .opt[data-k="p"]').forEach(b => {
     const on = d.proteinas.includes(b.dataset.v);
     b.classList.toggle('on', on);
@@ -803,7 +833,6 @@ function syncBuilder() {
     cp.classList.toggle('full', d.proteinas.length === p.escolhe);
   }
 
-  // 2. Calcula adicionais de preço e sincroniza subcategorias
   let extraPrecoTotal = 0;
 
   (d.subcategorias || []).forEach(sub => {
@@ -816,14 +845,12 @@ function syncBuilder() {
       subQtdTotal += q;
       extraPrecoTotal += precoUnit * q;
 
-      // Sincroniza contadores numéricos (cards e minimizado)
       const out = $(`output[data-out-sid="${sub.id}"][data-v="${CSS.escape(nome)}"]`);
       if (out) out.textContent = q;
       const decBtn = $(`button[data-a="sub_dec"][data-sid="${sub.id}"][data-v="${CSS.escape(nome)}"]`);
       if (decBtn) decBtn.classList.toggle('off', q === 0);
     });
 
-    // Sincroniza botões checklist
     if (sub.exibicao === 'checklist') {
       $$(`#optSub_${sub.id} .opt`).forEach(b => {
         const itemInfo = selMap[b.dataset.v];
@@ -847,7 +874,6 @@ function syncBuilder() {
   const add = $('#addBtn');
   const faltaP = p.escolhe - d.proteinas.length;
 
-  // Validação: se alguma subcategoria de checklist for obrigatória
   let faltaChecklist = false;
   (d.subcategorias || []).forEach(sub => {
     if (sub.exibicao === 'checklist' && sub.max_escolha > 0) {
@@ -880,7 +906,6 @@ $('#bBody').addEventListener('click', e => {
   const d = draft;
   if (!d) return;
 
-  // 1. Clique em Proteína
   const bP = e.target.closest('.opt[data-k="p"]');
   if (bP) {
     const v = bP.dataset.v;
@@ -899,7 +924,6 @@ $('#bBody').addEventListener('click', e => {
     return;
   }
 
-  // 2. Clique em Checklist de Subcategoria
   const bSub = e.target.closest('.opt[data-k="sub_check"]');
   if (bSub) {
     const sid = bSub.dataset.sid;
@@ -922,7 +946,6 @@ $('#bBody').addEventListener('click', e => {
     if (estaAtivo) {
       delete selMap[v];
     } else {
-      // Se tiver preço, ignora o limite. Se for incluso (preço 0), respeita o max_escolha
       if (preco === 0 && totalSemPreco >= maxLimit) {
         shake(bSub.parentElement);
         return;
@@ -933,7 +956,6 @@ $('#bBody').addEventListener('click', e => {
     return;
   }
 
-  // 3. Botões de Incremento e Decremento (para exibição em Cards e Minimizado dentro da montagem)
   const bInc = e.target.closest('[data-a="sub_inc"]');
   if (bInc) {
     const sid = bInc.dataset.sid;
@@ -972,7 +994,6 @@ function tryAdd() {
   const d = draft;
   if (d.proteinas.length < d.plano.escolhe) return;
 
-  // Alerta de opções restantes apenas se houver subcategorias de checklist incompletas
   let faltas = [];
   (d.subcategorias || []).forEach(sub => {
     if (sub.exibicao === 'checklist' && sub.max_escolha > 0) {
@@ -1015,7 +1036,6 @@ $('#moreG').addEventListener('click', e => { if (e.target === e.currentTarget) c
 function addToCart() {
   const d = draft, p = d.plano;
 
-  // Consolida as escolhas de todas as subcategorias
   const subItensResumo = [];
   let precoExtraTotal = 0;
 
@@ -1348,6 +1368,29 @@ $('#sobre').textContent = CONFIG.sobre;
 $('#horas').innerHTML = CONFIG.horarios.map(([d, h]) => `<div class="hr-row"><span>${esc(d)}</span><b>${esc(h)}</b></div>`).join('');
 $('#faq').innerHTML = CONFIG.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
 
+/* MODO PRINT: 5 CLIQUES NA LOGO RESTAURADOS */
+let logoClicks = 0;
+$('.brand').addEventListener('click', () => {
+  if (document.body.classList.contains('print-mode')) {
+    document.body.classList.remove('print-mode');
+    logoClicks = 0;
+    return;
+  }
+  logoClicks++;
+  if (logoClicks >= 5) {
+    document.body.classList.add('print-mode');
+    logoClicks = 0;
+  }
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.brand')) logoClicks = 0;
+}, true);
+$('#heroBrand').addEventListener('click', () => {
+  if (document.body.classList.contains('print-mode')) {
+    document.body.classList.remove('print-mode');
+  }
+});
+
 let splashDone = false;
 function hideSplash() {
   if (splashDone) return; splashDone = true;
@@ -1374,7 +1417,6 @@ function aplicarCardapio(cats, prods) {
   const todos = prods;
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
-  // 1. Extrair configurações personalizadas de cada categoria guardadas no __config
   cats.forEach(c => {
     const m = todos.find(x => x.categoria_id === c.id && x.nome === '__config');
     let j = {};
@@ -1409,7 +1451,7 @@ function aplicarCardapio(cats, prods) {
   CONFIG.subcategorias = catsSub.map(c => ({
     id: c.id,
     nome: c.nome,
-    exibicao: c.exibicao, // 'checklist', 'cards', 'min'
+    exibicao: c.exibicao,
     max_escolha: c.max_escolha,
     parents: c.parents,
     itens: por(c).filter(x => norm(x.nome) !== PL).map(x => ({
