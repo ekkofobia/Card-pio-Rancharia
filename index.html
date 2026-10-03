@@ -404,6 +404,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
     </div>
   </section>
 
+  <!-- Seção de Acompanhamentos/Bebidas do ecrã inicial (apenas não-pratos principais) -->
   <section id="extras" hidden>
     <div class="wrap">
       <h2 class="sec-title">Acompanhamentos e <em>Bebidas</em></h2>
@@ -586,7 +587,7 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
 }
 
-/* Renderização dos Pratos e dos Cards sem foto no Feed Principal */
+/* Renderização dos Pratos e dos Cards sem foto no Ecrã Principal */
 function renderPlates() {
   const container = $('#plates');
   let html = '';
@@ -760,7 +761,7 @@ function tryAdd() {
 function askMoreG(faltaG, faltaS) {
   const partes = [];
   if (faltaG > 0) partes.push(`${faltaG} ${faltaG > 1 ? 'guarnições' : 'guarnição'}`);
-  if (faltaS > 0) partes.push(`${faltaS} ${faltaS > 1 ? 'itens de salada' : 'item de salada'}`);
+  if (faltaS > 0) partes.push(`${faltaG > 1 ? 'itens de salada' : 'item de salada'}`);
   $('#mgTitle').innerHTML = `Você pode escolher mais <em>${partes.join(' e ')}</em>`;
   $('#mgText').textContent = `Seu prato leva até ${CONFIG.maxGuarnicoes} guarnições e ${CONFIG.maxSalada} itens de salada.`;
   const m = $('#moreG');
@@ -901,7 +902,7 @@ $('#viewOrder').addEventListener('click', e => {
 
 function renderCart() {
   const body = $('#cBody'), foot = $('#cFoot');
-  $('#cTitle').textContent = { list: 'Seu pedido', drinks: 'Acompanhamentos', form: 'Quase lá' }[step];
+  $('#cTitle').textContent = { list: 'Seu pedido', drinks: 'Ofertas adicionais', form: 'Quase lá' }[step];
   $('#cart').classList.toggle('sheet--full', step === 'form' || step === 'drinks');
 
   if (step === 'list') {
@@ -916,10 +917,10 @@ function renderCart() {
       <button class="btn btn--block" data-a="checkout">Finalizar pedido</button>
       ${temBump ? `<button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Ver ofertas adicionais</button>` : ''}`;
   } else if (step === 'drinks') {
-    // Exibe todos os itens definidos como Order Bump ou Ambos
+    // 1 ÚNICA VEZ NO ECRÃ DE ORDER BUMP: Apenas itens configurados com Order Bump ou Ambos
     const bumpItems = CONFIG.bebidas.filter(d => d.lugar === 'bump' || d.lugar === 'ambos');
-    body.innerHTML = `<p class="drinks-intro">Deseja adicionar mais algum item ou bebida ao seu pedido?</p>` + 
-      (bumpItems.length ? bumpItems.map(cardDe).join('') : '<p class="drinks-intro">Nenhum item adicional no momento.</p>');
+    body.innerHTML = `<p class="drinks-intro">Deseja adicionar mais alguma coisa antes de finalizar?</p>` + 
+      (bumpItems.length ? bumpItems.map(cardDe).join('') : '<p class="drinks-intro">Nenhuma oferta adicional no momento.</p>');
     foot.innerHTML = `<button class="btn btn--block" data-a="toform">Continuar</button>
       <button class="link" style="display:block;margin:6px auto 0" data-a="back">Voltar ao pedido</button>`;
   } else {
@@ -1092,7 +1093,7 @@ initReveal();
 updateBar();
 
 /* ==========================================================================
-   SINCRONIZAÇÃO TOTAL COM O PAINEL DE CONTROLE (ORDEM, PRATO, CARDS E ORDER BUMP)
+   SINCRONIZAÇÃO TOTAL COM O PAINEL DE CONTROLE (SEM DUPLICAÇÃO DE CARDS)
    ========================================================================== */
 function aplicarCardapio(cats, prods) {
   const todos = prods;
@@ -1132,7 +1133,7 @@ function aplicarCardapio(cats, prods) {
 
   const PL = 'valor do prato';
 
-  // Categorias que funcionam como montador de "Prato" (Clássica, Gourmet, etc.)
+  // 1. Categorias exibidas no topo como "Prato" montável (Aparece 1 vez no ecrã inicial)
   const catsPrato = cats.filter(c => c.exibicao === 'prato' && c.tipo !== 'item' && c.tipo !== 'bump');
   if (catsPrato.length) {
     CONFIG.planos = catsPrato.map(c => {
@@ -1152,7 +1153,7 @@ function aplicarCardapio(cats, prods) {
     });
   }
 
-  // Categorias exibidas no feed inicial como "Cards (sem foto)"
+  // 2. Categorias exibidas no feed inicial como "Cards (sem foto)" (Aparece 1 vez no ecrã inicial)
   const catsCards = cats.filter(c => c.exibicao === 'cards' && (c.tipo === 'principal' || c.tipo === 'ambos'));
   CONFIG.cardsAvulsos = catsCards.map(c => ({
     id: c.id,
@@ -1160,8 +1161,9 @@ function aplicarCardapio(cats, prods) {
     itens: por(c).filter(x => norm(x.nome) !== PL)
   })).filter(c => c.itens.length > 0);
 
-  // Categorias de Order Bump e Extras (Bebidas, Ofertas no Checkout, Sobremesas)
-  const catsExtras = cats.filter(c => c.tipo !== 'item' && (c.tipo === 'bump' || c.tipo === 'ambos' || c.exibicao === 'min' || c.exibicao === 'checklist'));
+  // 3. Categorias de acompanhamentos/bebidas/order bump
+  // NÃO duplica no #extras se a categoria já for um prato montável
+  const catsExtras = cats.filter(c => c.tipo !== 'item' && c.exibicao !== 'prato');
   
   CONFIG.bebidas = catsExtras.map(c => {
     const nome = c.nome.replace(/^bebidas\s*[·\-–:]?\s*/i, '') || c.nome;
@@ -1226,8 +1228,9 @@ function toggleDrink(id, ti, ii) {
   changeDrink(id, ti, ii, q ? -q : 1);
 }
 
+// No ecrã inicial, mostra em #extras apenas as categorias que não sejam exclusivamente bump nem cards já listados
 function renderExtras() {
-  const L = (CONFIG.bebidas || []).filter(d => d.tamanhos && d.tamanhos.length && d.lugar !== 'bump');
+  const L = (CONFIG.bebidas || []).filter(d => d.tamanhos && d.tamanhos.length && (d.lugar === 'principal' || d.lugar === 'ambos') && d.tipo !== 'csc');
   $('#extras').hidden = !L.length;
   $('#extrasList').innerHTML = L.map(cardDe).join('');
 }
