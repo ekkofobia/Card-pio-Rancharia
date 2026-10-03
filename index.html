@@ -4,37 +4,16 @@
 <script>
 /* ==========================================================================
    EDITE AQUI — proteínas de cada prato, guarnições e a salada
-   Basta digitar os itens separados por vírgula (,). Pra adicionar mais um
-   item, digite uma vírgula e escreva o próximo. Não precisa mexer no resto
-   do arquivo.
    ========================================================================== */
 window.EDITAVEL = {
-
-  // CLÁSSICA — proteínas desse prato
   classica: 'Ensopado de carne moída, Linguiça toscana',
-
-  // PREMIUM — proteínas desse prato
   premium: 'Frango a passarinha, Bode cozido',
-
-  // GOURMET — proteínas desse prato (leva 2)
   gourmet: 'Ensopado de carne moída, Linguiça toscana, Frango a passarinha, Bode cozido',
-
-  // EXECUTIVO — proteínas desse prato
   executivo: 'Carne do sol, Cupim, Contra filé, Bode',
-
-  // GUARNIÇÕES — opções que aparecem em todos os pratos na hora de montar
   guarnicoes: 'Baião, Arroz, Feijão caldo, Feijão verde, Feijão tropeiro, Macarrão, Farofa',
-
-  // Quantas guarnições o cliente pode escolher (número)
   maxGuarnicoes: 4,
-
-  // SALADA — nome/título da seção
   salada: 'Salada Tropical',
-
-  // SALADA — opções que o cliente pode escolher
   saladaItens: 'Alface, Tomate, Cebola roxa, Pepino, Milho',
-
-  // Quantos itens de salada o cliente pode escolher (número)
   maxSalada: 4
 };
 </script>
@@ -47,21 +26,15 @@ window.EDITAVEL = {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@400;500;600;700;800&family=Yellowtail&display=swap" rel="stylesheet">
 <style>
-/* =====================================================
-   RANCHARIA — style.css
-   Identidade tirada do cardápio: marrom-café + creme + dourado
-   Mobile-first. Para trocar cores, edite só as variáveis abaixo.
-   ===================================================== */
-
 :root {
-  --bg: #2a1509;          /* fundo da página */
-  --card: #341d0f;        /* cards */
-  --card-2: #402617;      /* cards em destaque */
-  --cream: #f7ecd8;       /* texto principal */
-  --muted: #cdb99c;       /* texto secundário */
-  --gold: #f2c46d;        /* destaque, preço, ações */
-  --gold-d: #d8a24a;      /* hover do dourado */
-  --ink: #2a1509;         /* texto sobre dourado */
+  --bg: #2a1509;
+  --card: #341d0f;
+  --card-2: #402617;
+  --cream: #f7ecd8;
+  --muted: #cdb99c;
+  --gold: #f2c46d;
+  --gold-d: #d8a24a;
+  --ink: #2a1509;
   --line: rgba(242, 196, 109, .24);
   --ok: #7bd389;
   --radius: 22px;
@@ -88,7 +61,7 @@ ul { padding: 0; list-style: none; }
 .wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 20px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
-/* ---------- Botões ---------- */
+/* Botões */
 .btn {
   position: relative; overflow: hidden;
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
@@ -113,7 +86,7 @@ ul { padding: 0; list-style: none; }
 }
 @keyframes ripple { to { transform: scale(4); opacity: 0; } }
 
-/* ---------- Splash ---------- */
+/* Splash */
 #splash {
   position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; text-align: center;
   background: var(--bg); transition: opacity .5s ease, visibility .5s;
@@ -124,7 +97,7 @@ ul { padding: 0; list-style: none; }
 #splash .s-bar i { display: block; height: 100%; width: 40%; background: var(--gold); border-radius: 3px; animation: load 1s ease-in-out infinite; }
 @keyframes load { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
 
-/* ---------- Topo ---------- */
+/* Topo */
 .top {
   position: fixed; top: 0; left: 0; right: 0; z-index: 30; width: 100%;
   background: rgba(42, 21, 9, .88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -138,7 +111,6 @@ ul { padding: 0; list-style: none; }
   border: 1.5px solid var(--line); font-weight: 600; transition: border-color .2s, background .2s;
 }
 .cart-btn:hover { border-color: var(--gold); background: rgba(242, 196, 109, .08); }
-.cart-btn svg { width: 20px; height: 20px; }
 .badge {
   min-width: 22px; height: 22px; padding: 0 6px; display: grid; place-items: center;
   border-radius: 999px; background: var(--gold); color: var(--ink); font-size: 13px; font-weight: 800;
@@ -146,8 +118,8 @@ ul { padding: 0; list-style: none; }
 .badge.pop { animation: pop .4s ease; }
 @keyframes pop { 40% { transform: scale(1.5); } }
 
-/* ---------- Hero ---------- */
-.hero { padding: 28px 0 44px; text-align: center; overflow: hidden; } /* respiro embaixo p/ o brilho do botão não cortar */
+/* Hero */
+.hero { padding: 28px 0 44px; text-align: center; overflow: hidden; }
 .hero h1 {
   font-family: var(--f-display); font-weight: 400; text-transform: uppercase;
   font-size: clamp(60px, 18vw, 150px); line-height: .95; letter-spacing: .005em;
@@ -160,9 +132,6 @@ ul { padding: 0; list-style: none; }
 .hero .lead { margin: 22px auto 0; max-width: 30ch; font-size: 20px; color: var(--cream); }
 .hero .lead b { color: var(--gold); }
 .hero .cta { margin-top: 20px; display: flex; flex-direction: column; align-items: center; gap: 14px; }
-.hero .from { color: var(--muted); font-size: 15px; }
-.hero .from b { color: var(--gold); font-size: 18px; }
-/* Única entrada orquestrada da página (após o splash) */
 body:not(.ready) .hero h1, body:not(.ready) .hero .script, body:not(.ready) .hero .lead,
 body:not(.ready) .hero .cta { opacity: 0; }
 body.ready .hero h1 { animation: rise .7s cubic-bezier(.2, .8, .2, 1) both; }
@@ -172,19 +141,20 @@ body.ready .hero .cta { animation: rise .6s .95s ease both; }
 @keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
 @keyframes wipe { from { opacity: 1; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
 
-/* ---------- Seções ---------- */
+/* Seções */
 section { padding: 46px 0; scroll-margin-top: 62px; }
 .sec-title { font-size: 26px; font-weight: 700; line-height: 1.15; }
 .sec-title em { font-style: normal; color: var(--gold); }
 .sec-sub { margin-top: 8px; color: var(--muted); max-width: 46ch; }
 
-/* Cards de prato (compactos) */
+/* Cards de prato e pratos compactos */
 #pratos { padding-top: 0; }
 .plates { display: grid; gap: 12px; margin-top: 0; }
 .plate { position: relative; overflow: hidden; padding: 16px; border-radius: var(--radius); background: linear-gradient(160deg, var(--card-2), var(--card) 55%); border: 1px solid var(--line); }
 .plate .price { position: absolute; top: 14px; right: 14px; z-index: 2; margin: 0; padding: 2px 12px; border-radius: 999px; background: var(--gold); color: var(--ink); font-weight: 800; font-size: 19px; }
 .plate .price small { font-size: 13px; font-weight: 800; }
 .plate .row { display: grid; grid-template-columns: 1fr 42%; gap: 6px; align-items: center; }
+.plate.nofoto .row { grid-template-columns: 1fr; }
 .plate .t1 { font-weight: 600; font-size: 13px; letter-spacing: .02em; text-transform: uppercase; }
 .plate .t2 { font-weight: 800; font-size: 22px; line-height: 1.1; color: var(--gold); text-transform: uppercase; }
 .plate ul { margin: 8px 0 0; display: grid; gap: 2px; font-size: 14px; }
@@ -207,7 +177,7 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .plate.first-card { opacity: 0; transform: translateY(30px); transition: opacity .4s ease, transform .4s ease; }
 .plate.first-card.in { opacity: 1; transform: none; }
 
-/* ---------- Barra fixa do carrinho ---------- */
+/* Barra fixa do carrinho */
 #cartBar {
   position: fixed; left: 50%; bottom: 16px; z-index: 40; width: calc(100% - 28px); max-width: 520px;
   transform: translate(-50%, 140%); transition: transform .4s cubic-bezier(.2, .9, .3, 1.2);
@@ -228,7 +198,7 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .mini-badge { position: absolute; top: -7px; right: -8px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--ink); color: var(--gold); font-size: 10px; font-weight: 800; display: grid; place-items: center; line-height: 1; }
 #cartBar .go { display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 999px; background: var(--ink); color: var(--gold); }
 
-/* ---------- Sheets (montar prato / pedido) ---------- */
+/* Sheets */
 .sheet { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; justify-content: center; }
 .sheet[hidden] { display: none; }
 .sheet .back { position: absolute; inset: 0; background: rgba(0, 0, 0, .65); opacity: 0; transition: opacity .3s; }
@@ -268,15 +238,7 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .shake { animation: shake .35s; }
 @keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
-.sw { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px; border-radius: 16px; border: 1.5px solid var(--line); background: var(--card-2); width: 100%; text-align: left; }
-.sw b { display: block; }
-.sw small { color: var(--muted); }
-.sw i { flex: none; width: 46px; height: 28px; border-radius: 999px; background: #5a4331; position: relative; transition: background .2s; }
-.sw i::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; transition: transform .2s; }
-.sw[aria-checked="true"] i { background: var(--gold); }
-.sw[aria-checked="true"] i::after { transform: translateX(18px); }
-
-textarea, input[type="text"], input[type="tel"] {
+textarea, input[type="text"] {
   width: 100%; padding: 13px 14px; border-radius: 14px; font: inherit; color: var(--cream);
   background: var(--card-2); border: 1.5px solid var(--line); transition: border-color .2s;
 }
@@ -285,7 +247,6 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 ::placeholder { color: #9d8a70; }
 .lbl { display: block; margin-bottom: 6px; font-weight: 600; font-size: 15px; }
 .err { border-color: #ff7a6b !important; }
-.errmsg { color: #ff9c90; font-size: 14px; margin-top: 6px; }
 
 .qty { display: inline-flex; align-items: center; gap: 4px; border: 1.5px solid var(--line); border-radius: 999px; }
 .qty button { width: 38px; height: 38px; font-size: 22px; border-radius: 50%; }
@@ -294,7 +255,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .foot-row { display: flex; align-items: center; gap: 12px; }
 .foot-row .btn { flex: 1; padding: 0 14px; font-size: 16px; white-space: nowrap; }
 
-/* Itens do carrinho */
+/* Linhas do carrinho */
 .line { padding: 14px 0; border-bottom: 1px solid var(--line); }
 .line:last-child { border-bottom: 0; }
 .line-top { display: flex; justify-content: space-between; gap: 12px; }
@@ -306,7 +267,6 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .link:hover { color: #ff9c90; }
 .empty { text-align: center; padding: 34px 10px; color: var(--muted); }
 .total { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
-.total .link { font-size: 15px; text-decoration: underline; }
 .vp-btn { color: #fff; font-size: 33px; font-weight: 700; text-decoration: underline; }
 .sheet--full .panel { width: 100%; max-width: none; height: 100%; max-height: none; border-radius: 0; border: 0; }
 .total span { color: var(--muted); }
@@ -317,7 +277,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .field { margin-bottom: 18px; }
 .note { font-size: 14px; color: var(--muted); margin-top: 8px; }
 
-/* Modal upsell */
+/* Modal upsell guarnições */
 .modal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: rgba(0, 0, 0, .7); opacity: 0; transition: opacity .25s; }
 .modal[hidden] { display: none; }
 .modal.open { opacity: 1; }
@@ -327,13 +287,10 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .modal h2 { margin-top: 10px; font-size: 24px; line-height: 1.2; }
 .modal h2 em { font-style: normal; color: var(--gold); }
 .modal p { margin: 8px 0 20px; color: var(--muted); }
-.modal .btn { width: 100%; }
-.modal .link { display: block; margin: 8px auto 0; }
-
 .modal .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .modal .btns .btn { width: 100%; padding: 0 10px; font-size: 16px; }
 
-/* Tela de bebidas (etapa do pedido) */
+/* Cards Extras / Minimizado */
 .drinks-intro { margin-bottom: 14px; color: var(--muted); }
 .drink { margin-bottom: 12px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--card-2); overflow: hidden; transition: border-color .2s; }
 .drink.open { border-color: var(--gold); }
@@ -350,12 +307,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .drink.open .chev { transform: rotate(-135deg); margin: 4px 4px 0 2px; }
 .drink-opts { display: grid; gap: 4px; padding: 0 14px 12px; }
 .drink-opts[hidden] { display: none; }
-.d-sub { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 2px; padding: 12px 0 6px; margin-top: 8px; border-top: 1px solid var(--line); }
-.d-sub:first-child { margin-top: 0; padding-top: 2px; border-top: 0; }
-.d-sub b { color: var(--cream); font-weight: 800; font-size: 19px; }
-.d-sub span { color: var(--gold); font-weight: 700; font-size: 13px; }
-.d-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0 0 6px; }
-.d-row { padding: 12px 0 12px 6px; border-top: 1px solid var(--line); }
+.d-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0 12px 6px; border-top: 1px solid var(--line); }
 .d-row:first-child { border-top: 0; padding-top: 2px; }
 .d-row b { font-weight: 500; font-size: 15px; flex: 1; min-width: 0; }
 .d-pr { color: var(--gold); font-weight: 700; font-size: 14px; white-space: nowrap; }
@@ -369,85 +321,26 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
-/* ---------- Telas maiores ---------- */
-@media (min-width: 760px) {
-  .wrap { padding: 0 32px; }
-  .plates { grid-template-columns: 1fr 1fr; }
-  .hero { padding: 56px 0 44px; }
-  .sheet { align-items: center; }
-  .sheet .panel { border-radius: 26px; border-bottom: 1px solid var(--line); max-height: 88vh; }
-}
-
-/* ---------- Modo print: 5 cliques na logo (só hero + pratos, 2 colunas, sem rolar) ---------- */
-.brand { cursor: pointer; }
-body.print-mode #heroBrand { cursor: pointer; }
-body.print-mode { overflow: hidden; height: 100dvh; }
-body.print-mode .top { display: none; }
-body.print-mode main {
-  height: 100dvh; overflow: hidden; padding-top: 0 !important;
-  display: flex; flex-direction: column; justify-content: center; gap: 8px;
-}
-body.print-mode .hero { padding: 4px 0; overflow: visible; }
-body.print-mode .hero .lead, body.print-mode .hero .cta { display: none; }
-body.print-mode .hero h1 { font-size: clamp(28px, 8vw, 56px); }
-body.print-mode .hero .script { font-size: clamp(24px, 7vw, 44px); margin-top: -.12em; }
-body.print-mode #pratos { padding: 0; }
-body.print-mode .plates { grid-template-columns: 1fr 1fr !important; gap: 8px; }
-body.print-mode .plate { padding: 20px 8px 8px; }
-body.print-mode .plate .price { top: 6px; right: 6px; font-size: 11px; padding: 1px 7px; line-height: 1.3; }
-body.print-mode .plate .price small { font-size: 9px; }
-body.print-mode .plate .row { grid-template-columns: 1fr; }
-body.print-mode .plate .t1 { font-size: 10px; }
-body.print-mode .plate .t2 { font-size: 14px; }
-body.print-mode .plate ul { font-size: 10px; }
-body.print-mode .plate .photo { margin-top: 6px; }
-body.print-mode .plate .photo img { width: 100%; }
-body.print-mode .plate .btn { display: none; }
-body.print-mode .final, body.print-mode footer, body.print-mode #cartBar, body.print-mode #extras, body.print-mode #avisos { display: none !important; }
-body.print-mode .plates .plate:nth-child(n+5):not(.print-salad) { display: none !important; }
-.print-salad { display: none; }
-body.print-mode .print-salad {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  grid-column: 1 / -1; height: auto; min-height: 44px; padding: 10px 8px; text-align: center;
-}
-body.print-mode .print-salad b { font-size: 15px; color: var(--gold); text-transform: uppercase; }
-body.print-mode .print-salad small { display: block; margin-top: 4px; font-size: 11px; color: var(--muted); line-height: 1.3; }
-
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
-  .reveal, .plate.first-card { opacity: 1; transform: none; }
-}
-
-
-/* ---------- Menu hambúrguer ---------- */
-.top-l { display: flex; align-items: center; gap: 12px; min-width: 0; }
+/* Menu Hambúrguer */
 .burger { flex: none; width: 42px; height: 42px; display: grid; place-content: center; gap: 5px; border-radius: 50%; border: 1.5px solid var(--line); transition: border-color .2s, background .2s; }
 .burger:hover { border-color: var(--gold); background: rgba(242, 196, 109, .08); }
 .burger span { display: block; width: 18px; height: 2px; border-radius: 2px; background: var(--cream); }
-
-/* drawer vindo da esquerda (reaproveita .sheet: foco, Esc e trava de rolagem) */
 .drawer { align-items: stretch; justify-content: flex-end; }
 .drawer .panel { width: 88%; max-width: 400px; height: 100%; max-height: none; border-radius: 26px 0 0 26px; border: 1px solid var(--line); border-right: 0; transform: translateX(100%); }
 .drawer .head { padding: calc(10px + env(safe-area-inset-top)) 20px 8px; }
-.drawer .body { padding: 4px 20px calc(12px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 18px; overflow: hidden; }
-.msec { margin-bottom: 0; }
+.drawer .body { padding: 4px 20px calc(12px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 18px; overflow-y: auto; }
 .msec h3 { margin-bottom: 6px; font-size: 20px; }
 .msec > p { color: var(--muted); font-size: 14px; line-height: 1.4; }
-
 .faq details { border-top: 1px solid var(--line); }
 .faq details:last-child { border-bottom: 1px solid var(--line); }
-.faq summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; list-style: none; cursor: pointer; font-weight: 600; font-size: 14px; line-height: 1.2; }
-.faq summary::-webkit-details-marker { display: none; }
+.faq summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; cursor: pointer; font-weight: 600; font-size: 14px; }
 .faq summary::after { content: ""; flex: none; width: 9px; height: 9px; margin: 0 4px 4px 0; border-right: 2px solid var(--gold); border-bottom: 2px solid var(--gold); transform: rotate(45deg); transition: transform .2s; }
 .faq details[open] summary::after { transform: rotate(-135deg); margin: 4px 4px 0 0; }
 .faq details p { padding: 0 0 10px; color: var(--muted); font-size: 13px; line-height: 1.4; }
-
 .pills { display: flex; flex-wrap: nowrap; gap: 6px; }
-.pill { flex: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 0 6px; border-radius: 999px; border: 1.5px solid var(--gold); color: var(--gold); font-weight: 600; font-size: 12px; text-decoration: none; transition: background .2s; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-a.pill:hover { background: rgba(242, 196, 109, .12); }
-
+.pill { flex: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 0 6px; border-radius: 999px; border: 1.5px solid var(--gold); color: var(--gold); font-weight: 600; font-size: 12px; text-decoration: none; }
 .mk { padding: 12px 14px; text-align: center; border-radius: 16px; background: var(--card-2); border: 1px solid var(--gold); }
-.mk p { margin-bottom: 10px; font-size: 17px; font-weight: 700; line-height: 1.2; }
+.mk p { margin-bottom: 10px; font-size: 17px; font-weight: 700; }
 .hrs { display: grid; gap: 3px; }
 .hr-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
 .hr-row b { color: var(--cream); font-weight: 600; }
@@ -460,38 +353,41 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
 #lojaModal b{display:block;font-size:22px;margin-bottom:8px;color:#f2c46d}
 #lojaModal button{margin-top:16px;width:100%;min-height:50px;border:0;border-radius:99px;background:#f2c46d;color:#2a1509;font-weight:700;font-size:16px}
 .xcard { background: linear-gradient(160deg, #402617, var(--card) 55%); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; margin-top: 14px; }
-.xcard h3 { font-size: 20px; font-weight: 800; color: var(--gold); text-transform: uppercase; margin-bottom: 4px; }
-.xs { margin-top: 10px; font-weight: 700; color: var(--cream); display: flex; justify-content: space-between; gap: 12px; }
-.xs span { color: var(--gold); }
-.xr { display: flex; justify-content: space-between; gap: 12px; padding: 7px 0; border-top: 1px dashed var(--line); color: var(--cream); }
-.xr span { color: var(--muted); }
+.xcard h3 { font-size: 20px; font-weight: 800; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; }
 #extras[hidden] { display: none; }
 .aviso { margin-bottom: 14px; padding: 14px 18px; border-radius: var(--radius); background: rgba(242, 196, 109, .12); border: 1.5px solid var(--gold); }
 .aviso h3 { font-size: 18px; font-weight: 800; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }
-.aviso p { margin-top: 4px; color: var(--cream); }.aviso small { display: block; color: var(--muted); font-size: 13px; }
-#extrasList .drink { margin-top: 12px; }
-.xcard .d-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 8px 0; border-top: 1px dashed var(--line); }
-.xn { display: grid; gap: 1px; }.xn b { font-weight: 700; }.xn i { font-style: normal; color: var(--gold); font-weight: 800; }.xn small { color: var(--muted); }
+.aviso p { margin-top: 4px; color: var(--cream); }
+.xn { display: grid; gap: 1px; }
+.xn b { font-weight: 700; font-size: 16px; }
+.xn i { font-style: normal; color: var(--gold); font-weight: 800; font-size: 15px; }
+.xn small { color: var(--muted); }
+.print-salad { display: none; }
+
+@media (min-width: 760px) {
+  .wrap { padding: 0 32px; }
+  .plates { grid-template-columns: 1fr 1fr; }
+  .hero { padding: 56px 0 44px; }
+  .sheet { align-items: center; }
+  .sheet .panel { border-radius: 26px; border-bottom: 1px solid var(--line); max-height: 88vh; }
+}
 </style>
 </head>
 <body class="lock">
 
-<!-- Loading inicial -->
 <div id="splash" aria-hidden="true">
   <div class="s-title">RANCHARIA</div>
   <div class="s-bar"><i></i></div>
 </div>
 
-<!-- Topo -->
 <header class="top">
   <div class="wrap">
     <span class="brand">RANCHARIA</span>
-    <button class="burger" id="menuBtn" aria-label="Abrir menu" aria-haspopup="dialog"><span></span><span></span><span></span></button>
+    <button class="burger" id="menuBtn" aria-label="Abrir menu"><span></span><span></span><span></span></button>
   </div>
 </header>
 
 <main style="padding-top:62px">
-  <!-- HERO -->
   <div class="hero">
     <div class="wrap">
       <h1><span id="heroBrand">Rancharia</span><span class="script">Cardápio</span></h1>
@@ -502,7 +398,6 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
     </div>
   </div>
 
-  <!-- PRATOS (renderizado pelo script.js a partir do CONFIG) -->
   <section id="pratos">
     <div class="wrap">
       <div id="avisos"></div>
@@ -510,16 +405,14 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
     </div>
   </section>
 
-  <!-- BEBIDAS E OUTRAS CATEGORIAS (vem do painel) -->
   <section id="extras" hidden>
     <div class="wrap">
-      <h2 class="sec-title">Bebidas e <em>extras</em></h2>
-      <p class="sec-sub">Toque para abrir e escolha as quantidades.</p>
+      <h2 class="sec-title">Acompanhamentos e <em>Bebidas</em></h2>
+      <p class="sec-sub">Escolha as quantidades para adicionar ao seu pedido.</p>
       <div id="extrasList"></div>
     </div>
   </section>
 
-  <!-- CTA FINAL -->
   <section class="final">
     <div class="wrap">
       <h2 class="sec-title reveal">Bateu a fome?<br><em>Monte seu prato agora.</em></h2>
@@ -530,7 +423,6 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
 
 <footer><div class="wrap">Rancharia · Pedidos pelo WhatsApp</div></footer>
 
-<!-- Barra fixa do carrinho -->
 <button id="cartBar" aria-label="Ver pedido">
   <span class="info">
     <span class="cart-line">
@@ -578,7 +470,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
   </div>
 </div>
 
-<!-- Menu (hambúrguer): sobre, FAQ, outros sites e CTA -->
+<!-- Menu (hambúrguer) -->
 <div class="sheet drawer" id="menu" role="dialog" aria-modal="true" aria-labelledby="mTitle" hidden>
   <div class="back" data-close></div>
   <div class="panel">
@@ -596,7 +488,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
   </div>
 </div>
 
-<!-- Sheet cheio: ver pedido por cima do check-out -->
+<!-- Ver pedido por cima do checkout -->
 <div class="sheet sheet--full" id="viewOrder" role="dialog" aria-modal="true" aria-labelledby="voTitle" hidden>
   <div class="back" data-close></div>
   <div class="panel">
@@ -606,6 +498,8 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
 </div>
 
 <div id="toast" role="status" aria-live="polite"></div>
+<div id="lojaBar" hidden>🔒 Loja fechada no momento — você pode ver o cardápio, mas os pedidos estão pausados.</div>
+<div id="lojaModal" hidden><div><b>Loja fechada</b>No momento não estamos aceitando pedidos. Volte em breve!<button type="button" id="lojaOk">Entendi</button></div></div>
 
 <script>
 const IMG = {
@@ -614,71 +508,37 @@ const IMG = {
   duas: "https://res.cloudinary.com/dwrq06fta/image/upload/v1790037884/file_00000000e9ec820eb2c1cd4c9d129425_h5aobq.webp",
   pf: "https://res.cloudinary.com/dwrq06fta/image/upload/v1790037884/file_00000000e9ec820eb2c1cd4c9d129425_h5aobq.webp"
 };
+setTimeout(function () { 
+  var s = document.getElementById('splash'); 
+  if (s) s.classList.add('done'); 
+  document.body.classList.add('ready'); 
+  document.body.classList.remove('lock'); 
+}, 2500);
 </script>
-<script>
-/* Segurança: se algo falhar no script principal, o splash some do mesmo jeito */
-setTimeout(function () { var s = document.getElementById('splash'); if (s) s.classList.add('done'); document.body.classList.add('ready'); document.body.classList.remove('lock'); }, 2500);
-</script>
-<div id="lojaBar" hidden>🔒 Loja fechada no momento — você pode ver o cardápio, mas os pedidos estão pausados.</div>
-<div id="lojaModal" hidden><div><b>Loja fechada</b>No momento não estamos aceitando pedidos. Volte em breve!<button type="button" id="lojaOk">Entendi</button></div></div>
+
 <script>
 'use strict';
-/* =====================================================
-   RANCHARIA — script.js
-   1) CONFIG  → tudo que o dono do restaurante pode mudar
-   2) Estado e utilidades
-   3) Renderização (pratos, guarnições)
-   4) Montar prato (builder)
-   5) Carrinho + upsell + envio WhatsApp
-   6) Animações (splash, scroll, voar pro carrinho, ripple)
-   ===================================================== */
-
-/* ---------- 1) CONFIG — edite aqui ---------- */
-const FOTO = k => (typeof IMG !== 'undefined' && IMG[k]) || 'data:image/gif;base64,R0lGODlhAQABAAAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==';
+const FOTO = k => (typeof IMG !== 'undefined' && IMG[k]) || '';
 const EDIT = window.EDITAVEL || {};
-const listar = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);   // "A, B, C" -> ['A','B','C']
+const listar = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);
+
 const CONFIG = {
   nome: 'Rancharia',
   whatsapp: '557498818-8139',
   maxGuarnicoes: Number(EDIT.maxGuarnicoes) || 4,
-  salada: EDIT.salada,
+  salada: EDIT.salada || 'Salada Tropical',
   saladaItens: listar(EDIT.saladaItens),
   maxSalada: Number(EDIT.maxSalada) || 4,
   planos: [
-    { id: 'classica', titulo1: 'Com uma proteína', titulo2: 'Clássica', preco: 15, escolhe: 1,
-      proteinas: listar(EDIT.classica), img: FOTO('classica') },
-    { id: 'premium', titulo1: 'Com uma proteína', titulo2: 'Premium', preco: 18, escolhe: 1,
-      proteinas: listar(EDIT.premium), img: FOTO('premium') },
-    { id: 'duas', titulo1: 'Com duas Proteínas', titulo2: 'Gourmet', preco: 22, escolhe: 2,
-      proteinas: listar(EDIT.gourmet), img: FOTO('duas') },
-    { id: 'pf', titulo1: 'Com uma proteína', titulo2: 'Executivo', preco: 25, escolhe: 1,
-      proteinas: listar(EDIT.executivo), img: FOTO('premium') }
+    { id: 'classica', titulo1: 'Com uma proteína', titulo2: 'Clássica', preco: 15, escolhe: 1, proteinas: listar(EDIT.classica), img: FOTO('classica') },
+    { id: 'premium', titulo1: 'Com uma proteína', titulo2: 'Premium', preco: 18, escolhe: 1, proteinas: listar(EDIT.premium), img: FOTO('premium') },
+    { id: 'duas', titulo1: 'Com duas Proteínas', titulo2: 'Gourmet', preco: 22, escolhe: 2, proteinas: listar(EDIT.gourmet), img: FOTO('duas') },
+    { id: 'pf', titulo1: 'Com uma proteína', titulo2: 'Executivo', preco: 25, escolhe: 1, proteinas: listar(EDIT.executivo), img: FOTO('premium') }
   ],
   guarnicoes: listar(EDIT.guarnicoes),
-  // Tela de bebidas mostrada ao finalizar (⚠️ CONFERIR TODOS OS PREÇOS E MARCAS)
-  // Cada tamanho traz 3 opções (itens); o preço é do tamanho, igual pros 3 itens dele
-  bebidas: [
-    { id: 'refri', emoji: '🥤', nome: 'Refrigerante', desc: 'Lata, 1 Litro ou 2 Litros',
-      tamanhos: [
-        { nome: 'Lata', preco: 5,  itens: ['Coca-Cola', 'Guaraná Antarctica', 'Fanta Laranja'] },
-        { nome: '1 Litro', preco: 8,  itens: ['Coca-Cola', 'Guaraná Antarctica', 'Fanta Laranja'] },
-        { nome: '2 Litros', preco: 12, itens: ['Coca-Cola', 'Guaraná Antarctica', 'Fanta Laranja'] }
-      ] },
-    { id: 'cerveja', emoji: '🍺', nome: 'Cerveja', desc: 'Piriguete, long neck, 600ml e 1 Litro',
-      tamanhos: [
-        { nome: 'Piriguete', preco: 4,  itens: ['Skol', 'Brahma', 'Antarctica'] },
-        { nome: 'Long neck', preco: 8,  itens: ['Heineken', 'Budweiser', 'Original'] },
-        { nome: '600ml',     preco: 12, itens: ['Skol', 'Brahma', 'Antarctica'] },
-        { nome: '1 Litro',   preco: 16, itens: ['Skol', 'Brahma', 'Antarctica'] }
-      ] },
-    { id: 'suco', emoji: '🧃', nome: 'Suco', desc: '500ml · preço único',
-      tamanhos: [
-        { nome: '500ml', preco: 6, itens: ['Laranja', 'Abacaxi', 'Maracujá'] }
-      ] }
-  ],
-  // Menu hambúrguer (⚠️ conferir os textos e colocar os links)
+  bebidas: [],
+  cardsAvulsos: [],
   sobre: 'A Rancharia serve pratos montados por você: escolha a proteína, capriche nas guarnições e leve a Salada Tropical incluída. Tudo em poucos toques, direto pelo WhatsApp.',
-  // Horário de funcionamento (⚠️ CONFERIR com o dono os dias e horas reais)
   horarios: [
     ['Segunda a sexta', '11h às 15h'],
     ['Sábado', '11h às 16h'],
@@ -687,55 +547,36 @@ const CONFIG = {
   faq: [
     ['Como faço meu pedido?', 'Escolha um prato, monte com a proteína e as guarnições e finalize. O pedido é enviado pelo WhatsApp.'],
     ['Quantas guarnições posso escolher?', 'De 1 a 4 guarnições e de 1 a 4 itens de salada por prato, do jeito que preferir.'],
-    ['Vocês entregam?', 'Sim. Ao finalizar, escolha Entrega e informe o endereço. A taxa é combinada com a gente no WhatsApp.'],
-    ['Posso comer no local ou retirar?', 'Pode sim. Ao finalizar, escolha Comer aqui (com o número da mesa), Retirar ou Entrega.']
+    ['Vocês entregam?', 'Sim. Ao finalizar, escolha Entrega e informe o endereço. A taxa é combinada com a gente no WhatsApp.']
   ],
-  sites: [                                   // nome + link de cada site (sem link, o botão só mostra o nome)
-    { nome: 'Em breve', url: '' },
-    { nome: 'Em breve', url: '' },
-    { nome: 'Em breve', url: '' }
-  ],
-  criador: { whatsapp: '5574988534600', instagram: 'iae.morenim',
-             msg: 'Oi! Vi o cardápio da Rancharia e quero um site assim.' }
+  sites: [{ nome: 'Em breve', url: '' }],
+  criador: { whatsapp: '5574988534600', instagram: 'iae.morenim', msg: 'Oi! Vi o cardápio da Rancharia e quero um site assim.' }
 };
 
-/* ---------- 2) Estado e utilidades ---------- */
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const brl = n => 'R$' + n.toFixed(2).replace('.', ',');
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const brl = n => 'R$' + Number(n || 0).toFixed(2).replace('.', ',');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const KEY = 'rancharia_cart_v1';
 
 let cart = [];
-try { localStorage.removeItem(KEY); } catch (e) {} // limpa restos de testes antigos
 let uid = Date.now();
-let draft = null;                 // prato em montagem
-let step = 'list';                // etapa do pedido: list | form
-let openDrink = null;             // card de bebida expandido
-let drinksBaseline = 0;            // qtd. de bebidas que já existiam no pedido ao abrir esta tela
-let current = null;               // sheet/modal aberto
+let draft = null;
+let step = 'list';
+let openDrink = null;
+let current = null;
 let lastFocus = null;
 const form = { nome: '', modo: 'local', mesa: '', bairro: '', rua: '', numero: '', pag: 'pix', troco: '', obs: '' };
 
-function load() { try { return JSON.parse(localStorage.getItem(KEY)) || []; } catch (e) { return []; } }
-function save() { try { localStorage.setItem(KEY, JSON.stringify(cart)); } catch (e) { /* modo privado */ } }
+function save() { try { localStorage.setItem(KEY, JSON.stringify(cart)); } catch (e) {} }
 const itemTotal = it => it.preco * it.qty;
 const total = () => cart.reduce((s, it) => s + itemTotal(it), 0);
 const count = () => cart.reduce((s, it) => s + it.qty, 0);
 
-/* Número que "conta" até o valor final */
 function setMoney(el, to) {
   if (!el) return;
-  const from = el._v ?? to;
-  el._v = to;
-  if (reduce || from === to) { el.textContent = brl(to); return; }
-  const t0 = performance.now(), dur = 380;
-  (function tick(t) {
-    const k = Math.min(1, (t - t0) / dur);
-    el.textContent = brl(from + (to - from) * (1 - Math.pow(1 - k, 3)));
-    if (k < 1) requestAnimationFrame(tick);
-  })(t0);
+  el.textContent = brl(to);
 }
 
 let toastTimer;
@@ -746,10 +587,14 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
 }
 
-/* ---------- 3) Renderização da página ---------- */
+/* Renderização dos Pratos e dos Cards sem foto no Feed Principal */
 function renderPlates() {
-  $('#plates').innerHTML = CONFIG.planos.map((p, i) => `
-    <article class="plate ${i < 2 ? 'first-card' + (splashDone ? ' in' : '') : 'reveal'}">
+  const container = $('#plates');
+  let html = '';
+
+  // 1. Pratos montáveis (Prato)
+  html += (CONFIG.planos || []).map((p, i) => `
+    <article class="plate ${!p.img ? 'nofoto' : ''} ${i < 2 ? 'first-card' + (splashDone ? ' in' : '') : 'reveal'}">
       <span class="price"><small>R$</small>${String(p.preco.toFixed(2)).replace('.', ',')}</span>
       <div class="row">
         <div>
@@ -757,17 +602,48 @@ function renderPlates() {
           <div class="t2">${esc(p.titulo2)}</div>
           <ul>${p.proteinas.map(n => `<li>${esc(n)}</li>`).join('')}</ul>
         </div>
-        <div class="photo"><img src="${p.img}" alt="Prato ${esc(p.titulo2)}" loading="lazy" width="298" height="220"></div>
+        ${p.img ? `<div class="photo"><img src="${p.img}" alt="Prato ${esc(p.titulo2)}" loading="lazy" width="298" height="220"></div>` : ''}
       </div>
       <button class="btn" data-plano="${p.id}">Montar esse prato</button>
-    </article>`).join('') + `
+    </article>`).join('');
+
+  // 2. Categorias configuradas como "Cards (sem foto)"
+  (CONFIG.cardsAvulsos || []).forEach(cat => {
+    html += `
+    <div style="grid-column: 1 / -1; margin-top: 14px;">
+      <h3 style="font-size:22px;color:var(--gold);font-weight:800;text-transform:uppercase">${esc(cat.nome)}</h3>
+    </div>`;
+    cat.itens.forEach(it => {
+      const q = drinkQty(it.nome);
+      html += `
+      <article class="plate nofoto reveal" style="padding:14px 16px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
+          <div>
+            <div class="t2" style="font-size:18px">${esc(it.nome)}</div>
+            ${it.descricao ? `<small style="color:var(--muted);display:block;margin-top:2px">${esc(it.descricao)}</small>` : ''}
+          </div>
+          <span style="font-weight:800;color:var(--gold);font-size:18px;white-space:nowrap">${brl(it.preco)}</span>
+        </div>
+        <div style="display:flex;justify-content:flex-end;margin-top:10px">
+          <div class="qty">
+            <button type="button" class="${q ? '' : 'off'}" data-a="cdec" data-name="${esc(it.nome)}" data-price="${it.preco}">−</button>
+            <output>${q}</output>
+            <button type="button" data-a="cinc" data-name="${esc(it.nome)}" data-price="${it.preco}">+</button>
+          </div>
+        </div>
+      </article>`;
+    });
+  });
+
+  html += `
     <article class="plate print-salad">
       <b>${esc(CONFIG.salada)}</b>
       <small>${esc(CONFIG.saladaItens.join(', '))}</small>
     </article>`;
+
+  container.innerHTML = html;
 }
 
-/* ---------- Sheets e modais (abrir/fechar com foco acessível) ---------- */
 function openSheet(el) {
   lastFocus = document.activeElement;
   el.hidden = false;
@@ -777,6 +653,7 @@ function openSheet(el) {
   setTimeout(() => { const f = $('.x', el) || $('button', el); f && f.focus(); }, 60);
   updateBar();
 }
+
 function closeSheet(el, restoreFocus = true) {
   if (!el || el.hidden) return;
   el.classList.remove('open');
@@ -786,24 +663,18 @@ function closeSheet(el, restoreFocus = true) {
   if (restoreFocus && lastFocus && lastFocus.focus) lastFocus.focus();
   updateBar();
 }
+
 document.addEventListener('keydown', e => {
   if (!current) return;
   if (e.key === 'Escape') { current.id === 'moreG' ? closeMoreG() : closeSheet(current); }
-  if (e.key === 'Tab') {                                   // prende o foco dentro do diálogo
-    const f = $$('button:not([disabled]), input, textarea, [tabindex="0"]', current).filter(x => x.offsetParent !== null);
-    if (!f.length) return;
-    const first = f[0], last = f[f.length - 1];
-    if (e.shiftKey && document.activeElement === first) { e.preventDefault(); last.focus(); }
-    else if (!e.shiftKey && document.activeElement === last) { e.preventDefault(); first.focus(); }
-  }
 });
 $$('[data-close]').forEach(b => b.addEventListener('click', () => closeSheet(b.closest('.sheet'))));
 
-/* ---------- 4) Montar prato ---------- */
 const optBtn = (k, v) => `<button type="button" class="opt" data-k="${k}" data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${esc(v)}</button>`;
 
 function openBuilder(id) {
   const p = CONFIG.planos.find(x => x.id === id);
+  if (!p) return;
   draft = { plano: p, proteinas: [], guarnicoes: [], salada: [], obs: '', qty: 1 };
   $('#bTitle').innerHTML = `${esc(p.titulo2)}<small>${esc(p.titulo1)} · ${brl(p.preco)}</small>`;
   $('#bBody').innerHTML = `
@@ -846,13 +717,13 @@ function syncBuilder() {
   cs.textContent = `${d.salada.length}/${CONFIG.maxSalada}`; cs.classList.toggle('full', d.salada.length === CONFIG.maxSalada);
   $('#bQty').textContent = d.qty;
   const add = $('#addBtn'), falta = p.escolhe - d.proteinas.length, semG = d.guarnicoes.length === 0;
-  add.disabled = falta > 0 || semG;                         // precisa de proteína(s) e 1+ guarnição (salada é opcional)
+  add.disabled = falta > 0 || semG;
   add.textContent = falta > 0 ? `Escolha ${falta} proteína${falta > 1 ? 's' : ''}`
     : semG ? 'Escolha 1 guarnição'
     : `Adicionar · ${brl(p.preco * d.qty)}`;
 }
 
-function shake(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); navigator.vibrate && navigator.vibrate(20); }
+function shake(el) { el.classList.remove('shake'); void el.offsetWidth; el.classList.add('shake'); }
 
 $('#bBody').addEventListener('click', e => {
   const d = draft, p = d.plano;
@@ -865,11 +736,12 @@ $('#bBody').addEventListener('click', e => {
     const i = arr.indexOf(v);
     if (i > -1) arr.splice(i, 1);
     else if (arr.length < max) arr.push(v);
-    else if (isP && max === 1) { arr.length = 0; arr.push(v); }   // troca a única proteína
+    else if (isP && max === 1) { arr.length = 0; arr.push(v); }
     else { shake(b.parentElement); return; }
     syncBuilder();
   }
 });
+
 $('#bBody').addEventListener('input', e => { if (e.target.id === 'bObs') draft.obs = e.target.value; });
 $('#bFoot').addEventListener('click', e => {
   const q = e.target.closest('[data-q]');
@@ -877,15 +749,15 @@ $('#bFoot').addEventListener('click', e => {
   if (e.target.closest('#addBtn')) tryAdd();
 });
 
-/* Se faltar guarnição e/ou salada, avisa antes de adicionar (mensagem combinada) */
 function tryAdd() {
   const d = draft;
   if (d.proteinas.length < d.plano.escolhe) return;
   if (!d.guarnicoes.length) { shake($('#optG')); return; }
   const faltaG = CONFIG.maxGuarnicoes - d.guarnicoes.length;
-  const faltaS = CONFIG.maxSalada - d.salada.length;   // sugere salada mesmo com 0 escolhidos (mas não bloqueia o Adicionar)
+  const faltaS = CONFIG.maxSalada - d.salada.length;
   if (faltaG > 0 || faltaS > 0) askMoreG(faltaG, faltaS); else addToCart();
 }
+
 function askMoreG(faltaG, faltaS) {
   const partes = [];
   if (faltaG > 0) partes.push(`${faltaG} ${faltaG > 1 ? 'guarnições' : 'guarnição'}`);
@@ -897,18 +769,20 @@ function askMoreG(faltaG, faltaS) {
   requestAnimationFrame(() => requestAnimationFrame(() => m.classList.add('open')));
   setTimeout(() => $('#mgPick').focus(), 60);
 }
+
 function closeMoreG() {
   const m = $('#moreG');
   m.classList.remove('open');
   setTimeout(() => { m.hidden = true; }, reduce ? 0 : 250);
   current = $('#builder');
 }
-$('#mgPick').addEventListener('click', () => {            // Escolher: leve rolagem até o título de Guarnições
+
+$('#mgPick').addEventListener('click', () => {
   closeMoreG();
   const alvo = $('#guarnicoesTitle');
   if (alvo) alvo.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' });
 });
-$('#mgGo').addEventListener('click', () => { closeMoreG(); addToCart(); });   // Continuar: segue sem completar
+$('#mgGo').addEventListener('click', () => { closeMoreG(); addToCart(); });
 $('#moreG').addEventListener('click', e => { if (e.target === e.currentTarget) closeMoreG(); });
 
 function addToCart() {
@@ -918,18 +792,16 @@ function addToCart() {
   save();
   closeSheet($('#builder'), false);
   updateBar();
-  setTimeout(goCheckout, reduce ? 0 : 250);            // vai direto para o check-out
+  setTimeout(goCheckout, reduce ? 0 : 250);
 }
 
-/* Abre o pedido já na tela de bebidas — só chamada logo após montar um prato */
 function goCheckout() {
   openDrink = null;
-  drinksBaseline = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0);
-  step = 'drinks';
-  renderCart(); openSheet($('#cart'));
+  step = CONFIG.bebidas.length ? 'drinks' : 'form';
+  renderCart(); 
+  openSheet($('#cart'));
 }
 
-/* ---------- 5) Carrinho, upsell e WhatsApp ---------- */
 function updateBar(bump) {
   const n = count(), bar = $('#cartBar');
   const badge = $('#topBadge');
@@ -953,14 +825,13 @@ function lineHTML(it) {
     <div class="line-top"><b>${it.qty}× ${esc(it.nome)}</b><span class="p">${brl(itemTotal(it))}</span></div>
     ${det}
     <div class="line-act">
-      <div class="qty"><button data-a="dec" data-u="${it.uid}" aria-label="Menos um">−</button><output>${it.qty}</output><button data-a="inc" data-u="${it.uid}" aria-label="Mais um">+</button></div>
+      <div class="qty"><button data-a="dec" data-u="${it.uid}">−</button><output>${it.qty}</output><button data-a="inc" data-u="${it.uid}">+</button></div>
       <button class="link" data-a="del" data-u="${it.uid}">Remover</button>
     </div></div>`;
 }
 
-const seg = (name, list, val) => list.map(([v, l]) => `<button type="button" class="opt ${val === v ? 'on' : ''}" data-seg="${name}" data-v="${v}" aria-pressed="${val === v}">${l}</button>`).join('');
+const seg = (name, list, val) => list.map(([v, l]) => `<button type="button" class="opt ${val === v ? 'on' : ''}" data-seg="${name}" data-v="${v}">${l}</button>`).join('');
 
-/* Bebidas: cada opção vira um item 'extra' no carrinho */
 const drinkName = (d, t, item) => [d.nome, t.nome, item].filter(Boolean).join(' ');
 const drinkQty = nome => { const it = cart.find(x => x.kind === 'extra' && x.nome === nome); return it ? it.qty : 0; };
 
@@ -969,25 +840,25 @@ function drinkHTML(d) {
   const n = d.tamanhos.reduce((s, t) => s + t.itens.reduce((s2, it) => s2 + drinkQty(drinkName(d, t, it)), 0), 0);
   const open = openDrink === d.id;
   const groups = d.tamanhos.map((t, ti) => {
-    const rows = t.itens.map((item, ii) => {
+    return t.itens.map((item, ii) => {
       const q = drinkQty(drinkName(d, t, item));
       return `<div class="d-row">
         <b>${esc(item)}</b>
         <span class="d-pr">${brl(t.preco)}</span>
         <div class="qty">
-          <button type="button" class="${q ? '' : 'off'}" data-a="ddec" data-d="${d.id}" data-t="${ti}" data-i="${ii}" aria-label="Menos um ${esc(drinkName(d, t, item))}">−</button>
+          <button type="button" class="${q ? '' : 'off'}" data-a="ddec" data-d="${d.id}" data-t="${ti}" data-i="${ii}">−</button>
           <output>${q}</output>
-          <button type="button" data-a="dinc" data-d="${d.id}" data-t="${ti}" data-i="${ii}" aria-label="Mais um ${esc(drinkName(d, t, item))}">+</button>
+          <button type="button" data-a="dinc" data-d="${d.id}" data-t="${ti}" data-i="${ii}">+</button>
         </div></div>`;
     }).join('');
-    return rows;
   }).join('');
+
   return `<div class="drink ${open ? 'open' : ''}">
-    <button type="button" class="drink-h" data-a="dtoggle" data-d="${d.id}" aria-expanded="${open}">
-      <span class="d-emoji" aria-hidden="true">${d.emoji}</span>
+    <button type="button" class="drink-h" data-a="dtoggle" data-d="${d.id}">
+      <span class="d-emoji">${d.emoji}</span>
       <span class="d-txt"><b>${esc(d.nome)}</b><small>${esc(d.desc)}</small></span>
       <span class="d-price"><i>${d.tamanhos.length > 1 ? 'a partir de' : 'preço único'}</i><b>${brl(min)}</b>${n ? `<i class="d-n">✓ ${n}</i>` : ''}</span>
-      <span class="chev" aria-hidden="true"></span>
+      <span class="chev"></span>
     </button>
     <div class="drink-opts" ${open ? '' : 'hidden'}>${groups}</div>
   </div>`;
@@ -1004,16 +875,20 @@ function changeDrink(id, ti, ii, delta) {
   save(); updateBar();
 }
 
-function refreshDrinks(focusSel) {                         // redesenha mantendo rolagem e foco
-  const b = $('#cBody'), st = b.scrollTop;
-  renderCart(); b.scrollTop = st;
-  const f = focusSel && $(focusSel, b); if (f) f.focus({ preventScroll: true });
+function changeCardAvulso(nome, preco, delta) {
+  const it = cart.find(x => x.kind === 'extra' && x.nome === nome);
+  if (!it && delta > 0) cart.push({ uid: ++uid, kind: 'extra', nome, preco: Number(preco), qty: 1 });
+  else if (it) {
+    it.qty = Math.min(20, it.qty + delta);
+    if (it.qty <= 0) cart = cart.filter(x => x !== it);
+  }
+  save(); updateBar(); renderPlates();
 }
 
-/* Tela cheia "Ver pedido" (sobre o check-out) */
 function renderOrderView() {
   $('#voBody').innerHTML = cart.length ? cart.map(lineHTML).join('') : '<div class="empty">Seu pedido está vazio.</div>';
 }
+
 $('#viewOrder').addEventListener('click', e => {
   const t = e.target.closest('[data-a]');
   if (!t) return;
@@ -1021,69 +896,61 @@ $('#viewOrder').addEventListener('click', e => {
   if (a === 'inc' && it) it.qty = Math.min(20, it.qty + 1);
   if (a === 'dec' && it) it.qty = Math.max(1, it.qty - 1);
   if (a === 'del' && it) cart = cart.filter(x => x !== it);
-  if (['inc', 'dec', 'del'].includes(a)) { save(); renderOrderView(); updateBar(); if (step === 'form') renderCart(); }
+  if (['inc', 'dec', 'del'].includes(a)) { save(); renderOrderView(); updateBar(); if (step === 'form') renderCart(); renderPlates(); }
 });
 
 function renderCart() {
   const body = $('#cBody'), foot = $('#cFoot');
   $('#cTitle').textContent = { list: 'Seu pedido', drinks: 'Bebidas', form: 'Quase lá' }[step];
   $('#cart').classList.toggle('sheet--full', step === 'form' || step === 'drinks');
+
   if (step === 'list') {
     if (!cart.length) {
-      body.innerHTML = '<div class="empty">Seu pedido está vazio.<br>Escolha um prato para começar.</div>';
-      foot.innerHTML = '<button class="btn btn--block" data-a="close">Ver pratos</button>';
+      body.innerHTML = '<div class="empty">Seu pedido está vazio.<br>Escolha um item para começar.</div>';
+      foot.innerHTML = '<button class="btn btn--block" data-a="close">Ver itens</button>';
       return;
     }
     body.innerHTML = cart.map(lineHTML).join('');
     foot.innerHTML = `<div class="total"><span>Total</span><b id="cTotal">${brl(total())}</b></div>
       <button class="btn btn--block" data-a="checkout">Finalizar pedido</button>
-      <button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Adicionar bebida</button>`;
+      ${CONFIG.bebidas.length ? `<button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Adicionar bebida</button>` : ''}`;
   } else if (step === 'drinks') {
-    body.innerHTML = `<p class="drinks-intro">${CONFIG.temExtras ? 'Quer uma bebida ou algo mais para acompanhar?' : 'Quer uma bebida para acompanhar?'}</p>` + CONFIG.bebidas.filter(d => d.lugar !== 'principal').map(cardDe).join('');
-    const bebNow = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0);
-    const bebLabel = bebNow > drinksBaseline ? 'Continuar' : (drinksBaseline > 0 ? 'Não obrigado, já escolhi.' : 'Continuar sem bebida');
-    foot.innerHTML = `<button class="btn btn--block" data-a="toform">${bebLabel}</button>
+    body.innerHTML = `<p class="drinks-intro">Quer uma bebida para acompanhar?</p>` + CONFIG.bebidas.filter(d => d.lugar !== 'principal').map(cardDe).join('');
+    foot.innerHTML = `<button class="btn btn--block" data-a="toform">Continuar</button>
       <button class="link" style="display:block;margin:6px auto 0" data-a="back">Voltar ao pedido</button>`;
   } else {
     const ent = form.modo === 'entregar';
     body.innerHTML = `
-      <div class="field"><input id="fNome" type="text" autocomplete="name" aria-label="Seu nome" placeholder="Seu nome" value="${esc(form.nome)}"></div>
+      <div class="field"><input id="fNome" type="text" placeholder="Seu nome" value="${esc(form.nome)}"></div>
       <div class="field"><span class="lbl">Como quer receber?</span>
         <div class="seg">${seg('modo', [['local', 'Comer aqui'], ['retirar', 'Retirar'], ['entregar', 'Entrega']], form.modo)}</div></div>
       <div class="field" id="fMesaW" ${form.modo === 'local' ? '' : 'hidden'}>
-        <input id="fMesa" type="text" inputmode="numeric" aria-label="Número da mesa" placeholder="Número da mesa — ex.: 12" value="${esc(form.mesa)}"></div>
+        <input id="fMesa" type="text" placeholder="Número da mesa — ex.: 12" value="${esc(form.mesa)}"></div>
       <div class="field" id="fEndW" ${ent ? '' : 'hidden'}>
-        <input id="fBairro" type="text" autocomplete="address-level2" aria-label="Bairro" placeholder="Bairro" value="${esc(form.bairro)}" style="margin-bottom:8px">
+        <input id="fBairro" type="text" placeholder="Bairro" value="${esc(form.bairro)}" style="margin-bottom:8px">
         <div style="display:flex;gap:8px">
-          <input id="fRua" type="text" autocomplete="street-address" aria-label="Rua" placeholder="Rua" value="${esc(form.rua)}" style="flex:2">
-          <input id="fNumero" type="text" inputmode="numeric" aria-label="Número da casa" placeholder="Nº" value="${esc(form.numero)}" style="flex:1;min-width:0">
+          <input id="fRua" type="text" placeholder="Rua" value="${esc(form.rua)}" style="flex:2">
+          <input id="fNumero" type="text" placeholder="Nº" value="${esc(form.numero)}" style="flex:1;min-width:0">
         </div>
-        <p class="note">A taxa de entrega é combinada com a gente no WhatsApp.</p></div>
+        <p class="note">A taxa de entrega é combinada no WhatsApp.</p></div>
       <div class="field" id="fPagW" ${ent ? '' : 'hidden'}><span class="lbl">Pagamento</span>
         <div class="seg">${seg('pag', [['pix', 'Pix'], ['cartao', 'Cartão'], ['dinheiro', 'Dinheiro']], form.pag)}</div></div>
       <div class="field" id="fTrocoW" ${ent && form.pag === 'dinheiro' ? '' : 'hidden'}>
-        <input id="fTroco" type="text" inputmode="decimal" aria-label="Troco para quanto" placeholder="Troco para? — ex.: 50 (opcional)" value="${esc(form.troco)}"></div>
-      <div class="field"><textarea id="fObs" maxlength="200" aria-label="Observação do pedido" placeholder="Observação (opcional) — ex.: talheres extras, sem gelo">${esc(form.obs)}</textarea></div>`;
+        <input id="fTroco" type="text" placeholder="Troco para? — ex.: 50" value="${esc(form.troco)}"></div>
+      <div class="field"><textarea id="fObs" maxlength="200" placeholder="Observação (opcional)">${esc(form.obs)}</textarea></div>`;
     foot.innerHTML = `<div class="total">
       <span style="display:flex;align-items:baseline;gap:16px">
         <button type="button" class="link vp-btn" data-a="toggleItems" style="padding:0">Ver pedido</button>
-        <button type="button" class="link" data-a="drinks" style="padding:0;color:#fff;font-weight:700;font-size:16px;text-decoration:underline">Ver bebida</button>
       </span>
       <span style="text-align:right"><small style="display:block;color:var(--muted);font-size:13px;font-weight:600">Total</small><b id="cTotal" style="font-size:24px">${brl(total())}</b></span>
     </div>
-      <button class="btn btn--block" data-a="send">Enviar pedido no WhatsApp</button>
-      <button class="btn btn--ghost btn--block" data-a="newDish" style="margin-top:10px;min-height:58px;font-size:18px">Montar outro prato</button>`;
+      <button class="btn btn--block" data-a="send">Enviar pedido no WhatsApp</button>`;
   }
 }
 
 function openCart() { step = 'list'; renderCart(); openSheet($('#cart')); }
 
-$('#cart').addEventListener('click', e => {
-  const t = e.target.closest('[data-a], [data-seg]');
-  if (!t) return;
-  if (t.dataset.seg) {                                     // opções de modo/pagamento
-    form[t.dataset.seg] = t.dataset.v;
-    $$(`[data-seg="${t.dataset.seg}"]`).forEach(b => { const on = b === t; b.classList.toggle('on', on); b.setAttribute('aria-pressed', on); });
+$('#cart').addEventListener('click', e => {   const t = e.target.closest('[data-a], [data-seg]');   if (!t) return;   if (t.dataset.seg) {     form[t.dataset.seg] = t.dataset.v;     $$(`[data-seg="${t.dataset.seg}"]`).forEach(b => b.classList.toggle('on', b === t));
     $('#fMesaW').hidden = form.modo !== 'local';
     $('#fEndW').hidden = form.modo !== 'entregar';
     $('#fPagW').hidden = form.modo !== 'entregar';
@@ -1092,57 +959,46 @@ $('#cart').addEventListener('click', e => {
   }
   const a = t.dataset.a, it = cart.find(x => x.uid === +t.dataset.u);
   if (a === 'dtoggle') {
-    const willOpen = openDrink !== t.dataset.d;
-    openDrink = willOpen ? t.dataset.d : null;
-    refreshDrinks(`[data-a="dtoggle"][data-d="${t.dataset.d}"]`);
-    if (willOpen) { const el = $(`[data-a="dtoggle"][data-d="${t.dataset.d}"]`); if (el) el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); }
-    return;
+    openDrink = openDrink === t.dataset.d ? null : t.dataset.d;
+    renderCart(); return;
   }
-  if (a === 'dtog') { toggleDrink(t.dataset.d, +t.dataset.t, +t.dataset.i); refreshDrinks(`[data-a="dtog"][data-d="${t.dataset.d}"][data-t="${t.dataset.t}"][data-i="${t.dataset.i}"]`); return; }
+  if (a === 'dtog') { toggleDrink(t.dataset.d, +t.dataset.t, +t.dataset.i); renderCart(); return; }
   if (a === 'dinc' || a === 'ddec') {
     changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
-    refreshDrinks(`[data-a="${a}"][data-d="${t.dataset.d}"][data-t="${t.dataset.t}"][data-i="${t.dataset.i}"]`); return;
+    renderCart(); return;
   }
-  if (a === 'drinks') { step = 'drinks'; openDrink = null; drinksBaseline = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0); renderCart(); return; }
+  if (a === 'drinks') { step = 'drinks'; openDrink = null; renderCart(); return; }
   if (a === 'toform') { step = 'form'; renderCart(); return; }
   if (a === 'inc' && it) { it.qty = Math.min(20, it.qty + 1); }
   if (a === 'dec' && it) { it.qty = Math.max(1, it.qty - 1); }
   if (a === 'del' && it) { cart = cart.filter(x => x !== it); }
-  if (['inc', 'dec', 'del'].includes(a)) { save(); renderCart(); updateBar(); return; }
+  if (['inc', 'dec', 'del'].includes(a)) { save(); renderCart(); updateBar(); renderPlates(); return; }
   if (a === 'close') closeSheet($('#cart'));
   if (a === 'toggleItems') { renderOrderView(); openSheet($('#viewOrder')); return; }
-  if (a === 'newDish') { closeSheet($('#cart')); setTimeout(() => window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' }), reduce ? 0 : 60); return; }
   if (a === 'back') { step = 'list'; renderCart(); }
   if (a === 'checkout') { step = 'form'; renderCart(); }
   if (a === 'send') sendOrder();
 });
+
 $('#cart').addEventListener('input', e => {
   const m = { fNome: 'nome', fMesa: 'mesa', fBairro: 'bairro', fRua: 'rua', fNumero: 'numero', fTroco: 'troco', fObs: 'obs' }[e.target.id];
   if (m) { form[m] = e.target.value; e.target.classList.remove('err'); }
 });
 
-/* Supabase — guarda o pedido em segundo plano (fetch nativo, sem SDK; nunca bloqueia o envio) */
 const SUPABASE_URL = 'https://svvvzwsajneesmuatcvc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ARLDqBsmhhhfOUp6I2zKiw_9G7pQ5_O';
+
 function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
   try {
     fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
       method: 'POST',
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Content-Type': 'application/json',
-        'Prefer': 'return=minimal'
-      },
+      headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify({ cliente: String(cliente).slice(0, 80), total: valorTotal, detalhes: String(detalhes || '').slice(0, 4000) }),
       keepalive: true
-    }).then(r => { if (!r.ok) r.text().then(t => console.warn('Supabase recusou o pedido', r.status, t)); })
-      .catch(err => console.warn('Supabase: pedido não salvo', err));
-  } catch (err) {
-    console.warn('Supabase: pedido não salvo', err);
-  }
+    });
+  } catch (err) {}
 }
 
-/* Envio pelo WhatsApp */
 function sendOrder() {
   let bad = null;
   if (!form.nome.trim()) bad = $('#fNome');
@@ -1157,9 +1013,7 @@ function sendOrder() {
 
   let msg = `*${CONFIG.nome} — Novo pedido*\n`;
   msg += `━━━━━━━━━━━━━━━\n`;
-
-  msg += `*Cliente*\n`;
-  msg += `Nome: ${form.nome.trim()}\n`;
+  msg += `*Cliente*\nNome: ${form.nome.trim()}\n`;
   if (form.modo === 'local') msg += `Mesa: ${form.mesa.trim()}\n`;
   if (form.modo === 'entregar') {
     msg += `Bairro: ${form.bairro.trim()}\n`;
@@ -1178,222 +1032,235 @@ function sendOrder() {
   });
 
   msg += `\n━━━━━━━━━━━━━━━\n`;
-  msg += `*Total: ${brl(total())}*${ent ? ' (+ taxa de entrega a combinar)' : ''}\n`;
-  if (ent) {                                               // pagamento só na entrega
+  msg += `*Total: ${brl(total())}*${ent ? ' (+ taxa a combinar)' : ''}\n`;
+  if (ent) {
     msg += `\n*Pagamento*\n${pag}`;
     if (form.pag === 'dinheiro' && form.troco.trim()) msg += ` (troco para R$${form.troco.trim()})`;
     msg += `\n`;
   }
-  if (form.obs.trim()) msg += `\n*Observação geral*\n${form.obs.trim()}`;
+  if (form.obs.trim()) msg += `\n*Observação*\n${form.obs.trim()}`;
 
-  salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100, `Tipo: ${modo}\n${msg}`);   // segundo plano, não espera resposta
+  salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100, `Tipo: ${modo}\n${msg}`);
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
-  setTimeout(() => {                                       // limpa o pedido depois de abrir o WhatsApp
+  setTimeout(() => {
     cart = []; save(); form.obs = '';
     closeSheet($('#cart'), false); updateBar(); toast('Pedido enviado! 🙌');
+    renderPlates();
   }, 700);
 }
 
-/* Cliques gerais da página */
-$('#plates').addEventListener('click', e => { const b = e.target.closest('[data-plano]'); if (b) openBuilder(b.dataset.plano); });
+$('#plates').addEventListener('click', e => {
+  const b = e.target.closest('[data-plano]');
+  if (b) { openBuilder(b.dataset.plano); return; }
+  const cinc = e.target.closest('[data-a="cinc"]');
+  if (cinc) { changeCardAvulso(cinc.dataset.name, cinc.dataset.price, 1); return; }
+  const cdec = e.target.closest('[data-a="cdec"]');
+  if (cdec) { changeCardAvulso(cdec.dataset.name, cdec.dataset.price, -1); return; }
+});
+
 $('#cartBar').addEventListener('click', openCart);
-/* Menu hambúrguer */
 $('#menuBtn').addEventListener('click', () => openSheet($('#menu')));
 $('#sobre').textContent = CONFIG.sobre;
 $('#horas').innerHTML = CONFIG.horarios.map(([d, h]) => `<div class="hr-row"><span>${esc(d)}</span><b>${esc(h)}</b></div>`).join('');
 $('#faq').innerHTML = CONFIG.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
-$('#sites').innerHTML = CONFIG.sites.map(x => x.url
-  ? `<a class="pill" href="${esc(x.url)}" target="_blank" rel="noopener">${esc(x.nome)}</a>`
-  : `<span class="pill">${esc(x.nome)}</span>`).join('');
-$('#mkBtn').href = CONFIG.criador.whatsapp
-  ? `https://wa.me/${CONFIG.criador.whatsapp}?text=${encodeURIComponent(CONFIG.criador.msg)}`
-  : `https://instagram.com/${CONFIG.criador.instagram}`;
 
-/* ---------- 6) Animações ---------- */
-/* Ripple nos botões */
-document.addEventListener('pointerdown', e => {
-  const b = e.target.closest('.btn');
-  if (!b || reduce) return;
-  const r = b.getBoundingClientRect(), s = Math.max(r.width, r.height);
-  const dot = document.createElement('span');
-  dot.className = 'ripple';
-  dot.style.cssText = `width:${s}px;height:${s}px;left:${e.clientX - r.left - s / 2}px;top:${e.clientY - r.top - s / 2}px`;
-  b.appendChild(dot);
-  setTimeout(() => dot.remove(), 650);
-});
-
-/* Elementos aparecem ao entrar na tela */
-function initReveal() {
-  const els = $$('.reveal'); // .first-card não entra aqui: some no tempo certo via hideSplash()
-  if (!('IntersectionObserver' in window) || reduce) { els.forEach(el => el.classList.add('in')); return; }
-  const io = new IntersectionObserver(list => list.forEach(en => {
-    if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
-  }), { threshold: .15, rootMargin: '0px 0px -30px 0px' });
-  els.forEach((el, i) => { el.style.transitionDelay = (i % 4) * 70 + 'ms'; io.observe(el); });
-}
-
-/* Loading inicial (com fallback para nunca travar) */
 let splashDone = false;
 function hideSplash() {
   if (splashDone) return; splashDone = true;
   $('#splash').classList.add('done');
   document.body.classList.add('ready');
-  document.body.classList.remove('lock');   // libera a rolagem só depois do loading
-  // Clássica e Premium sobem em sequência, logo depois da animação do botão "Montar meu prato"
-  $$('.plate.first-card').forEach((c, i) => setTimeout(() => c.classList.add('in'), reduce ? 0 : 900 + i * 150));
+  document.body.classList.remove('lock');
+  $$('.plate.first-card').forEach((c, i) => setTimeout(() => c.classList.add('in'), reduce ? 0 : 900 + i * 150)); } window.addEventListener('load', () => setTimeout(hideSplash, 600));  function initReveal() {   const els = $$
+('.reveal');
+  if (!('IntersectionObserver' in window) || reduce) { els.forEach(el => el.classList.add('in')); return; }
+  const io = new IntersectionObserver(list => list.forEach(en => {
+    if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
+  }), { threshold: .15 });
+  els.forEach(el => io.observe(el));
 }
-const t0 = performance.now();
-window.addEventListener('load', () => setTimeout(hideSplash, Math.max(0, 900 - (performance.now() - t0))));
-setTimeout(hideSplash, 2500);
 
-/* Modo print: 5 cliques seguidos na logo (sem clicar em outro lugar) */
-let logoClicks = 0;
-$('.brand').addEventListener('click', () => {
-  if (document.body.classList.contains('print-mode')) { document.body.classList.remove('print-mode'); logoClicks = 0; return; }
-  logoClicks++;
-  if (logoClicks >= 5) { document.body.classList.add('print-mode'); logoClicks = 0; }
-});
-document.addEventListener('click', e => { if (!e.target.closest('.brand')) logoClicks = 0; }, true);
-$('#heroBrand').addEventListener('click', () => { if (document.body.classList.contains('print-mode')) document.body.classList.remove('print-mode'); });
-
-/* ---------- Início ---------- */
 renderPlates();
-renderAvisos();
-renderExtras();
 initReveal();
 updateBar();
 
-/* ---------- Cardápio vindo do painel (Supabase). Se falhar, fica o cardápio acima ---------- */
+/* ==========================================================================
+   SINCRONIZAÇÃO TOTAL COM O PAINEL DE CONTROLE (ORDEM, PRATO E CARDS)
+   ========================================================================== */
 function aplicarCardapio(cats, prods) {
-  const todos = prods;                                   // inclui marcadores técnicos (__tipo, __lugar, __parent...)
-  prods = prods.filter(x => !/^__/.test(String(x.nome || '')));   // itens técnicos nunca aparecem no site
+  const todos = prods;
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
-  const por = c => prods.filter(x => x.categoria_id === c.id);
+
+  // 1. Extrair configurações personalizadas de cada categoria salvas no __config
+  cats.forEach(c => {
+    const m = todos.find(x => x.categoria_id === c.id && x.nome === '__config');
+    let j = {};
+    if (m && m.descricao) {
+      try { j = JSON.parse(m.descricao); } catch (e) {}
+    }
+    c.tipo = j.tipo || c.tipo || (norm(c.nome).includes('guarni') || norm(c.nome).includes('salada') ? 'item' : /bebida|refri|suco|cerveja/.test(norm(c.nome)) ? 'ambos' : 'principal');
+    c.exibicao = j.exibicao || c.exibicao || (norm(c.nome).includes('guarni') ? 'checklist' : /bebida|refri|suco|cerveja/.test(norm(c.nome)) ? 'min' : 'prato');
+    c.item_order = j.item_order || [];
+  });
+
+  // Função para retornar os produtos de uma categoria respeitando a ordem exata do painel
+  const por = c => {
+    const items = prods.filter(x => x.categoria_id === c.id && !/^__/.test(String(x.nome || '')));
+    if (Array.isArray(c.item_order) && c.item_order.length) {
+      const orderMap = new Map();
+      c.item_order.forEach((id, idx) => orderMap.set(Number(id), idx));
+      items.sort((a, b) => {
+        const ia = orderMap.has(a.id) ? orderMap.get(a.id) : 99999;
+        const ib = orderMap.has(b.id) ? orderMap.get(b.id) : 99999;
+        return ia - ib || a.id - b.id;
+      });
+    }
+    return items;
+  };
+
   const achar = n => cats.find(c => norm(c.nome) === n);
-  const pr = achar('pratos'), pro = achar('proteinas'), gar = achar('guarnicoes'), sal = achar('salada');
-  if (pr) CONFIG.planos = por(pr).map(x => {
-    const old = CONFIG.planos.find(o => norm(o.titulo2) === norm(x.nome)), k = norm(x.nome);
-    return { id: old ? old.id : 'p' + x.id, titulo1: x.descricao || 'Com uma proteína', titulo2: x.nome,
-      preco: Number(x.preco), escolhe: /duas|2/i.test(x.descricao || '') ? 2 : 1,
-      proteinas: pro ? por(pro).filter(q => (q.descricao || '').split(',').map(z => z.trim()).some(z => z === '@' + x.id || norm(z) === k)).map(q => q.nome) : (old ? old.proteinas : []),
-      img: old ? old.img : FOTO('premium') };
-  });
-  const PL = 'Valor do prato', pcs = cats.filter(c => por(c).some(x => x.nome === PL)), base = CONFIG.planos.slice();
-  if (pcs.length) CONFIG.planos = pcs.map((c, i) => {
-    const v = por(c).find(x => x.nome === PL), old = base.find(o => norm(o.titulo2) === norm(c.nome)) || base[i] || base[1];
-    return { id: old && base.includes(old) && !pcs.slice(0, i).some(z => norm(z.nome) === norm(old.titulo2)) ? old.id : 'p' + c.id,
-      titulo1: v.descricao || 'Com uma proteína', titulo2: c.nome, preco: Number(v.preco),
-      escolhe: /duas|2/i.test(v.descricao || '') ? 2 : 1, proteinas: por(c).filter(x => x !== v).map(x => x.nome), img: old.img };
-  });
+  const gar = achar('guarnicoes');
+  const sal = achar('salada');
   if (gar) CONFIG.guarnicoes = por(gar).map(x => x.nome);
   if (sal) CONFIG.saladaItens = por(sal).map(x => x.nome);
-  /* Categorias novas: o tipo vem de um item marcador "__tipo" (min = minimizado, csc = card sem categoria, aviso) */
-  const cfgDe = c => { const m = todos.find(x => x.categoria_id === c.id && x.nome === '__config'); let j = {};
-    try { j = JSON.parse((m && m.descricao) || '{}'); } catch (e) {}
-    return { tipo: j.tipo || c.tipo, exibicao: j.exibicao || c.exibicao }; };
-  const lugarDe = c => cfgDe(c).tipo || (/bebida|refri|suco|cerveja/.test(norm(c.nome)) ? 'ambos' : 'principal');
-  const fixas = ['pratos', 'proteinas'], bs = cats.filter(c => !/^__/.test(c.nome) && !fixas.includes(norm(c.nome)) &&
-    !pcs.includes(c) && c !== gar && c !== sal && lugarDe(c) !== 'item');
-  const tipoDe = c => { const m = todos.find(x => x.categoria_id === c.id && x.nome === '__tipo'); if (m && m.descricao) return m.descricao;
-    const ex = cfgDe(c).exibicao; return ex === 'cards' ? 'csc' : ex === 'checklist' ? 'ck' : 'min'; };   // novo painel: coluna exibicao
-  const itens = c => por(c).filter(x => x.nome !== '__tipo');
-  CONFIG.avisos = bs.filter(c => tipoDe(c) === 'aviso' && itens(c).length)
-    .map(c => ({ id: 'a' + c.id, nome: c.nome, linhas: itens(c).map(x => ({ t: x.nome, d: x.descricao || '' })) }));
-  CONFIG.temExtras = bs.some(c => tipoDe(c) !== 'aviso' && lugarDe(c) !== 'principal' && !/^bebidas/.test(norm(c.nome)));
-  CONFIG.bebidas = bs.filter(c => tipoDe(c) !== 'aviso').map(c => {
-    const nome = c.nome.replace(/^bebidas\s*[·\-–:]?\s*/i, '') || c.nome, tam = [];
-    itens(c).forEach(x => {
-      const k = (x.descricao || '') + '|' + Number(x.preco); let t = tam.find(z => z.k === k);
+
+  const PL = 'Valor do prato';
+  
+  // Categorias que atuam como montador de "Prato"
+  const catsPrato = cats.filter(c => c.exibicao === 'prato' && c.tipo !== 'item');
+  if (catsPrato.length) {
+    CONFIG.planos = catsPrato.map(c => {
+      const planItem = todos.find(x => x.categoria_id === c.id && x.nome === PL);
+      const proteinas = por(c).filter(x => x.nome !== PL);
+      const preco = planItem ? Number(planItem.preco) : (proteinas[0] ? Number(proteinas[0].preco) : 15);
+      const idKey = norm(c.nome).includes('classica') ? 'classica' : norm(c.nome).includes('gourmet') ? 'duas' : norm(c.nome).includes('executivo') ? 'pf' : 'premium';
+      return {
+        id: 'c' + c.id,
+        titulo1: planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
+        titulo2: c.nome,
+        preco: preco,
+        escolhe: /duas|gourmet/i.test(c.nome) ? 2 : 1,
+        proteinas: proteinas.map(x => x.nome),
+        img: FOTO(idKey)
+      };
+    });
+  }
+
+  // Categorias exibidas no Feed como "Cards (sem foto)"
+  const catsCards = cats.filter(c => c.exibicao === 'cards' && c.tipo !== 'item');
+  CONFIG.cardsAvulsos = catsCards.map(c => ({
+    id: c.id,
+    nome: c.nome,
+    itens: por(c)
+  })).filter(c => c.itens.length > 0);
+
+  // Categorias minimizadas ou checklist (Bebidas, Sobremesas, Extras)
+  const catsExtras = cats.filter(c => (c.exibicao === 'min' || c.exibicao === 'checklist') && c.tipo !== 'item');
+  CONFIG.bebidas = catsExtras.map(c => {
+    const nome = c.nome.replace(/^bebidas\s*[·\-–:]?\s*/i, '') || c.nome;
+    const tam = [];
+    por(c).forEach(x => {
+      const k = (x.descricao || '') + '|' + Number(x.preco);
+      let t = tam.find(z => z.k === k);
       if (!t) tam.push(t = { k, nome: x.descricao || '', preco: Number(x.preco), itens: [] });
       t.itens.push(x.nome);
     });
-    const n = norm(c.nome), beb = /^bebidas/.test(n);
-    return { id: 'b' + c.id, tipo: tipoDe(c), lugar: lugarDe(c), nome, tamanhos: tam, desc: [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
-      emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : beb || /refri|bebida/.test(n) ? '🥤' :
-        /sobremes|doce|pudim|bolo|sorvete|mousse/.test(n) ? '🍰' : /porc|petisc|frit/.test(n) ? '🍟' : '🍽️' };
-  }).filter(d => d.tamanhos.length);
+    const n = norm(c.nome);
+    return {
+      id: 'b' + c.id,
+      tipo: c.exibicao === 'checklist' ? 'ck' : 'min',
+      lugar: c.tipo,
+      nome,
+      tamanhos: tam,
+      desc: [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
+      emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : /refri|bebida/.test(n) ? '🥤' : /sobremes|doce/.test(n) ? '🍰' : '🍽️'
+    };
+  }).filter(d => d.tamanhos.length > 0);
 }
+
 (async function carregarCardapio() {
   try {
-    const get = u => fetch(`${SUPABASE_URL}/rest/v1/${u}`, { headers: { apikey: SUPABASE_KEY } })
-      .then(r => { if (!r.ok) throw 0; return r.json(); });
-    const limite = new Promise((_, no) => setTimeout(() => no(new Error('tempo esgotado')), 6000));
-    const [c, p] = await Promise.race([Promise.all([get('categorias?select=*&order=ordem.asc,id.asc'), get('produtos?select=*&order=id.asc')]), limite]);
-    if (!c.length || !p.length) return;          // painel ainda sem cardápio: mantém o padrão
-    aplicarCardapio(c, p.filter(x => !x.pausado));
-    renderPlates(); renderAvisos(); renderExtras(); initReveal(); updateBar();
-  } catch (e) { console.warn('Cardápio do painel indisponível; usando o padrão', e); }
+    const get = u => fetch(`${SUPABASE_URL}/rest/v1/${u}`, { headers: { apikey: SUPABASE_KEY } }).then(r => r.json());
+    const [c, p] = await Promise.all([
+      get('categorias?select=*&order=ordem.asc,id.asc'),
+      get('produtos?select=*&order=id.asc')
+    ]);
+    if (c && c.length && p && p.length) {
+      aplicarCardapio(c, p.filter(x => !x.pausado));
+      renderPlates();
+      renderExtras();
+      initReveal();
+      updateBar();
+    }
+  } catch (e) {
+    console.warn('Erro ao sincronizar com o painel:', e);
+  }
 })();
 
-
-
-/* ---------- Lista de bebidas e extras na página ---------- */
-function qtyBtns(d, ti, ii, nome) {
-  const q = drinkQty(nome);
-  return `<div class="qty"><button type="button" class="${q ? '' : 'off'}" data-a="ddec" data-d="${d.id}" data-t="${ti}" data-i="${ii}" aria-label="Menos um ${esc(nome)}">−</button><output>${q}</output><button type="button" data-a="dinc" data-d="${d.id}" data-t="${ti}" data-i="${ii}" aria-label="Mais um ${esc(nome)}">+</button></div>`;
-}
-function cscHTML(d) {                                       // card sem categoria: itens com contador, direto na página
+function cscHTML(d) {
   return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3>` + d.tamanhos.map((t, ti) => t.itens.map((item, ii) =>
     `<div class="d-row"><span class="xn"><b>${esc(item)}</b>${t.nome ? `<small>${esc(t.nome)}</small>` : ''}<i>${brl(t.preco)}</i></span>${qtyBtns(d, ti, ii, drinkName(d, t, item))}</div>`).join('')).join('') + `</div>`;
 }
-function ckHTML(d) {                                       // check list: toque marca/desmarca (1 unidade)
+
+function ckHTML(d) {
   return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3><div class="opts one">` + d.tamanhos.map((t, ti) => t.itens.map((item, ii) =>
     `<button type="button" class="opt ${drinkQty(drinkName(d, t, item)) ? 'on' : ''}" data-a="dtog" data-d="${d.id}" data-t="${ti}" data-i="${ii}"><span class="tick"></span>${esc(item)}<span style="margin-left:auto">${brl(t.preco)}</span></button>`).join('')).join('') + `</div></div>`;
 }
-function cardDe(d) { return d.tipo === 'csc' ? cscHTML(d) : d.tipo === 'ck' ? ckHTML(d) : drinkHTML(d); }
+
+function qtyBtns(d, ti, ii, nome) {
+  const q = drinkQty(nome);
+  return `<div class="qty"><button type="button" class="${q ? '' : 'off'}" data-a="ddec" data-d="${d.id}" data-t="${ti}" data-i="${ii}">−</button><output>${q}</output><button type="button" data-a="dinc" data-d="${d.id}" data-t="${ti}" data-i="${ii}">+</button></div>`;
+}
+
+function cardDe(d) { return d.tipo === 'ck' ? ckHTML(d) : drinkHTML(d); }
+
 function toggleDrink(id, ti, ii) {
   const d = CONFIG.bebidas.find(x => x.id === id), t = d.tamanhos[ti], q = drinkQty(drinkName(d, t, d.tamanhos[ti].itens[ii]));
   changeDrink(id, ti, ii, q ? -q : 1);
 }
+
 function renderExtras() {
   const L = (CONFIG.bebidas || []).filter(d => d.tamanhos && d.tamanhos.length && d.lugar !== 'bump');
   $('#extras').hidden = !L.length;
   $('#extrasList').innerHTML = L.map(cardDe).join('');
 }
-function renderAvisos() {
-  $('#avisos').innerHTML = (CONFIG.avisos || []).map(a => `<div class="aviso"><h3>📢 ${esc(a.nome)}</h3>` +
-    a.linhas.map(l => `<p>${esc(l.t)}${l.d ? `<small>${esc(l.d)}</small>` : ''}</p>`).join('') + `</div>`).join('');
-}
+
 $('#extrasList').addEventListener('click', e => {
   const t = e.target.closest('[data-a]'); if (!t) return;
   const a = t.dataset.a;
   if (a === 'dtoggle') { openDrink = openDrink === t.dataset.d ? null : t.dataset.d; renderExtras(); return; }
-  if (a === 'dtog') { toggleDrink(t.dataset.d, +t.dataset.t, +t.dataset.i); return; }
+  if (a === 'dtog') { toggleDrink(t.dataset.d, +t.dataset.t, +t.dataset.i); renderExtras(); return; }
   if (a === 'dinc' || a === 'ddec') {
     changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
-    const f = $(`#extrasList [data-a="${a}"][data-d="${t.dataset.d}"][data-t="${t.dataset.t}"][data-i="${t.dataset.i}"]`); if (f) f.focus({ preventScroll: true });
+    renderExtras();
   }
 });
+
 const _updateBar = updateBar;
 updateBar = function (b) { _updateBar(b); renderExtras(); };
 
-/* ---------- Loja aberta/fechada (controlada pelo painel) ---------- */
 function setLoja(f) {
-  const era = document.body.classList.contains('fechada');
   document.body.classList.toggle('fechada', f);
   $('#lojaBar').hidden = !f;
-  if (f && !era) { try { closeSheet($('#cart')); closeSheet($('#builder')); } catch (e) {} }
+  if (f) { try { closeSheet($('#cart')); closeSheet($('#builder')); } catch (e) {} }
 }
 function avisoLoja() { $('#lojaModal').hidden = false; }
 $('#lojaOk').addEventListener('click', () => { $('#lojaModal').hidden = true; });
+
 document.addEventListener('click', e => {
   if (!document.body.classList.contains('fechada') || e.target.closest('#lojaModal')) return;
-  if (e.target.closest('[data-plano], #cartBar, [data-a="checkout"], [data-a="send"], [data-a="dinc"], [data-a="dtog"]')) {
+  if (e.target.closest('[data-plano], #cartBar, [data-a="checkout"], [data-a="send"], [data-a="dinc"], [data-a="dtog"], [data-a="cinc"]')) {
     e.preventDefault(); e.stopImmediatePropagation(); avisoLoja();
   }
 }, true);
-const guardaLoja = f => function () { if (document.body.classList.contains('fechada')) return avisoLoja(); return f.apply(this, arguments); };
-openBuilder = guardaLoja(openBuilder); openCart = guardaLoja(openCart);
-goCheckout = guardaLoja(goCheckout); sendOrder = guardaLoja(sendOrder); addToCart = guardaLoja(addToCart);
+
 async function checarLoja() {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/categorias?select=id&nome=eq.__loja_fechada`, { headers: { apikey: SUPABASE_KEY } });
     if (!r.ok) return;
     setLoja((await r.json()).length > 0);
-  } catch (e) { /* sem rede: mantém o estado atual */ }
+  } catch (e) {}
 }
 checarLoja(); setInterval(checarLoja, 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden) checarLoja(); });
 </script>
 </body>
 </html>
