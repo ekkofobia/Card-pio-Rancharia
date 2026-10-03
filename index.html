@@ -1039,7 +1039,7 @@ function renderCart() {
       <button class="btn btn--block" data-a="checkout">Finalizar pedido</button>
       <button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Adicionar bebida</button>`;
   } else if (step === 'drinks') {
-    body.innerHTML = `<p class="drinks-intro">${CONFIG.temExtras ? 'Quer uma bebida ou algo mais para acompanhar?' : 'Quer uma bebida para acompanhar?'}</p>` + CONFIG.bebidas.filter(d => d.lugar !== 'principal').map(drinkHTML).join('');
+    body.innerHTML = `<p class="drinks-intro">${CONFIG.temExtras ? 'Quer uma bebida ou algo mais para acompanhar?' : 'Quer uma bebida para acompanhar?'}</p>` + CONFIG.bebidas.filter(d => d.lugar !== 'principal').map(cardDe).join('');
     const bebNow = cart.filter(x => x.kind === 'extra').reduce((s, x) => s + x.qty, 0);
     const bebLabel = bebNow > drinksBaseline ? 'Continuar' : (drinksBaseline > 0 ? 'Não obrigado, já escolhi.' : 'Continuar sem bebida');
     foot.innerHTML = `<button class="btn btn--block" data-a="toform">${bebLabel}</button>
@@ -1098,6 +1098,7 @@ $('#cart').addEventListener('click', e => {
     if (willOpen) { const el = $(`[data-a="dtoggle"][data-d="${t.dataset.d}"]`); if (el) el.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'start' }); }
     return;
   }
+  if (a === 'dtog') { toggleDrink(t.dataset.d, +t.dataset.t, +t.dataset.i); refreshDrinks(`[data-a="dtog"][data-d="${t.dataset.d}"][data-t="${t.dataset.t}"][data-i="${t.dataset.i}"]`); return; }
   if (a === 'dinc' || a === 'ddec') {
     changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
     refreshDrinks(`[data-a="${a}"][data-d="${t.dataset.d}"][data-t="${t.dataset.t}"][data-i="${t.dataset.i}"]`); return;
@@ -1287,12 +1288,14 @@ function aplicarCardapio(cats, prods) {
   if (gar) CONFIG.guarnicoes = por(gar).map(x => x.nome);
   if (sal) CONFIG.saladaItens = por(sal).map(x => x.nome);
   /* Categorias novas: o tipo vem de um item marcador "__tipo" (min = minimizado, csc = card sem categoria, aviso) */
+  const cfgDe = c => { const m = todos.find(x => x.categoria_id === c.id && x.nome === '__config'); let j = {};
+    try { j = JSON.parse((m && m.descricao) || '{}'); } catch (e) {}
+    return { tipo: j.tipo || c.tipo, exibicao: j.exibicao || c.exibicao }; };
+  const lugarDe = c => cfgDe(c).tipo || (/bebida|refri|suco|cerveja/.test(norm(c.nome)) ? 'ambos' : 'principal');
   const fixas = ['pratos', 'proteinas'], bs = cats.filter(c => !/^__/.test(c.nome) && !fixas.includes(norm(c.nome)) &&
-    !pcs.includes(c) && c !== gar && c !== sal && c.tipo !== 'item');
-  /* Onde a categoria aparece: principal (só na página), bump (só na tela de bebidas), ambos. Igual ao painel: sem tipo salvo, só bebida conta como ambos */
-  const lugarDe = c => c.tipo || (/bebida|refri|suco|cerveja/.test(norm(c.nome)) ? 'ambos' : 'principal');
+    !pcs.includes(c) && c !== gar && c !== sal && lugarDe(c) !== 'item');
   const tipoDe = c => { const m = todos.find(x => x.categoria_id === c.id && x.nome === '__tipo'); if (m && m.descricao) return m.descricao;
-    return c.exibicao ? (c.exibicao === 'cards' ? 'csc' : 'min') : 'min'; };   // novo painel: coluna exibicao
+    const ex = cfgDe(c).exibicao; return ex === 'cards' ? 'csc' : ex === 'checklist' ? 'ck' : 'min'; };   // novo painel: coluna exibicao
   const itens = c => por(c).filter(x => x.nome !== '__tipo');
   CONFIG.avisos = bs.filter(c => tipoDe(c) === 'aviso' && itens(c).length)
     .map(c => ({ id: 'a' + c.id, nome: c.nome, linhas: itens(c).map(x => ({ t: x.nome, d: x.descricao || '' })) }));
@@ -1333,10 +1336,19 @@ function cscHTML(d) {                                       // card sem categori
   return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3>` + d.tamanhos.map((t, ti) => t.itens.map((item, ii) =>
     `<div class="d-row"><span class="xn"><b>${esc(item)}</b>${t.nome ? `<small>${esc(t.nome)}</small>` : ''}<i>${brl(t.preco)}</i></span>${qtyBtns(d, ti, ii, drinkName(d, t, item))}</div>`).join('')).join('') + `</div>`;
 }
+function ckHTML(d) {                                       // check list: toque marca/desmarca (1 unidade)
+  return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3><div class="opts one">` + d.tamanhos.map((t, ti) => t.itens.map((item, ii) =>
+    `<button type="button" class="opt ${drinkQty(drinkName(d, t, item)) ? 'on' : ''}" data-a="dtog" data-d="${d.id}" data-t="${ti}" data-i="${ii}"><span class="tick"></span>${esc(item)}<span style="margin-left:auto">${brl(t.preco)}</span></button>`).join('')).join('') + `</div></div>`;
+}
+function cardDe(d) { return d.tipo === 'csc' ? cscHTML(d) : d.tipo === 'ck' ? ckHTML(d) : drinkHTML(d); }
+function toggleDrink(id, ti, ii) {
+  const d = CONFIG.bebidas.find(x => x.id === id), t = d.tamanhos[ti], q = drinkQty(drinkName(d, t, d.tamanhos[ti].itens[ii]));
+  changeDrink(id, ti, ii, q ? -q : 1);
+}
 function renderExtras() {
   const L = (CONFIG.bebidas || []).filter(d => d.tamanhos && d.tamanhos.length && d.lugar !== 'bump');
   $('#extras').hidden = !L.length;
-  $('#extrasList').innerHTML = L.map(d => d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d)).join('');
+  $('#extrasList').innerHTML = L.map(cardDe).join('');
 }
 function renderAvisos() {
   $('#avisos').innerHTML = (CONFIG.avisos || []).map(a => `<div class="aviso"><h3>📢 ${esc(a.nome)}</h3>` +
@@ -1346,6 +1358,7 @@ $('#extrasList').addEventListener('click', e => {
   const t = e.target.closest('[data-a]'); if (!t) return;
   const a = t.dataset.a;
   if (a === 'dtoggle') { openDrink = openDrink === t.dataset.d ? null : t.dataset.d; renderExtras(); return; }
+  if (a === 'dtog') { toggleDrink(t.dataset.d, +t.dataset.t, +t.dataset.i); return; }
   if (a === 'dinc' || a === 'ddec') {
     changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
     const f = $(`#extrasList [data-a="${a}"][data-d="${t.dataset.d}"][data-t="${t.dataset.t}"][data-i="${t.dataset.i}"]`); if (f) f.focus({ preventScroll: true });
@@ -1365,7 +1378,7 @@ function avisoLoja() { $('#lojaModal').hidden = false; }
 $('#lojaOk').addEventListener('click', () => { $('#lojaModal').hidden = true; });
 document.addEventListener('click', e => {
   if (!document.body.classList.contains('fechada') || e.target.closest('#lojaModal')) return;
-  if (e.target.closest('[data-plano], #cartBar, [data-a="checkout"], [data-a="send"], [data-a="dinc"]')) {
+  if (e.target.closest('[data-plano], #cartBar, [data-a="checkout"], [data-a="send"], [data-a="dinc"], [data-a="dtog"]')) {
     e.preventDefault(); e.stopImmediatePropagation(); avisoLoja();
   }
 }, true);
