@@ -147,7 +147,7 @@ section { padding: 46px 0; scroll-margin-top: 62px; }
 .sec-title em { font-style: normal; color: var(--gold); }
 .sec-sub { margin-top: 8px; color: var(--muted); max-width: 46ch; }
 
-/* Cards de prato e pratos compactos */
+/* Cards de prato */
 #pratos { padding-top: 0; }
 .plates { display: grid; gap: 12px; margin-top: 0; }
 .plate { position: relative; overflow: hidden; padding: 16px; border-radius: var(--radius); background: linear-gradient(160deg, var(--card-2), var(--card) 55%); border: 1px solid var(--line); }
@@ -317,8 +317,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 #toast {
   position: fixed; left: 50%; top: 76px; z-index: 90; transform: translate(-50%, -20px); opacity: 0; pointer-events: none;
   padding: 10px 18px; border-radius: 999px; background: var(--cream); color: var(--ink); font-weight: 700; font-size: 15px;
-  transition: .3s; white-space: nowrap;
-}
+  transition: .3s; white-space: nowrap; }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 /* Menu Hambúrguer */
@@ -797,7 +796,8 @@ function addToCart() {
 
 function goCheckout() {
   openDrink = null;
-  step = CONFIG.bebidas.length ? 'drinks' : 'form';
+  const temBump = CONFIG.bebidas.some(d => d.lugar === 'bump' || d.lugar === 'ambos');
+  step = temBump ? 'drinks' : 'form';
   renderCart(); 
   openSheet($('#cart'));
 }
@@ -818,7 +818,7 @@ function lineHTML(it) {
     ? `<ul>
         <li>${esc(it.proteinas.join(' + '))}</li>
         <li>${it.guarnicoes.length ? esc(it.guarnicoes.join(', ')) : 'Sem guarnições'}</li>
-        ${it.salada && it.salada.length ? `<li>${esc(CONFIG.salada)}:${esc(it.salada.join(', '))}</li>` : ''}
+        ${it.salada && it.salada.length ? `<li>${esc(CONFIG.salada)}: ${esc(it.salada.join(', '))}</li>` : ''}
         ${it.obs ? `<li>Obs.: ${esc(it.obs)}</li>` : ''}
       </ul>` : '<ul></ul>';
   return `<div class="line">
@@ -901,7 +901,7 @@ $('#viewOrder').addEventListener('click', e => {
 
 function renderCart() {
   const body = $('#cBody'), foot = $('#cFoot');
-  $('#cTitle').textContent = { list: 'Seu pedido', drinks: 'Bebidas', form: 'Quase lá' }[step];
+  $('#cTitle').textContent = { list: 'Seu pedido', drinks: 'Acompanhamentos', form: 'Quase lá' }[step];
   $('#cart').classList.toggle('sheet--full', step === 'form' || step === 'drinks');
 
   if (step === 'list') {
@@ -911,11 +911,15 @@ function renderCart() {
       return;
     }
     body.innerHTML = cart.map(lineHTML).join('');
+    const temBump = CONFIG.bebidas.some(d => d.lugar === 'bump' || d.lugar === 'ambos');
     foot.innerHTML = `<div class="total"><span>Total</span><b id="cTotal">${brl(total())}</b></div>
       <button class="btn btn--block" data-a="checkout">Finalizar pedido</button>
-      ${CONFIG.bebidas.length ? `<button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Adicionar bebida</button>` : ''}`;
+      ${temBump ? `<button class="link" style="display:block;margin:10px auto 0;color:#fff;font-weight:700;font-size:16px" data-a="drinks">Ver ofertas adicionais</button>` : ''}`;
   } else if (step === 'drinks') {
-    body.innerHTML = `<p class="drinks-intro">Quer uma bebida para acompanhar?</p>` + CONFIG.bebidas.filter(d => d.lugar !== 'principal').map(cardDe).join('');
+    // Exibe todos os itens definidos como Order Bump ou Ambos
+    const bumpItems = CONFIG.bebidas.filter(d => d.lugar === 'bump' || d.lugar === 'ambos');
+    body.innerHTML = `<p class="drinks-intro">Deseja adicionar mais algum item ou bebida ao seu pedido?</p>` + 
+      (bumpItems.length ? bumpItems.map(cardDe).join('') : '<p class="drinks-intro">Nenhum item adicional no momento.</p>');
     foot.innerHTML = `<button class="btn btn--block" data-a="toform">Continuar</button>
       <button class="link" style="display:block;margin:6px auto 0" data-a="back">Voltar ao pedido</button>`;
   } else {
@@ -976,7 +980,11 @@ $('#cart').addEventListener('click', e => {   const t = e.target.closest('[data-
   if (a === 'close') closeSheet($('#cart'));
   if (a === 'toggleItems') { renderOrderView(); openSheet($('#viewOrder')); return; }
   if (a === 'back') { step = 'list'; renderCart(); }
-  if (a === 'checkout') { step = 'form'; renderCart(); }
+  if (a === 'checkout') {
+    const temBump = CONFIG.bebidas.some(d => d.lugar === 'bump' || d.lugar === 'ambos');
+    step = temBump ? 'drinks' : 'form';
+    renderCart(); 
+  }
   if (a === 'send') sendOrder();
 });
 
@@ -1084,13 +1092,13 @@ initReveal();
 updateBar();
 
 /* ==========================================================================
-   SINCRONIZAÇÃO TOTAL COM O PAINEL DE CONTROLE (ORDEM, PRATO E CARDS)
+   SINCRONIZAÇÃO TOTAL COM O PAINEL DE CONTROLE (ORDEM, PRATO, CARDS E ORDER BUMP)
    ========================================================================== */
 function aplicarCardapio(cats, prods) {
   const todos = prods;
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
 
-  // 1. Extrair configurações personalizadas de cada categoria salvas no __config
+  // 1. Extrair configurações personalizadas de cada categoria guardadas no __config
   cats.forEach(c => {
     const m = todos.find(x => x.categoria_id === c.id && x.nome === '__config');
     let j = {};
@@ -1123,9 +1131,9 @@ function aplicarCardapio(cats, prods) {
   if (sal) CONFIG.saladaItens = por(sal).map(x => x.nome);
 
   const PL = 'valor do prato';
-  
-  // Categorias que atuam como montador de "Prato" (Clássica, Gourmet, etc.)
-  const catsPrato = cats.filter(c => c.exibicao === 'prato' && c.tipo !== 'item');
+
+  // Categorias que funcionam como montador de "Prato" (Clássica, Gourmet, etc.)
+  const catsPrato = cats.filter(c => c.exibicao === 'prato' && c.tipo !== 'item' && c.tipo !== 'bump');
   if (catsPrato.length) {
     CONFIG.planos = catsPrato.map(c => {
       const planItem = todos.find(x => x.categoria_id === c.id && norm(x.nome) === PL);
@@ -1144,16 +1152,17 @@ function aplicarCardapio(cats, prods) {
     });
   }
 
-  // Categorias exibidas no Feed como "Cards (sem foto)"
-  const catsCards = cats.filter(c => c.exibicao === 'cards' && c.tipo !== 'item');
+  // Categorias exibidas no feed inicial como "Cards (sem foto)"
+  const catsCards = cats.filter(c => c.exibicao === 'cards' && (c.tipo === 'principal' || c.tipo === 'ambos'));
   CONFIG.cardsAvulsos = catsCards.map(c => ({
     id: c.id,
     nome: c.nome,
     itens: por(c).filter(x => norm(x.nome) !== PL)
   })).filter(c => c.itens.length > 0);
 
-  // Categorias minimizadas ou checklist (Bebidas, Sobremesas, Extras)
-  const catsExtras = cats.filter(c => (c.exibicao === 'min' || c.exibicao === 'checklist') && c.tipo !== 'item');
+  // Categorias de Order Bump e Extras (Bebidas, Ofertas no Checkout, Sobremesas)
+  const catsExtras = cats.filter(c => c.tipo !== 'item' && (c.tipo === 'bump' || c.tipo === 'ambos' || c.exibicao === 'min' || c.exibicao === 'checklist'));
+  
   CONFIG.bebidas = catsExtras.map(c => {
     const nome = c.nome.replace(/^bebidas\s*[·\-–:]?\s*/i, '') || c.nome;
     const tam = [];
@@ -1166,12 +1175,12 @@ function aplicarCardapio(cats, prods) {
     const n = norm(c.nome);
     return {
       id: 'b' + c.id,
-      tipo: c.exibicao === 'checklist' ? 'ck' : 'min',
+      tipo: c.exibicao === 'checklist' ? 'ck' : (c.exibicao === 'cards' ? 'csc' : 'min'),
       lugar: c.tipo,
       nome,
       tamanhos: tam,
       desc: [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
-      emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : /refri|bebida/.test(n) ? '🥤' : /sobremes|doce/.test(n) ? '🍰' : '🍽️'
+      emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : /refri|bebida/.test(n) ? '🥤' : /sobremes|doce/.test(n) ? '🍰' : /porc|frit|batata/.test(n) ? '🍟' : '✨'
     };
   }).filter(d => d.tamanhos.length > 0);
 }
@@ -1210,7 +1219,7 @@ function qtyBtns(d, ti, ii, nome) {
   return `<div class="qty"><button type="button" class="${q ? '' : 'off'}" data-a="ddec" data-d="${d.id}" data-t="${ti}" data-i="${ii}">−</button><output>${q}</output><button type="button" data-a="dinc" data-d="${d.id}" data-t="${ti}" data-i="${ii}">+</button></div>`;
 }
 
-function cardDe(d) { return d.tipo === 'ck' ? ckHTML(d) : drinkHTML(d); }
+function cardDe(d) { return d.tipo === 'ck' ? ckHTML(d) : (d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d)); }
 
 function toggleDrink(id, ti, ii) {
   const d = CONFIG.bebidas.find(x => x.id === id), t = d.tamanhos[ti], q = drinkQty(drinkName(d, t, d.tamanhos[ti].itens[ii]));
