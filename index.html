@@ -810,7 +810,7 @@ function updateBar(bump) {
   $('#barCount').textContent = n === 1 ? 'item' : 'itens';
   setMoney($('#barTotal'), total());
   bar.classList.toggle('show', n > 0 && !current);
-  if (bump) { bar.classList.remove('bump'); void bar.offsetWidth; bar.classList.add('bump'); }
+  if (bump) { bar.classList.remove('bump'); void bar.offsetWidth; badge.classList.add('bump'); }
 }
 
 function lineHTML(it) {
@@ -818,7 +818,7 @@ function lineHTML(it) {
     ? `<ul>
         <li>${esc(it.proteinas.join(' + '))}</li>
         <li>${it.guarnicoes.length ? esc(it.guarnicoes.join(', ')) : 'Sem guarnições'}</li>
-        ${it.salada && it.salada.length ? `<li>${esc(CONFIG.salada)}: ${esc(it.salada.join(', '))}</li>` : ''}
+        ${it.salada && it.salada.length ? `<li>${esc(CONFIG.salada)}:${esc(it.salada.join(', '))}</li>` : ''}
         ${it.obs ? `<li>Obs.: ${esc(it.obs)}</li>` : ''}
       </ul>` : '<ul></ul>';
   return `<div class="line">
@@ -1102,7 +1102,6 @@ function aplicarCardapio(cats, prods) {
     c.item_order = j.item_order || [];
   });
 
-  // Função para retornar os produtos de uma categoria respeitando a ordem exata do painel
   const por = c => {
     const items = prods.filter(x => x.categoria_id === c.id && !/^__/.test(String(x.nome || '')));
     if (Array.isArray(c.item_order) && c.item_order.length) {
@@ -1123,14 +1122,14 @@ function aplicarCardapio(cats, prods) {
   if (gar) CONFIG.guarnicoes = por(gar).map(x => x.nome);
   if (sal) CONFIG.saladaItens = por(sal).map(x => x.nome);
 
-  const PL = 'Valor do prato';
+  const PL = 'valor do prato';
   
-  // Categorias que atuam como montador de "Prato"
+  // Categorias que atuam como montador de "Prato" (Clássica, Gourmet, etc.)
   const catsPrato = cats.filter(c => c.exibicao === 'prato' && c.tipo !== 'item');
   if (catsPrato.length) {
     CONFIG.planos = catsPrato.map(c => {
-      const planItem = todos.find(x => x.categoria_id === c.id && x.nome === PL);
-      const proteinas = por(c).filter(x => x.nome !== PL);
+      const planItem = todos.find(x => x.categoria_id === c.id && norm(x.nome) === PL);
+      const proteinas = por(c).filter(x => norm(x.nome) !== PL);
       const preco = planItem ? Number(planItem.preco) : (proteinas[0] ? Number(proteinas[0].preco) : 15);
       const idKey = norm(c.nome).includes('classica') ? 'classica' : norm(c.nome).includes('gourmet') ? 'duas' : norm(c.nome).includes('executivo') ? 'pf' : 'premium';
       return {
@@ -1150,7 +1149,7 @@ function aplicarCardapio(cats, prods) {
   CONFIG.cardsAvulsos = catsCards.map(c => ({
     id: c.id,
     nome: c.nome,
-    itens: por(c)
+    itens: por(c).filter(x => norm(x.nome) !== PL)
   })).filter(c => c.itens.length > 0);
 
   // Categorias minimizadas ou checklist (Bebidas, Sobremesas, Extras)
@@ -1158,7 +1157,7 @@ function aplicarCardapio(cats, prods) {
   CONFIG.bebidas = catsExtras.map(c => {
     const nome = c.nome.replace(/^bebidas\s*[·\-–:]?\s*/i, '') || c.nome;
     const tam = [];
-    por(c).forEach(x => {
+    por(c).filter(x => norm(x.nome) !== PL).forEach(x => {
       const k = (x.descricao || '') + '|' + Number(x.preco);
       let t = tam.find(z => z.k === k);
       if (!t) tam.push(t = { k, nome: x.descricao || '', preco: Number(x.preco), itens: [] });
@@ -1228,7 +1227,7 @@ $('#extrasList').addEventListener('click', e => {
   const t = e.target.closest('[data-a]'); if (!t) return;
   const a = t.dataset.a;
   if (a === 'dtoggle') { openDrink = openDrink === t.dataset.d ? null : t.dataset.d; renderExtras(); return; }
-  if (a === 'dtog') { toggleDrink(t.dataset.d, +t.dataset.t, +t.dataset.i); renderExtras(); return; }
+  if (a === 'dtog') { toggleDrink(t.dataset.d, +t.dataset.t, +t.dataset.i); return; }
   if (a === 'dinc' || a === 'ddec') {
     changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
     renderExtras();
