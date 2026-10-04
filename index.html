@@ -23,7 +23,7 @@ window.EDITAVEL = {
 <meta name="description" content="Escolha sua proteína, monte suas guarnições e envie o pedido pelo WhatsApp. Pratos a partir de R$15,00.">
 <meta name="theme-color" content="#2a1509">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://fonts.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@400;500;600;700;800&family=Yellowtail&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -206,16 +206,31 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
   position: relative; width: 100%; max-width: 560px; max-height: 92dvh; display: flex; flex-direction: column;
   background: var(--card); border-radius: 26px 26px 0 0; border: 1px solid var(--line); border-bottom: 0;
   transform: translateY(100%); transition: transform .38s cubic-bezier(.2, .85, .3, 1);
+  overflow: hidden; /* Corta o conteúdo impedindo que suba além da borda arredondada */
 }
 .sheet.open .back { opacity: 1; }
 .sheet.open .panel { transform: none; }
-.sheet .head { display: flex; align-items: center; gap: 14px; padding: 18px 20px 14px; border-bottom: 1px solid var(--line); }
+.sheet .head { 
+  position: relative;
+  display: flex; align-items: center; gap: 14px; padding: 18px 20px 14px; 
+  border-bottom: 1px solid var(--line); 
+  background: var(--card) !important; /* Totalmente sólido, veda a passagem */
+  border-radius: 26px 26px 0 0; /* Preenche os cantos arredondados perfeitamente */
+  z-index: 30; /* Garante que fique acima de qualquer item scrollado */
+  box-shadow: 0 4px 12px rgba(0,0,0,.18); /* Sombra que esconde a transição */
+}
 .sheet .head h2 { flex: 1; font-size: 21px; line-height: 1.15; }
 .sheet .head h2 small { display: block; font-size: 14px; font-weight: 500; color: var(--muted); }
 .x { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--line); font-size: 22px; line-height: 1; transition: background .2s; }
 .x:hover { background: rgba(242, 196, 109, .14); }
 .sheet .body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 18px 20px; }
-.sheet .foot { padding: 14px 20px calc(16px + env(safe-area-inset-bottom)); border-top: 1px solid var(--line); background: var(--card); }
+.sheet .foot { 
+  position: relative;
+  padding: 14px 20px calc(16px + env(safe-area-inset-bottom)); 
+  border-top: 1px solid var(--line); 
+  background: var(--card) !important; 
+  z-index: 30; 
+}
 
 .grp { margin-bottom: 22px; }
 .grp-h { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 10px; }
@@ -278,6 +293,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .total { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
 .vp-btn { color: #fff; font-size: 33px; font-weight: 700; text-decoration: underline; }
 .sheet--full .panel { width: 100%; max-width: none; height: 100%; max-height: none; border-radius: 0; border: 0; }
+.sheet--full .panel .head { border-radius: 0; }
 .total span { color: var(--muted); }
 .total b { font-size: 30px; color: var(--gold); }
 .seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -371,7 +387,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
 .xn i { font-style: normal; color: var(--gold); font-weight: 800; font-size: 15px; }
 .xn small { color: var(--muted); }
 
-/* ---------- MODO PRINT (5 cliques na logo): Só os 4 primeiros cards e a salada ---------- */
+/* ---------- MODO PRINT: 5 cliques na logo ---------- */
 .brand { cursor: pointer; }
 body.print-mode #heroBrand { cursor: pointer; }
 body.print-mode { overflow: hidden; height: 100dvh; }
@@ -387,9 +403,7 @@ body.print-mode .hero .script { font-size: clamp(24px, 7vw, 44px); margin-top: -
 body.print-mode #pratos { padding: 0; }
 body.print-mode .plates { grid-template-columns: 1fr 1fr !important; gap: 8px; }
 
-/* Oculta tudo que não seja prato montável nem salada */
 body.print-mode .plates > *:not(.plate-prato):not(.print-salad) { display: none !important; }
-/* Exibe somente os 4 primeiros pratos */
 body.print-mode .plates .plate-prato:nth-of-type(n+5) { display: none !important; }
 
 body.print-mode .plate { padding: 20px 8px 8px; }
@@ -573,7 +587,7 @@ const listar = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);
 
 const CONFIG = {
   nome: 'Rancharia',
-  whatsapp: '557498818-8139',
+  whatsapp: '5574988188139',
   maxGuarnicoes: Number(EDIT.maxGuarnicoes) || 4,
   salada: EDIT.salada || 'Salada Tropical',
   saladaItens: listar(EDIT.saladaItens),
@@ -617,6 +631,7 @@ let step = 'list';
 let openDrink = null;
 let current = null;
 let lastFocus = null;
+let openedFromOrderBump = false;
 const form = { nome: '', modo: 'local', mesa: '', bairro: '', rua: '', numero: '', pag: 'pix', troco: '', obs: '' };
 
 function save() { try { localStorage.setItem(KEY, JSON.stringify(cart)); } catch (e) {} }
@@ -642,9 +657,8 @@ function renderPlates() {
   const container = $('#plates');
   let html = '';
 
-  // 1. Pratos montáveis (Prato) — adicionada a classe identificadora 'plate-prato'
   html += (CONFIG.planos || []).map((p, i) => `
-    <article class="plate plate-prato ${!p.img ? 'nofoto' : ''} ${i < 2 ? 'first-card' + (splashDone ? ' in' : '') : 'reveal'}">
+    <article class="plate plate-prato ${!p.img ? 'nofoto' : ''} ${i < 2 ? 'first-card' + (splashDone ? ' in' : '') : 'reveal' + (splashDone ? ' in' : '')}">
       <span class="price"><small>R$</small>${String(p.preco.toFixed(2)).replace('.', ',')}</span>
       <div class="row">
         <div>
@@ -657,7 +671,6 @@ function renderPlates() {
       <button class="btn" data-plano="${p.id}">Montar esse prato</button>
     </article>`).join('');
 
-  // 2. Categorias configuradas como "Cards (sem foto)"
   (CONFIG.cardsAvulsos || []).forEach(cat => {
     html += `
     <div style="grid-column: 1 / -1; margin-top: 14px;">
@@ -666,7 +679,7 @@ function renderPlates() {
     cat.itens.forEach(it => {
       const q = drinkQty(it.nome);
       html += `
-      <article class="plate nofoto reveal" style="padding:14px 16px">
+      <article class="plate nofoto ${splashDone ? 'in' : 'reveal'}" style="padding:14px 16px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
           <div>
             <div class="t2" style="font-size:18px">${esc(it.nome)}</div>
@@ -685,7 +698,6 @@ function renderPlates() {
     });
   });
 
-  // Identifica a salada (estática ou da subcategoria dinâmica) para o modo print
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   const subSalad = (CONFIG.subcategorias || []).find(s => norm(s.nome).includes('salada'));
   const saladNome = subSalad ? subSalad.nome : CONFIG.salada;
@@ -720,16 +732,39 @@ function closeSheet(el, restoreFocus = true) {
   updateBar();
 }
 
+function handleCloseBuilder() {
+  closeSheet($('#builder'), false);
+  if (openedFromOrderBump) {
+    openedFromOrderBump = false;
+    step = 'drinks';
+    renderCart();
+    setTimeout(() => openSheet($('#cart')), reduce ? 0 : 250);
+  }
+}
+
 document.addEventListener('keydown', e => {
   if (!current) return;
-  if (e.key === 'Escape') { current.id === 'moreG' ? closeMoreG() : closeSheet(current); }
+  if (e.key === 'Escape') { 
+    if (current.id === 'moreG') closeMoreG();
+    else if (current.id === 'builder') handleCloseBuilder();
+    else closeSheet(current); 
+  }
 });
-$$('[data-close]').forEach(b => b.addEventListener('click', () => closeSheet(b.closest('.sheet'))));
+
+$$('[data-close]').forEach(b => b.addEventListener('click', () => {
+  const sh = b.closest('.sheet');
+  if (sh && sh.id === 'builder') {
+    handleCloseBuilder();
+  } else if (sh) {
+    closeSheet(sh);
+  }
+}));
 
 const optBtn = (k, v, sid) => `<button type="button" class="opt" data-k="${k}" ${sid ? `data-sid="${sid}"` : ''} data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${esc(v)}</button>`;
 
 /* ABERTURA DO BUILDER */
-function openBuilder(id) {
+function openBuilder(id, fromBump = false) {
+  openedFromOrderBump = !!fromBump;
   const p = CONFIG.planos.find(x => x.id === id);
   if (!p) return;
 
@@ -1084,7 +1119,15 @@ function addToCart() {
   save();
   closeSheet($('#builder'), false);
   updateBar();
-  setTimeout(goCheckout, reduce ? 0 : 250);
+  
+  if (openedFromOrderBump) {
+    openedFromOrderBump = false;
+    step = 'drinks';
+    renderCart();
+    setTimeout(() => openSheet($('#cart')), reduce ? 0 : 250);
+  } else {
+    setTimeout(goCheckout, reduce ? 0 : 250);
+  }
 }
 
 function goCheckout() {
@@ -1168,7 +1211,9 @@ function changeDrink(id, ti, ii, delta) {
     it.qty = Math.min(20, it.qty + delta);
     if (it.qty <= 0) cart = cart.filter(x => x !== it);
   }
-  save(); updateBar();
+  save(); 
+  updateBar();
+  renderExtras();
 }
 
 function changeCardAvulso(nome, preco, delta) {
@@ -1178,7 +1223,18 @@ function changeCardAvulso(nome, preco, delta) {
     it.qty = Math.min(20, it.qty + delta);
     if (it.qty <= 0) cart = cart.filter(x => x !== it);
   }
-  save(); updateBar(); renderPlates();
+  save(); 
+  updateBar(true);
+
+  const novaQtd = drinkQty(nome);
+  $$(`button[data-a="cinc"][data-name="${CSS.escape(nome)}"], button[data-a="cdec"][data-name="${CSS.escape(nome)}"]`).forEach(btn => {
+    const wrap = btn.closest('.qty');
+    if (!wrap) return;
+    const out = wrap.querySelector('output');
+    const decBtn = wrap.querySelector('[data-a="cdec"]');
+    if (out) out.textContent = novaQtd;
+    if (decBtn) decBtn.classList.toggle('off', novaQtd === 0);
+  });
 }
 
 function renderOrderView() {
@@ -1254,7 +1310,7 @@ $('#cart').addEventListener('click', e => {
   if (!t) return;
   if (t.dataset.bumpPlano) {
     closeSheet($('#cart'), false);
-    openBuilder(t.dataset.bumpPlano);
+    openBuilder(t.dataset.bumpPlano, true);
     return;
   }
   if (t.dataset.seg) {
@@ -1301,18 +1357,21 @@ $('#cart').addEventListener('input', e => {
 const SUPABASE_URL = 'https://svvvzwsajneesmuatcvc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ARLDqBsmhhhfOUp6I2zKiw_9G7pQ5_O';
 
-function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
+async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
   try {
-    fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
       method: 'POST',
       headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
       body: JSON.stringify({ cliente: String(cliente).slice(0, 80), total: valorTotal, detalhes: String(detalhes || '').slice(0, 4000) }),
       keepalive: true
     });
-  } catch (err) {}
+    return res.ok;
+  } catch (err) {
+    return false;
+  }
 }
 
-function sendOrder() {
+async function sendOrder() {
   let bad = null;
   if (!form.nome.trim()) bad = $('#fNome');
   else if (form.modo === 'local' && !form.mesa.trim()) bad = $('#fMesa');
@@ -1320,43 +1379,92 @@ function sendOrder() {
   else if (form.modo === 'entregar' && !form.rua.trim()) bad = $('#fRua');
   if (bad) { bad.classList.add('err'); bad.focus(); shake(bad); toast('Preencha os campos em destaque'); return; }
 
-  const modo = { retirar: 'Retirar no local', entregar: 'Entrega', local: 'Comer no local' }[form.modo];
+  const btnSend = $('#cart [data-a="send"]');
+  if (btnSend) {
+    btnSend.disabled = true;
+    btnSend.textContent = 'Enviando...';
+  }
+
+  const agora = new Date();
+  const diaFmt = String(agora.getDate()).padStart(2, '0');
+  const mesFmt = String(agora.getMonth() + 1).padStart(2, '0');
+  const anoFmt = agora.getFullYear();
+  const horaFmt = String(agora.getHours()).padStart(2, '0');
+  const minFmt = String(agora.getMinutes()).padStart(2, '0');
+  const dataExtenso = `${diaFmt}-${mesFmt}-${anoFmt}`;
+  const horaExtenso = `${horaFmt}:${minFmt}`;
+
+  let modoTexto = 'RETIRADA';
+  if (form.modo === 'local') modoTexto = `MESA: ${form.mesa.trim()}`;
+  if (form.modo === 'entregar') modoTexto = 'ENTREGA';
+
   const pag = { pix: 'Pix', cartao: 'Cartão', dinheiro: 'Dinheiro' }[form.pag];
   const ent = form.modo === 'entregar';
 
-  let msg = `*${CONFIG.nome} — Novo pedido*\n`;
-  msg += `━━━━━━━━━━━━━━━\n`;
-  msg += `*Cliente*\nNome: ${form.nome.trim()}\n`;
-  if (form.modo === 'local') msg += `Mesa: ${form.mesa.trim()}\n`;
+  // Cabeçalho duplex: data e hora alinhados à direita
+  let msg = `*RANCHARIA*                     ${dataExtenso}\n`;
+  msg += `                                ${horaExtenso}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `*${modoTexto}*\n`;
+  msg += `*NOME:* ${form.nome.trim()}\n`;
+
   if (form.modo === 'entregar') {
-    msg += `Bairro: ${form.bairro.trim()}\n`;
-    msg += `Rua: ${form.rua.trim()}${form.numero.trim() ? ', nº ' + form.numero.trim() : ''}\n`;
+    msg += `Endereço: ${form.rua.trim()}${form.numero.trim() ? ', nº ' + form.numero.trim() : ''} - ${form.bairro.trim()}\n`;
   }
 
-  msg += `\n*Itens do pedido*\n`;
-  cart.forEach(it => {
-    msg += `\n${it.qty}x ${it.nome} — ${brl(itemTotal(it))}\n`;
-    if (it.kind === 'prato') {
-      msg += `  • Proteína: ${it.proteinas.join(' + ')}\n`;
-      if (it.subResumo && it.subResumo.length) {
-        it.subResumo.forEach(sr => {
-          msg += `  • ${sr.nome}: ${sr.itens.join(', ')}\n`;
-        });
-      }
-      if (it.obs) msg += `  • Obs.: ${it.obs}\n`;
+  msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+
+  // Itens: comida com espaçamento; bebidas em sequência sem quebra extra
+  const comidas = cart.filter(it => it.kind === 'prato');
+  const bebidas = cart.filter(it => it.kind !== 'prato');
+
+  comidas.forEach((it, idx) => {
+    msg += `${it.qty}x ${it.nome} — ${brl(itemTotal(it))}\n`;
+    msg += `  • Proteína: ${it.proteinas.join(' + ')}\n`;
+    if (it.subResumo && it.subResumo.length) {
+      it.subResumo.forEach(sr => {
+        msg += `  • ${sr.nome}: ${sr.itens.join(', ')}\n`;
+      });
+    }
+    if (it.obs) msg += `  • Obs.: ${it.obs}\n`;
+    if (idx < comidas.length - 1 || bebidas.length > 0) {
+      msg += `\n`;
     }
   });
 
-  msg += `\n━━━━━━━━━━━━━━━\n`;
-  msg += `*Total: ${brl(total())}*${ent ? ' (+ taxa a combinar)' : ''}\n`;
+  bebidas.forEach(it => {
+    msg += `${it.qty}x ${it.nome} — ${brl(itemTotal(it))}\n`;
+  });
+
+  msg += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+  msg += `Total: ${brl(total())}${ent ? ' (+ taxa a combinar)' : ''}\n`;
+
   if (ent) {
-    msg += `\n*Pagamento*\n${pag}`;
+    msg += `Pagamento: ${pag}`;
     if (form.pag === 'dinheiro' && form.troco.trim()) msg += ` (troco para R$${form.troco.trim()})`;
     msg += `\n`;
   }
-  if (form.obs.trim()) msg += `\n*Observação*\n${form.obs.trim()}`;
 
-  salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100, `Tipo: ${modo}\n${msg}`);
+  if (form.obs.trim()) {
+    msg += `Obs. Geral: ${form.obs.trim()}\n`;
+  }
+
+  msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+  msg += `    CNPJ: 12.345.678/0001-90\n`;
+
+  const gravouNoBanco = await salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100, msg);
+
+  if (btnSend) {
+    btnSend.disabled = false;
+    btnSend.textContent = 'Enviar pedido no WhatsApp';
+  }
+
+  if (!gravouNoBanco) {
+    toast('A loja pode estar fechada no momento.');
+    avisoLoja();
+    return;
+  }
+
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
   setTimeout(() => {
     cart = []; save(); form.obs = '';
@@ -1380,7 +1488,7 @@ $('#sobre').textContent = CONFIG.sobre;
 $('#horas').innerHTML = CONFIG.horarios.map(([d, h]) => `<div class="hr-row"><span>${esc(d)}</span><b>${esc(h)}</b></div>`).join('');
 $('#faq').innerHTML = CONFIG.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
 
-/* MODO PRINT RESTAURADO: 5 CLIQUES NA LOGO */
+/* MODO PRINT: 5 CLIQUES NA LOGO */
 let logoClicks = 0;
 $('.brand').addEventListener('click', () => {
   if (document.body.classList.contains('print-mode')) {
@@ -1409,8 +1517,13 @@ function hideSplash() {
   $('#splash').classList.add('done');
   document.body.classList.add('ready');
   document.body.classList.remove('lock');
-  $$('.plate.first-card').forEach((c, i) => setTimeout(() => c.classList.add('in'), reduce ? 0 : 900 + i * 150)); } window.addEventListener('load', () => setTimeout(hideSplash, 600));  function initReveal() {   const els = $$
-('.reveal');
+  $$('.plate.first-card').forEach((c, i) => setTimeout(() => c.classList.add('in'), reduce ? 0 : 900 + i * 150));
+  $$('.plate.reveal').forEach(c => c.classList.add('in'));
+}
+window.addEventListener('load', () => setTimeout(hideSplash, 600));
+
+function initReveal() {
+  const els = $$('.reveal');
   if (!('IntersectionObserver' in window) || reduce) { els.forEach(el => el.classList.add('in')); return; }
   const io = new IntersectionObserver(list => list.forEach(en => {
     if (en.isIntersecting) { en.target.classList.add('in'); io.unobserve(en.target); }
@@ -1422,9 +1535,7 @@ renderPlates();
 initReveal();
 updateBar();
 
-/* ==========================================================================
-   SINCRONIZAÇÃO TOTAL COM O PAINEL DE CONTROLE (SUBCATEGORIAS DINÂMICAS)
-   ========================================================================== */
+/* ================== SINCRONIZAÇÃO COM O PAINEL ================== */
 function aplicarCardapio(cats, prods) {
   const todos = prods;
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -1458,7 +1569,6 @@ function aplicarCardapio(cats, prods) {
 
   const PL = 'valor do prato';
 
-  // 1. Guarda todas as subcategorias dinâmicas com os respetivos pais e tipos de exibição
   const catsSub = cats.filter(c => c.tipo === 'item');
   CONFIG.subcategorias = catsSub.map(c => ({
     id: c.id,
@@ -1474,7 +1584,6 @@ function aplicarCardapio(cats, prods) {
     }))
   }));
 
-  // 2. Categorias de "Prato" montável exibidas no ecrã inicial
   const catsPrato = cats.filter(c => c.exibicao === 'prato' && c.tipo !== 'item' && c.tipo !== 'bump');
   if (catsPrato.length) {
     CONFIG.planos = catsPrato.map(c => {
@@ -1495,7 +1604,6 @@ function aplicarCardapio(cats, prods) {
     });
   }
 
-  // 3. Categorias exibidas no feed inicial como "Cards (sem foto)"
   const catsCards = cats.filter(c => c.exibicao === 'cards' && (c.tipo === 'principal' || c.tipo === 'ambos'));
   CONFIG.cardsAvulsos = catsCards.map(c => ({
     id: c.id,
@@ -1503,7 +1611,6 @@ function aplicarCardapio(cats, prods) {
     itens: por(c).filter(x => norm(x.nome) !== PL)
   })).filter(c => c.itens.length > 0);
 
-  // 4. Todas as categorias de Order Bump e Extras
   const catsExtras = cats.filter(c => c.tipo !== 'item' && (c.tipo === 'bump' || c.tipo === 'ambos' || c.exibicao === 'min' || c.exibicao === 'checklist'));
   
   CONFIG.bebidas = catsExtras.map(c => {
@@ -1637,9 +1744,6 @@ $('#extrasList').addEventListener('click', e => {
     renderExtras();
   }
 });
-
-const _updateBar = updateBar;
-updateBar = function (b) { _updateBar(b); renderExtras(); };
 
 function setLoja(f) {
   document.body.classList.toggle('fechada', f);
