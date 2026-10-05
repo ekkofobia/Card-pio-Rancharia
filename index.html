@@ -3,24 +3,24 @@
 <head>
 <script>
 /* ==========================================================================
-   CONFIGURAÇÃO DINÂMICA VIA DASHBOARD
+   EDITE AQUI — proteínas de cada prato, guarnições e a salada
    ========================================================================== */
 window.EDITAVEL = {
-  classica: '',
-  premium: '',
-  gourmet: '',
-  executivo: '',
-  guarnicoes: '',
+  classica: 'Ensopado de carne moída, Linguiça toscana',
+  premium: 'Frango a passarinha, Bode cozido',
+  gourmet: 'Ensopado de carne moída, Linguiça toscana, Frango a passarinha, Bode cozido',
+  executivo: 'Carne do sol, Cupim, Contra filé, Bode',
+  guarnicoes: 'Baião, Arroz, Feijão caldo, Feijão verde, Feijão tropeiro, Macarrão, Farofa',
   maxGuarnicoes: 4,
-  salada: 'Salada',
-  saladaItens: '',
+  salada: 'Salada Tropical',
+  saladaItens: 'Alface, Tomate, Cebola roxa, Pepino, Milho',
   maxSalada: 4
 };
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Rancharia — Monte seu prato</title>
-<meta name="description" content="Escolha sua proteína, monte suas guarnições e envie o pedido pelo WhatsApp.">
+<meta name="description" content="Escolha sua proteína, monte suas guarnições e envie o pedido pelo WhatsApp. Pratos a partir de R$15,00.">
 <meta name="theme-color" content="#2a1509">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com">
@@ -61,6 +61,7 @@ ul { padding: 0; list-style: none; }
 .wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 20px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+/* Botões */
 .btn {
   position: relative; overflow: hidden;
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
@@ -78,7 +79,14 @@ ul { padding: 0; list-style: none; }
 .btn--ghost:hover { background: rgba(242, 196, 109, .12); box-shadow: none; }
 .btn--block { width: 100%; }
 .btn[disabled] { opacity: .45; pointer-events: none; }
+.ripple {
+  position: absolute; border-radius: 50%; pointer-events: none;
+  background: rgba(255, 255, 255, .45); transform: scale(0);
+  animation: ripple .6s ease-out forwards;
+}
+@keyframes ripple { to { transform: scale(4); opacity: 0; } }
 
+/* Splash */
 #splash {
   position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; text-align: center;
   background: var(--bg); transition: opacity .5s ease, visibility .5s;
@@ -89,6 +97,7 @@ ul { padding: 0; list-style: none; }
 #splash .s-bar i { display: block; height: 100%; width: 40%; background: var(--gold); border-radius: 3px; animation: load 1s ease-in-out infinite; }
 @keyframes load { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
 
+/* Topo */
 .top {
   position: fixed; top: 0; left: 0; right: 0; z-index: 30; width: 100%;
   background: rgba(42, 21, 9, .88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -96,7 +105,20 @@ ul { padding: 0; list-style: none; }
 }
 .top .wrap { display: flex; align-items: center; justify-content: space-between; height: 62px; }
 .brand { font-family: var(--f-display); font-size: 26px; letter-spacing: .05em; }
+.cart-btn {
+  position: relative; display: inline-flex; align-items: center; gap: 8px;
+  height: 42px; padding: 0 16px; border-radius: 999px;
+  border: 1.5px solid var(--line); font-weight: 600; transition: border-color .2s, background .2s;
+}
+.cart-btn:hover { border-color: var(--gold); background: rgba(242, 196, 109, .08); }
+.badge {
+  min-width: 22px; height: 22px; padding: 0 6px; display: grid; place-items: center;
+  border-radius: 999px; background: var(--gold); color: var(--ink); font-size: 13px; font-weight: 800;
+}
+.badge.pop { animation: pop .4s ease; }
+@keyframes pop { 40% { transform: scale(1.5); } }
 
+/* Hero */
 .hero { padding: 28px 0 44px; text-align: center; overflow: hidden; }
 .hero h1 {
   font-family: var(--f-display); font-weight: 400; text-transform: uppercase;
@@ -119,11 +141,13 @@ body.ready .hero .cta { animation: rise .6s .95s ease both; }
 @keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
 @keyframes wipe { from { opacity: 1; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
 
+/* Seções */
 section { padding: 46px 0; scroll-margin-top: 62px; }
 .sec-title { font-size: 26px; font-weight: 700; line-height: 1.15; }
 .sec-title em { font-style: normal; color: var(--gold); }
 .sec-sub { margin-top: 8px; color: var(--muted); max-width: 46ch; }
 
+/* Cards de prato */
 #pratos { padding-top: 0; }
 .plates { display: grid; gap: 12px; margin-top: 0; }
 .plate { position: relative; overflow: hidden; padding: 16px; border-radius: var(--radius); background: linear-gradient(160deg, var(--card-2), var(--card) 55%); border: 1px solid var(--line); }
@@ -140,16 +164,20 @@ section { padding: 46px 0; scroll-margin-top: 62px; }
 .plate .photo img { width: calc(100% + 10px); max-width: none; height: auto; }
 .plate .btn { width: 100%; min-height: 44px; margin-top: 12px; font-size: 15px; }
 
+/* CTA final */
 .final { text-align: center; padding-bottom: 130px; }
 .final .sec-title { font-size: 32px; }
 .final .btn { margin-top: 22px; min-height: 60px; padding: 0 34px; font-size: 19px; }
 footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+.final + footer { padding-top: 26px; }
 
+/* Scroll reveal */
 .reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
 .reveal.in { opacity: 1; transform: none; }
 .plate.first-card { opacity: 0; transform: translateY(30px); transition: opacity .4s ease, transform .4s ease; }
 .plate.first-card.in { opacity: 1; transform: none; }
 
+/* Barra fixa do carrinho */
 #cartBar {
   position: fixed; left: 50%; bottom: 16px; z-index: 40; width: calc(100% - 28px); max-width: 520px;
   transform: translate(-50%, 140%); transition: transform .4s cubic-bezier(.2, .9, .3, 1.2);
@@ -159,6 +187,8 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
   box-shadow: 0 14px 34px rgba(0, 0, 0, .5);
 }
 #cartBar.show { transform: translate(-50%, 0); }
+#cartBar.bump { animation: bump .45s ease; }
+@keyframes bump { 30% { transform: translate(-50%, -6px) scale(1.04); } }
 #cartBar .info { display: flex; flex-direction: column; line-height: 1.2; text-align: left; }
 #cartBar .info small { font-weight: 500; opacity: .75; }
 #cartBar .info b { font-size: 20px; }
@@ -168,6 +198,7 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .mini-badge { position: absolute; top: -7px; right: -8px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--ink); color: var(--gold); font-size: 10px; font-weight: 800; display: grid; place-items: center; line-height: 1; }
 #cartBar .go { display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 999px; background: var(--ink); color: var(--gold); }
 
+/* Sheets */
 .sheet { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; justify-content: center; }
 .sheet[hidden] { display: none; }
 .sheet .back { position: absolute; inset: 0; background: rgba(0, 0, 0, .65); opacity: 0; transition: opacity .3s; }
@@ -219,7 +250,10 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .opt.on .tick { border-color: var(--ink); }
 .opt.on .tick::after { transform: rotate(-45deg) scale(1); }
 .opts.one { grid-template-columns: 1fr; }
+.shake { animation: shake .35s; }
+@keyframes shake { 25% { transform: translateX(-6px); } 75% { transform: translateX(6px); } }
 
+/* Cards/Linhas dentro do builder */
 .builder-card-row {
   display: flex; align-items: center; justify-content: space-between; gap: 10px;
   padding: 10px 14px; border-radius: 16px; background: var(--card-2);
@@ -236,6 +270,7 @@ textarea { resize: none; min-height: 72px; }
 textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 ::placeholder { color: #9d8a70; }
 .lbl { display: block; margin-bottom: 6px; font-weight: 600; font-size: 15px; }
+.err { border-color: #ff7a6b !important; }
 
 .qty { display: inline-flex; align-items: center; gap: 4px; border: 1.5px solid var(--line); border-radius: 999px; }
 .qty button { width: 38px; height: 38px; font-size: 22px; border-radius: 50%; }
@@ -244,6 +279,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .foot-row { display: flex; align-items: center; gap: 12px; }
 .foot-row .btn { flex: 1; padding: 0 14px; font-size: 16px; white-space: nowrap; }
 
+/* Linhas do carrinho */
 .line { padding: 14px 0; border-bottom: 1px solid var(--line); }
 .line:last-child { border-bottom: 0; }
 .line-top { display: flex; justify-content: space-between; gap: 12px; }
@@ -266,6 +302,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .field { margin-bottom: 18px; }
 .note { font-size: 14px; color: var(--muted); margin-top: 8px; }
 
+/* Modal upsell guarnições */
 .modal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: rgba(0, 0, 0, .7); opacity: 0; transition: opacity .25s; }
 .modal[hidden] { display: none; }
 .modal.open { opacity: 1; }
@@ -278,6 +315,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .modal .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .modal .btns .btn { width: 100%; padding: 0 10px; font-size: 16px; }
 
+/* Cards Extras / Minimizado */
 .drinks-intro { margin-bottom: 14px; color: var(--muted); }
 .drink { margin-bottom: 12px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--card-2); overflow: hidden; transition: border-color .2s; }
 .drink.open { border-color: var(--gold); }
@@ -300,12 +338,14 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .d-pr { color: var(--gold); font-weight: 700; font-size: 14px; white-space: nowrap; }
 .qty button.off { opacity: .35; }
 
+/* Toast */
 #toast {
   position: fixed; left: 50%; top: 76px; z-index: 90; transform: translate(-50%, -20px); opacity: 0; pointer-events: none;
   padding: 10px 18px; border-radius: 999px; background: var(--cream); color: var(--ink); font-weight: 700; font-size: 15px;
   transition: .3s; white-space: nowrap; }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+/* Menu Hambúrguer */
 .burger { flex: none; width: 42px; height: 42px; display: grid; place-content: center; gap: 5px; border-radius: 50%; border: 1.5px solid var(--line); transition: border-color .2s, background .2s; }
 .burger:hover { border-color: var(--gold); background: rgba(242, 196, 109, .08); }
 .burger span { display: block; width: 18px; height: 2px; border-radius: 2px; background: var(--cream); }
@@ -339,12 +379,241 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
 .xcard { background: linear-gradient(160deg, #402617, var(--card) 55%); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px 18px; margin-top: 14px; }
 .xcard h3 { font-size: 20px; font-weight: 800; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; }
 #extras[hidden] { display: none; }
+.aviso { margin-bottom: 14px; padding: 14px 18px; border-radius: var(--radius); background: rgba(242, 196, 109, .12); border: 1.5px solid var(--gold); }
+.aviso h3 { font-size: 18px; font-weight: 800; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }
+.aviso p { margin-top: 4px; color: var(--cream); }
 .xn { display: grid; gap: 1px; }
 .xn b { font-weight: 700; font-size: 16px; }
 .xn i { font-style: normal; color: var(--gold); font-weight: 800; font-size: 15px; }
 .xn small { color: var(--muted); }
 
+/* ---------- MODO PRINT: 5 cliques na logo ---------- */
 .brand { cursor: pointer; }
+body.print-mode #heroBrand { cursor: pointer; }
+
+body.print-mode { 
+  overflow: hidden; 
+  height: 100dvh; 
+  padding: 0;
+  margin: 0;
+}
+
+body.print-mode .top { display: none !important; }
+
+body.print-mode main {
+  height: 100dvh; 
+  max-height: 100dvh;
+  overflow: hidden; 
+  padding: 4px 8px 6px !important;
+  display: flex; 
+  flex-direction: column; 
+  justify-content: flex-start;
+  gap: 4px;
+  box-sizing: border-box;
+}
+
+body.print-mode .wrap {
+  padding: 0 4px;
+  height: 100%;
+  max-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+body.print-mode .hero { 
+  padding: 0; 
+  overflow: visible; 
+  flex-shrink: 0;
+  margin: 0 0 4px 0;
+}
+body.print-mode .hero .lead, 
+body.print-mode .hero .cta { 
+  display: none !important; 
+}
+body.print-mode .hero h1 { 
+  font-size: clamp(28px, 7vw, 40px);
+  line-height: 1;
+}
+body.print-mode .hero .script { 
+  font-size: clamp(26px, 6.5vw, 36px);
+  margin-top: -0.1em; 
+  line-height: 1;
+}
+
+body.print-mode #pratos { 
+  padding: 0; 
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 0;
+}
+
+/* Os cards se ajustam ao tamanho do conteúdo sem esticar */
+body.print-mode .plates { 
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important; 
+  grid-template-rows: auto auto auto !important;
+  align-content: start;
+  gap: 8px; 
+  height: auto;
+  max-height: 100%;
+  min-height: 0;
+}
+
+body.print-mode .plates > *:not(.plate-prato):not(.print-salad) { display: none !important; }
+body.print-mode .plates .plate-prato:nth-of-type(n+5) { display: none !important; }
+
+/* Card com altura automática e sem espaço vazio sobrando */
+body.print-mode .plate { 
+  padding: 8px 8px 8px 10px; 
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  text-align: left;
+  overflow: hidden;
+  position: relative;
+  height: fit-content;
+  min-height: 0;
+}
+
+/* O preço fica no topo, acima dos 2 títulos */
+body.print-mode .plate .price { 
+  position: static !important;
+  order: 1;
+  margin-bottom: 3px;
+  align-self: flex-start;
+  font-size: 14px; 
+  padding: 1px 8px; 
+  line-height: 1.2; 
+}
+body.print-mode .plate .price small { font-size: 12px; }
+
+body.print-mode .plate .row { 
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+  width: 100%;
+  height: auto;
+  gap: 1px;
+  order: 2;
+}
+
+body.print-mode .plate .row > div {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* Os 2 títulos vêm logo abaixo do preço */
+body.print-mode .plate .t1 { 
+  font-size: 11px; 
+  line-height: 1.1;
+  letter-spacing: 0.01em;
+  text-align: left;
+  width: 100%;
+}
+body.print-mode .plate .t2 { 
+  font-size: 16px; 
+  line-height: 1.1; 
+  margin-bottom: 3px;
+  text-align: left;
+  width: 100%;
+}
+
+/* Lista de proteínas */
+body.print-mode .plate ul { 
+  font-size: 12.5px; 
+  line-height: 1.2;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5px;
+  text-align: left;
+  width: 100%;
+  padding: 0;
+  margin: 0 0 6px 0 !important;
+}
+body.print-mode .plate li { 
+  padding-left: 12px; 
+  text-align: left;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+body.print-mode .plate li::before {
+  width: 4.5px;
+  height: 4.5px;
+  top: 0.48em;
+  left: 1px;
+}
+
+/* Imagem abaixo do último texto, alinhada à esquerda e ampliada em 20% */
+body.print-mode .plate .photo { 
+  position: static !important;
+  order: 3;
+  margin: 6px 0 0 0 !important;
+  width: 156px;
+  height: auto;
+  max-height: none;
+  display: block;
+  align-self: flex-start;
+  pointer-events: none;
+  -webkit-mask-image: none;
+  mask-image: none;
+}
+body.print-mode .plate .photo img { 
+  width: 156px; 
+  height: auto;
+  max-width: 100%;
+  object-fit: contain;
+  display: block;
+  margin-left: -4px;
+}
+
+body.print-mode .plate .btn { display: none !important; }
+body.print-mode .final, 
+body.print-mode footer, 
+body.print-mode #cartBar, 
+body.print-mode #extras, 
+body.print-mode #avisos { 
+  display: none !important; 
+}
+
+.print-salad { display: none; }
+body.print-mode .print-salad {
+  display: flex !important; 
+  flex-direction: column; 
+  align-items: center; 
+  justify-content: center;
+  grid-column: 1 / -1 !important; 
+  height: auto; 
+  min-height: 48px; 
+  padding: 8px 10px !important; 
+  text-align: center;
+  border-radius: 12px;
+  flex-shrink: 0;
+  margin-top: 4px;
+}
+body.print-mode .print-salad b { 
+  font-size: 15px; 
+  line-height: 1.15;
+  color: var(--gold); 
+  text-transform: uppercase; 
+}
+body.print-mode .print-salad small { 
+  display: block; 
+  margin-top: 3px; 
+  font-size: 12.5px; 
+  line-height: 1.25;
+  color: var(--muted); 
+}
 
 @media (min-width: 760px) {
   .wrap { padding: 0 32px; }
@@ -387,6 +656,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
     </div>
   </section>
 
+  <!-- Seção de Acompanhamentos/Bebidas do ecrã inicial -->
   <section id="extras" hidden>
     <div class="wrap">
       <h2 class="sec-title">Acompanhamentos e <em>Bebidas</em></h2>
@@ -419,6 +689,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
   <span class="go">Ver pedido</span>
 </button>
 
+<!-- Sheet: montar prato -->
 <div class="sheet sheet--full" id="builder" role="dialog" aria-modal="true" aria-labelledby="bTitle" hidden>
   <div class="back" data-close></div>
   <div class="panel">
@@ -428,6 +699,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
   </div>
 </div>
 
+<!-- Sheet: pedido -->
 <div class="sheet" id="cart" role="dialog" aria-modal="true" aria-labelledby="cTitle" hidden>
   <div class="back" data-close></div>
   <div class="panel">
@@ -437,6 +709,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
   </div>
 </div>
 
+<!-- Modal: aviso de opções restantes -->
 <div class="modal" id="moreG" role="dialog" aria-modal="true" aria-labelledby="mgTitle" hidden>
   <div class="card">
     <div class="emoji" aria-hidden="true">🍛</div>
@@ -449,6 +722,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
   </div>
 </div>
 
+<!-- Menu (hambúrguer) -->
 <div class="sheet drawer" id="menu" role="dialog" aria-modal="true" aria-labelledby="mTitle" hidden>
   <div class="back" data-close></div>
   <div class="panel">
@@ -466,6 +740,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
   </div>
 </div>
 
+<!-- Ver pedido por cima do checkout -->
 <div class="sheet sheet--full" id="viewOrder" role="dialog" aria-modal="true" aria-labelledby="voTitle" hidden>
   <div class="back" data-close></div>
   <div class="panel">
@@ -496,23 +771,36 @@ setTimeout(function () {
 <script>
 'use strict';
 const FOTO = k => (typeof IMG !== 'undefined' && IMG[k]) || '';
+const EDIT = window.EDITAVEL || {};
+const listar = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);
 
 const CONFIG = {
   nome: 'Rancharia',
   whatsapp: '5574988188139',
-  planos: [],
+  maxGuarnicoes: Number(EDIT.maxGuarnicoes) || 4,
+  salada: EDIT.salada || 'Salada Tropical',
+  saladaItens: listar(EDIT.saladaItens),
+  maxSalada: Number(EDIT.maxSalada) || 4,
+  planos: [
+    { id: 'classica', catId: null, titulo1: 'Com uma proteína', titulo2: 'Clássica', preco: 15, escolhe: 1, proteinas: listar(EDIT.classica), img: FOTO('classica') },
+    { id: 'premium', catId: null, titulo1: 'Com uma proteína', titulo2: 'Premium', preco: 18, escolhe: 1, proteinas: listar(EDIT.premium), img: FOTO('premium') },
+    { id: 'duas', catId: null, titulo1: 'Com duas Proteínas', titulo2: 'Gourmet', preco: 22, escolhe: 2, proteinas: listar(EDIT.gourmet), img: FOTO('duas') },
+    { id: 'pf', catId: null, titulo1: 'Com uma proteína', titulo2: 'Executivo', preco: 25, escolhe: 1, proteinas: listar(EDIT.executivo), img: FOTO('premium') }
+  ],
+  guarnicoes: listar(EDIT.guarnicoes),
   subcategorias: [],
   bebidas: [],
   cardsAvulsos: [],
-  sobre: 'A Rancharia serve pratos montados por você: escolha a proteína, capriche nas guarnições e finalize seu pedido direto pelo WhatsApp.',
+  sobre: 'A Rancharia serve pratos montados por você: escolha a proteína, capriche nas guarnições e leve a Salada Tropical incluída. Tudo em poucoso toques, direto pelo WhatsApp.',
   horarios: [
     ['Segunda a sexta', '11h às 15h'],
     ['Sábado', '11h às 16h'],
     ['Domingo', '11h às 14h']
   ],
   faq: [
-    ['Como faço meu pedido?', 'Escolha um prato, monte suas opções e envie direto no WhatsApp.'],
-    ['Vocês entregam?', 'Sim. Ao finalizar, escolha Entrega e informe o endereço. A taxa é combinada pelo WhatsApp.']
+    ['Como faço meu pedido?', 'Escolha um prato, monte com a proteína e as guarnições e finalize. O pedido é enviado pelo WhatsApp.'],
+    ['Quantas guarnições posso escolher?', 'De 1 a 4 guarnições e de 1 a 4 itens de salada por prato, do jeito que preferir.'],
+    ['Vocês entregam?', 'Sim. Ao finalizar, escolha Entrega e informe o endereço. A taxa é combinada com a gente no WhatsApp.']
   ],
   sites: [{ nome: 'Em breve', url: '' }],
   criador: { whatsapp: '5574988534600', instagram: 'iae.morenim', msg: 'Oi! Vi o cardápio da Rancharia e quero um site assim.' }
@@ -553,6 +841,7 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
 }
 
+/* Renderização dos Pratos e dos Cards sem foto no Ecrã Principal */
 function renderPlates() {
   const container = $('#plates');
   let html = '';
@@ -597,6 +886,17 @@ function renderPlates() {
       </article>`;
     });
   });
+
+  const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+  const subSalad = (CONFIG.subcategorias || []).find(s => norm(s.nome).includes('salada'));
+  const saladNome = subSalad ? subSalad.nome : CONFIG.salada;
+  const saladItens = subSalad ? subSalad.itens.map(x => x.nome).join(', ') : CONFIG.saladaItens.join(', ');
+
+  html += `
+    <article class="plate print-salad">
+      <b>${esc(saladNome)}</b>
+      <small>${esc(saladItens)}</small>
+    </article>`;
 
   container.innerHTML = html;
 }
@@ -651,11 +951,13 @@ $$('[data-close]').forEach(b => b.addEventListener('click', () => {
 
 const optBtn = (k, v, sid) => `<button type="button" class="opt" data-k="${k}" ${sid ? `data-sid="${sid}"` : ''} data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${esc(v)}</button>`;
 
+/* ABERTURA DO BUILDER */
 function openBuilder(id, fromBump = false) {
   openedFromOrderBump = !!fromBump;
   const p = CONFIG.planos.find(x => x.id === id);
   if (!p) return;
 
+  // FILTRA SUBCATEGORIAS VINCULADAS AO PRATO E GARANTE QUE NÃO ESTEJAM VAZIAS
   const subcatsDoPrato = (CONFIG.subcategorias || []).filter(sub => {
     if (!sub.itens || !sub.itens.length) return false;
     if (!sub.parents || !sub.parents.length) return true;
@@ -678,14 +980,11 @@ function openBuilder(id, fromBump = false) {
 
   $('#bTitle').innerHTML = `${esc(p.titulo2)}<small>${esc(p.titulo1)} · ${brl(p.preco)}</small>`;
   
-  let bodyHTML = '';
-  if (p.proteinas && p.proteinas.length > 0) {
-    bodyHTML += `
-      <div class="grp">
-        <div class="grp-h"><h3>${p.escolhe === 1 ? 'Escolha 1 proteína' : 'Escolha 2 proteínas'}</h3><span id="cntP"></span></div>
-        <div class="opts one" id="optP">${p.proteinas.map(n => optBtn('p', n)).join('')}</div>
-      </div>`;
-  }
+  let bodyHTML = `
+    <div class="grp">
+      <div class="grp-h"><h3>${p.escolhe === 1 ? 'Escolha 1 proteína' : 'Escolha 2 proteínas'}</h3><span id="cntP"></span></div>
+      <div class="opts one" id="optP">${p.proteinas.map(n => optBtn('p', n)).join('')}</div>
+    </div>`;
 
   subcatsDoPrato.forEach(sub => {
     const isChecklist = sub.exibicao === 'checklist';
@@ -811,7 +1110,7 @@ function syncBuilder() {
 
   $('#bQty').textContent = d.qty;
   const add = $('#addBtn');
-  const faltaP = p.proteinas.length > 0 ? p.escolhe - d.proteinas.length : 0;
+  const faltaP = p.escolhe - d.proteinas.length;
 
   let faltaChecklist = false;
   (d.subcategorias || []).forEach(sub => {
@@ -931,7 +1230,7 @@ $('#bFoot').addEventListener('click', e => {
 
 function tryAdd() {
   const d = draft;
-  if (d.plano.proteinas.length > 0 && d.proteinas.length < d.plano.escolhe) return;
+  if (d.proteinas.length < d.plano.escolhe) return;
 
   let faltas = [];
   (d.subcategorias || []).forEach(sub => {
@@ -1038,6 +1337,7 @@ function updateBar(bump) {
   $('#barCount').textContent = n === 1 ? 'item' : 'itens';
   setMoney($('#barTotal'), total());
   bar.classList.toggle('show', n > 0 && !current);
+  if (bump) { bar.classList.remove('bump'); void badge.offsetWidth; badge.classList.add('bump'); }
 }
 
 function lineHTML(it) {
@@ -1048,7 +1348,7 @@ function lineHTML(it) {
 
   const det = it.kind === 'prato'
     ? `<ul>
-        ${it.proteinas.length ? `<li>${esc(it.proteinas.join(' + '))}</li>` : ''}
+        <li>${esc(it.proteinas.join(' + '))}</li>
         ${subHTML}
         ${it.obs ? `<li>Obs.: ${esc(it.obs)}</li>` : ''}
       </ul>` : '<ul></ul>';
@@ -1292,6 +1592,7 @@ async function sendOrder() {
   const pag = { pix: 'Pix', cartao: 'Cartão', dinheiro: 'Dinheiro' }[form.pag];
   const ent = form.modo === 'entregar';
 
+  // Cabeçalho duplex: data e hora alinhados à direita
   let msg = `*RANCHARIA*                     ${dataExtenso}\n`;
   msg += `                                ${horaExtenso}\n`;
   msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
@@ -1304,12 +1605,13 @@ async function sendOrder() {
 
   msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
 
+  // Itens: comida com espaçamento; bebidas em sequência sem quebra extra
   const comidas = cart.filter(it => it.kind === 'prato');
   const bebidas = cart.filter(it => it.kind !== 'prato');
 
   comidas.forEach((it, idx) => {
     msg += `${it.qty}x ${it.nome} — ${brl(itemTotal(it))}\n`;
-    if (it.proteinas.length) msg += `  • Proteína: ${it.proteinas.join(' + ')}\n`;
+    msg += `  • Proteína: ${it.proteinas.join(' + ')}\n`;
     if (it.subResumo && it.subResumo.length) {
       it.subResumo.forEach(sr => {
         msg += `  • ${sr.nome}: ${sr.itens.join(', ')}\n`;
@@ -1377,11 +1679,34 @@ $('#sobre').textContent = CONFIG.sobre;
 $('#horas').innerHTML = CONFIG.horarios.map(([d, h]) => `<div class="hr-row"><span>${esc(d)}</span><b>${esc(h)}</b></div>`).join('');
 $('#faq').innerHTML = CONFIG.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
 
+/* MODO PRINT: 5 CLIQUES NA LOGO */
+let logoClicks = 0;
+$('.brand').addEventListener('click', () => {
+  if (document.body.classList.contains('print-mode')) {
+    document.body.classList.remove('print-mode');
+    logoClicks = 0;
+    return;
+  }
+  logoClicks++;
+  if (logoClicks >= 5) {
+    document.body.classList.add('print-mode');
+    logoClicks = 0;
+  }
+});
+document.addEventListener('click', e => {
+  if (!e.target.closest('.brand')) logoClicks = 0;
+}, true);
+$('#heroBrand').addEventListener('click', () => {
+  if (document.body.classList.contains('print-mode')) {
+    document.body.classList.remove('print-mode');
+  }
+});
+
 let splashDone = false;
 function hideSplash() {
   if (splashDone) return; splashDone = true;
   $('#splash').classList.add('done');   document.body.classList.add('ready');   document.body.classList.remove('lock');   $$('.plate.first-card').forEach((c, i) => setTimeout(() => c.classList.add('in'), reduce ? 0 : 900 + i * 150));
-  $$('.plate.reveal').forEach(c => c.classList.add('in')); } window.addEventListener('load', () => setTimeout(hideSplash, 600));  function initReveal() {   const els = $$
+  $$('.plate.reveal').forEach(c => c.classList.add('in')); } window.addEventListener('load', () => setTimeout(hideSplash, 600));  function initReveal() {   const els =$$
 ('.reveal');
   if (!('IntersectionObserver' in window) || reduce) { els.forEach(el => el.classList.add('in')); return; }
   const io = new IntersectionObserver(list => list.forEach(en => {
@@ -1394,7 +1719,7 @@ renderPlates();
 initReveal();
 updateBar();
 
-/* ================== SINCRONIZAÇÃO TOTAL COM O PAINEL ================== */
+/* ================== SINCRONIZAÇÃO COM O PAINEL ================== */
 function aplicarCardapio(cats, prods) {
   const todos = prods;
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -1441,25 +1766,27 @@ function aplicarCardapio(cats, prods) {
       preco: Number(x.preco || 0),
       descricao: x.descricao || ''
     }))
-  })).filter(c => c.itens.length > 0);
+  })).filter(c => c.itens.length > 0); // Remove subcategorias sem itens no cardápio
 
   const catsPrato = cats.filter(c => c.exibicao === 'prato' && c.tipo !== 'item' && c.tipo !== 'bump');
-  CONFIG.planos = catsPrato.map(c => {
-    const planItem = todos.find(x => x.categoria_id === c.id && norm(x.nome) === PL);
-    const proteinas = por(c).filter(x => norm(x.nome) !== PL);
-    const preco = planItem ? Number(planItem.preco) : (proteinas[0] ? Number(proteinas[0].preco) : 15);
-    const idKey = norm(c.nome).includes('classica') ? 'classica' : norm(c.nome).includes('gourmet') ? 'duas' : norm(c.nome).includes('executivo') ? 'pf' : 'premium';
-    return {
-      id: 'c' + c.id,
-      catId: c.id,
-      titulo1: planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
-      titulo2: c.nome,
-      preco: preco,
-      escolhe: /duas|gourmet/i.test(c.nome) ? 2 : 1,
-      proteinas: proteinas.map(x => x.nome),
-      img: FOTO(idKey)
-    };
-  });
+  if (catsPrato.length) {
+    CONFIG.planos = catsPrato.map(c => {
+      const planItem = todos.find(x => x.categoria_id === c.id && norm(x.nome) === PL);
+      const proteinas = por(c).filter(x => norm(x.nome) !== PL);
+      const preco = planItem ? Number(planItem.preco) : (proteinas[0] ? Number(proteinas[0].preco) : 15);
+      const idKey = norm(c.nome).includes('classica') ? 'classica' : norm(c.nome).includes('gourmet') ? 'duas' : norm(c.nome).includes('executivo') ? 'pf' : 'premium';
+      return {
+        id: 'c' + c.id,
+        catId: c.id,
+        titulo1: planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
+        titulo2: c.nome,
+        preco: preco,
+        escolhe: /duas|gourmet/i.test(c.nome) ? 2 : 1,
+        proteinas: proteinas.map(x => x.nome),
+        img: FOTO(idKey)
+      };
+    });
+  }
 
   const catsCards = cats.filter(c => c.exibicao === 'cards' && (c.tipo === 'principal' || c.tipo === 'ambos'));
   CONFIG.cardsAvulsos = catsCards.map(c => ({
@@ -1534,7 +1861,7 @@ function aplicarCardapio(cats, prods) {
       get('categorias?select=*&order=ordem.asc,id.asc'),
       get('produtos?select=*&order=id.asc')
     ]);
-    if (c && c.length && p) {
+    if (c && c.length && p && p.length) {
       aplicarCardapio(c, p.filter(x => !x.pausado));
       renderPlates();
       renderExtras();
