@@ -451,7 +451,6 @@ body.print-mode #pratos {
   min-height: 0;
 }
 
-/* Os cards se ajustam ao tamanho do conteúdo sem esticar */
 body.print-mode .plates { 
   display: grid !important;
   grid-template-columns: 1fr 1fr !important; 
@@ -466,7 +465,6 @@ body.print-mode .plates {
 body.print-mode .plates > *:not(.plate-prato):not(.print-salad) { display: none !important; }
 body.print-mode .plates .plate-prato:nth-of-type(n+5) { display: none !important; }
 
-/* Card com altura automática e sem espaço vazio sobrando */
 body.print-mode .plate { 
   padding: 8px 8px 8px 10px; 
   border-radius: 14px;
@@ -481,7 +479,6 @@ body.print-mode .plate {
   min-height: 0;
 }
 
-/* O preço fica no topo, acima dos 2 títulos */
 body.print-mode .plate .price { 
   position: static !important;
   order: 1;
@@ -512,7 +509,6 @@ body.print-mode .plate .row > div {
   text-align: left;
 }
 
-/* Os 2 títulos vêm logo abaixo do preço */
 body.print-mode .plate .t1 { 
   font-size: 11px; 
   line-height: 1.1;
@@ -528,7 +524,6 @@ body.print-mode .plate .t2 {
   width: 100%;
 }
 
-/* Lista de proteínas */
 body.print-mode .plate ul { 
   font-size: 12.5px; 
   line-height: 1.2;
@@ -554,7 +549,6 @@ body.print-mode .plate li::before {
   left: 1px;
 }
 
-/* Imagem abaixo do último texto, alinhada à esquerda e ampliada em 20% */
 body.print-mode .plate .photo { 
   position: static !important;
   order: 3;
@@ -791,7 +785,7 @@ const CONFIG = {
   subcategorias: [],
   bebidas: [],
   cardsAvulsos: [],
-  sobre: 'A Rancharia serve pratos montados por você: escolha a proteína, capriche nas guarnições e leve a Salada Tropical incluída. Tudo em poucoso toques, direto pelo WhatsApp.',
+  sobre: 'A Rancharia serve pratos montados por você: escolha a proteína, capriche nas guarnições e leve a Salada Tropical incluída. Tudo em poucos toques, direto pelo WhatsApp.',
   horarios: [
     ['Segunda a sexta', '11h às 15h'],
     ['Sábado', '11h às 16h'],
@@ -951,13 +945,12 @@ $$('[data-close]').forEach(b => b.addEventListener('click', () => {
 
 const optBtn = (k, v, sid) => `<button type="button" class="opt" data-k="${k}" ${sid ? `data-sid="${sid}"` : ''} data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${esc(v)}</button>`;
 
-/* ABERTURA DO BUILDER */
+/* ABERTURA DO BUILDER (LAYOUT ORIGINAL CLÁSSICO) */
 function openBuilder(id, fromBump = false) {
   openedFromOrderBump = !!fromBump;
   const p = CONFIG.planos.find(x => x.id === id);
   if (!p) return;
 
-  // FILTRA SUBCATEGORIAS VINCULADAS AO PRATO E GARANTE QUE NÃO ESTEJAM VAZIAS
   const subcatsDoPrato = (CONFIG.subcategorias || []).filter(sub => {
     if (!sub.itens || !sub.itens.length) return false;
     if (!sub.parents || !sub.parents.length) return true;
@@ -987,7 +980,7 @@ function openBuilder(id, fromBump = false) {
     </div>`;
 
   subcatsDoPrato.forEach(sub => {
-    const isChecklist = sub.exibicao === 'checklist';
+    const isChecklist = sub.exibicao === 'checklist' || !sub.exibicao;
     const isMin = sub.exibicao === 'min';
 
     bodyHTML += `
@@ -997,7 +990,7 @@ function openBuilder(id, fromBump = false) {
           ${esc(sub.nome)}
           ${isChecklist && sub.max_escolha ? `<small style="font-size:12px;color:var(--muted);font-weight:400">(até ${sub.max_escolha})</small>` : ''}
         </h3>
-        <span id="cntSub_${sub.id}"></span>
+        <span id="cntSub_${sub.id}">0/${sub.max_escolha || 4}</span>
       </div>`;
 
     if (isChecklist) {
@@ -1089,7 +1082,7 @@ function syncBuilder() {
       if (decBtn) decBtn.classList.toggle('off', q === 0);
     });
 
-    if (sub.exibicao === 'checklist') {
+    if (sub.exibicao === 'checklist' || !sub.exibicao) {
       $$(`#optSub_${sub.id} .opt`).forEach(b => {
         const itemInfo = selMap[b.dataset.v];
         const on = itemInfo && (typeof itemInfo === 'object' ? itemInfo.qty > 0 : itemInfo > 0);
@@ -1114,7 +1107,7 @@ function syncBuilder() {
 
   let faltaChecklist = false;
   (d.subcategorias || []).forEach(sub => {
-    if (sub.exibicao === 'checklist' && sub.max_escolha > 0) {
+    if ((sub.exibicao === 'checklist' || !sub.exibicao) && sub.max_escolha > 0) {
       const selMap = d.subSelections[sub.id] || {};
       const countItens = Object.values(selMap).reduce((s, v) => s + (typeof v === 'object' ? v.qty : v), 0);
       if (countItens === 0 && sub.itens.length > 0) {
@@ -1234,7 +1227,7 @@ function tryAdd() {
 
   let faltas = [];
   (d.subcategorias || []).forEach(sub => {
-    if (sub.exibicao === 'checklist' && sub.max_escolha > 0) {
+    if ((sub.exibicao === 'checklist' || !sub.exibicao) && sub.max_escolha > 0) {
       const selMap = d.subSelections[sub.id] || {};
       const countItens = Object.values(selMap).reduce((s, v) => s + (typeof v === 'object' ? v.qty : v), 0);
       const faltaN = sub.max_escolha - countItens;
@@ -1366,7 +1359,7 @@ const drinkName = (d, t, item) => [d.nome, t.nome, item].filter(Boolean).join(' 
 const drinkQty = nome => { const it = cart.find(x => x.kind === 'extra' && x.nome === nome); return it ? it.qty : 0; };
 
 function drinkHTML(d) {
-  const min = Math.min(...d.tamanhos.map(t => t.preco));
+  const min = d.apartir_de || Math.min(...d.tamanhos.map(t => t.preco));
   const n = d.tamanhos.reduce((s, t) => s + t.itens.reduce((s2, it) => s2 + drinkQty(drinkName(d, t, it)), 0), 0);
   const open = openDrink === d.id;
   const groups = d.tamanhos.map((t, ti) => {
@@ -1387,7 +1380,7 @@ function drinkHTML(d) {
     <button type="button" class="drink-h" data-a="dtoggle" data-d="${d.id}">
       <span class="d-emoji">${d.emoji}</span>
       <span class="d-txt"><b>${esc(d.nome)}</b><small>${esc(d.desc)}</small></span>
-      <span class="d-price"><i>${d.tamanhos.length > 1 ? 'a partir de' : 'preço único'}</i><b>${brl(min)}</b>${n ? `<i class="d-n">✓ ${n}</i>` : ''}</span>
+      <span class="d-price"><i>a partir de</i><b>${brl(min)}</b>${n ? `<i class="d-n">✓ ${n}</i>` : ''}</span>
       <span class="chev"></span>
     </button>
     <div class="drink-opts" ${open ? '' : 'hidden'}>${groups}</div>
@@ -1705,8 +1698,8 @@ $('#heroBrand').addEventListener('click', () => {
 let splashDone = false;
 function hideSplash() {
   if (splashDone) return; splashDone = true;
-  $('#splash').classList.add('done');   document.body.classList.add('ready');   document.body.classList.remove('lock');   $$('.plate.first-card').forEach((c, i) => setTimeout(() => c.classList.add('in'), reduce ? 0 : 900 + i * 150));
-  $$('.plate.reveal').forEach(c => c.classList.add('in')); } window.addEventListener('load', () => setTimeout(hideSplash, 600));  function initReveal() {   const els =$$
+  $('#splash').classList.add('done'); document.body.classList.add('ready'); document.body.classList.remove('lock'); $$('.plate.first-card').forEach((c, i) => setTimeout(() => c.classList.add('in'), reduce ? 0 : 900 + i * 150));
+  $$('.plate.reveal').forEach(c => c.classList.add('in')); } window.addEventListener('load', () => setTimeout(hideSplash, 600)); function initReveal() { const els =$$
 ('.reveal');
   if (!('IntersectionObserver' in window) || reduce) { els.forEach(el => el.classList.add('in')); return; }
   const io = new IntersectionObserver(list => list.forEach(en => {
@@ -1735,6 +1728,8 @@ function aplicarCardapio(cats, prods) {
     c.max_escolha = j.max_escolha !== undefined ? Number(j.max_escolha) : 4;
     c.parents = j.parents || c.parents || [];
     c.item_order = j.item_order || [];
+    c.substituto = j.substituto || '';
+    c.apartir_de = j.apartir_de !== undefined ? Number(j.apartir_de) : 0;
   });
 
   const por = c => {
@@ -1760,13 +1755,15 @@ function aplicarCardapio(cats, prods) {
     exibicao: c.exibicao,
     max_escolha: c.max_escolha,
     parents: c.parents,
+    substituto: c.substituto,
+    apartir_de: c.apartir_de,
     itens: por(c).filter(x => norm(x.nome) !== PL).map(x => ({
       id: x.id,
       nome: x.nome,
       preco: Number(x.preco || 0),
       descricao: x.descricao || ''
     }))
-  })).filter(c => c.itens.length > 0); // Remove subcategorias sem itens no cardápio
+  })).filter(c => c.itens.length > 0);
 
   const catsPrato = cats.filter(c => c.exibicao === 'prato' && c.tipo !== 'item' && c.tipo !== 'bump');
   if (catsPrato.length) {
@@ -1829,8 +1826,9 @@ function aplicarCardapio(cats, prods) {
         planoId: 'c' + c.id,
         preco: precoBase,
         tamanhos: [{ nome: '', preco: precoBase, itens: [c.nome] }],
-        desc: proteinas.map(x => x.nome).join(', '),
-        emoji: '🍽️'
+        desc: c.substituto || proteinas.map(x => x.nome).join(', '),
+        emoji: '🍽️',
+        apartir_de: c.apartir_de
       };
     }
 
@@ -1848,8 +1846,9 @@ function aplicarCardapio(cats, prods) {
       lugar: c.tipo,
       nome,
       tamanhos: tam,
-      desc: [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
-      emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : /refri|bebida/.test(n) ? '🥤' : /sobremes|doce/.test(n) ? '🍰' : /porc|frit|batata/.test(n) ? '🍟' : '✨'
+      desc: c.substituto || [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
+      emoji: /cerv/.test(n) ? '🍺' : /suco/.test(n) ? '🧃' : /refri|bebida/.test(n) ? '🥤' : /sobremes|doce/.test(n) ? '🍰' : /porc|frit|batata/.test(n) ? '🍟' : '✨',
+      apartir_de: c.apartir_de
     };
   }).filter(d => d.tamanhos.length > 0 || d.tipo === 'prato');
 }
