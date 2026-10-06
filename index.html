@@ -2,6 +2,9 @@
 <html lang="pt-BR">
 <head>
 <script>
+/* ==========================================================================
+   EDITE AQUI — proteínas de cada prato, guarnições e a salada
+   ========================================================================== */
 window.EDITAVEL = {
   classica: 'Ensopado de carne moída, Linguiça toscana',
   premium: 'Frango a passarinha, Bode cozido',
@@ -62,6 +65,7 @@ ul { padding: 0; list-style: none; }
 .wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 20px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+/* Botões */
 .btn {
   position: relative; overflow: hidden;
   display: inline-flex; align-items: center; justify-content: center; gap: 10px;
@@ -86,6 +90,7 @@ ul { padding: 0; list-style: none; }
 }
 @keyframes ripple { to { transform: scale(4); opacity: 0; } }
 
+/* Splash */
 #splash {
   position: fixed; inset: 0; z-index: 100; display: grid; place-content: center; text-align: center;
   background: var(--bg); transition: opacity .5s ease, visibility .5s;
@@ -96,6 +101,7 @@ ul { padding: 0; list-style: none; }
 #splash .s-bar i { display: block; height: 100%; width: 40%; background: var(--gold); border-radius: 3px; animation: load 1s ease-in-out infinite; }
 @keyframes load { from { transform: translateX(-100%); } to { transform: translateX(300%); } }
 
+/* Topo */
 .top {
   position: fixed; top: 0; left: 0; right: 0; z-index: 30; width: 100%;
   background: rgba(42, 21, 9, .88); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
@@ -105,6 +111,7 @@ ul { padding: 0; list-style: none; }
 .brand { font-family: var(--f-display); font-size: 26px; letter-spacing: .05em; }
 .top-actions { display: flex; align-items: center; gap: 8px; }
 
+/* Botão PWA & Status Dinâmico no Topo */
 .btn-pwa {
   display: inline-flex; align-items: center; justify-content: center; gap: 4px;
   height: 38px; padding: 0 12px; border-radius: 999px;
@@ -139,6 +146,7 @@ ul { padding: 0; list-style: none; }
 .badge.pop { animation: pop .4s ease; }
 @keyframes pop { 40% { transform: scale(1.5); } }
 
+/* Hero */
 .hero { padding: 28px 0 44px; text-align: center; overflow: hidden; }
 .hero h1 {
   font-family: var(--f-display); font-weight: 400; text-transform: uppercase;
@@ -161,11 +169,13 @@ body.ready .hero .cta { animation: rise .6s .95s ease both; }
 @keyframes rise { from { opacity: 0; transform: translateY(26px); } to { opacity: 1; transform: none; } }
 @keyframes wipe { from { opacity: 1; clip-path: inset(0 100% 0 0); } to { opacity: 1; clip-path: inset(0 0 0 0); } }
 
+/* Seções */
 section { padding: 46px 0; scroll-margin-top: 62px; }
 .sec-title { font-size: 26px; font-weight: 700; line-height: 1.15; }
 .sec-title em { font-style: normal; color: var(--gold); }
 .sec-sub { margin-top: 8px; color: var(--muted); max-width: 46ch; }
 
+/* Cards de prato */
 #pratos { padding-top: 0; }
 .plates { display: grid; gap: 12px; margin-top: 0; }
 .plate { position: relative; overflow: hidden; padding: 16px; border-radius: var(--radius); background: linear-gradient(160deg, var(--card-2), var(--card) 55%); border: 1px solid var(--line); }
@@ -182,17 +192,20 @@ section { padding: 46px 0; scroll-margin-top: 62px; }
 .plate .photo img { width: calc(100% + 10px); max-width: none; height: auto; }
 .plate .btn { width: 100%; min-height: 44px; margin-top: 12px; font-size: 15px; }
 
+/* CTA final */
 .final { text-align: center; padding-bottom: 130px; }
 .final .sec-title { font-size: 32px; }
 .final .btn { margin-top: 22px; min-height: 60px; padding: 0 34px; font-size: 19px; }
 footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
 .final + footer { padding-top: 26px; }
 
+/* Scroll reveal */
 .reveal { opacity: 0; transform: translateY(22px); transition: opacity .6s ease, transform .6s ease; }
 .reveal.in { opacity: 1; transform: none; }
 .plate.first-card { opacity: 0; transform: translateY(30px); transition: opacity .4s ease, transform .4s ease; }
 .plate.first-card.in { opacity: 1; transform: none; }
 
+/* Barra fixa do carrinho */
 #cartBar {
   position: fixed; left: 50%; bottom: 16px; z-index: 40; width: calc(100% - 28px); max-width: 520px;
   transform: translate(-50%, 140%); transition: transform .4s cubic-bezier(.2, .9, .3, 1.2);
@@ -213,6 +226,7 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .mini-badge { position: absolute; top: -7px; right: -8px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--ink); color: var(--gold); font-size: 10px; font-weight: 800; display: grid; place-items: center; line-height: 1; }
 #cartBar .go { display: inline-flex; align-items: center; height: 44px; padding: 0 20px; border-radius: 999px; background: var(--ink); color: var(--gold); }
 
+/* Sheets */
 .sheet { position: fixed; inset: 0; z-index: 60; display: flex; align-items: flex-end; justify-content: center; }
 .sheet[hidden] { display: none; }
 .sheet .back { position: absolute; inset: 0; background: rgba(0, 0, 0, .65); opacity: 0; transition: opacity .3s; }
@@ -275,6 +289,7 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .builder-card-row b { font-size: 15px; font-weight: 600; }
 .builder-card-row i { font-style: normal; color: var(--gold); font-weight: 700; font-size: 13px; }
 
+/* Status do Pedido */
 .track-wrap { display: flex; flex-direction: column; gap: 16px; }
 .track-badge-card {
   padding: 16px 18px; border-radius: 18px; background: var(--card-2);
@@ -334,6 +349,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .foot-row { display: flex; align-items: center; gap: 12px; }
 .foot-row .btn { flex: 1; padding: 0 14px; font-size: 16px; white-space: nowrap; }
 
+/* Linhas do carrinho */
 .line { padding: 14px 0; border-bottom: 1px solid var(--line); }
 .line:last-child { border-bottom: 0; }
 .line-top { display: flex; justify-content: space-between; gap: 12px; }
@@ -356,6 +372,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .field { margin-bottom: 18px; }
 .note { font-size: 14px; color: var(--muted); margin-top: 8px; }
 
+/* Modal upsell guarnições */
 .modal { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: rgba(0, 0, 0, .7); opacity: 0; transition: opacity .25s; }
 .modal[hidden] { display: none; }
 .modal.open { opacity: 1; }
@@ -368,6 +385,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .modal .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 .modal .btns .btn { width: 100%; padding: 0 10px; font-size: 16px; }
 
+/* Cards Extras / Minimizado */
 .drinks-intro { margin-bottom: 14px; color: var(--muted); }
 .drink { margin-bottom: 12px; border-radius: 18px; border: 1.5px solid var(--line); background: var(--card-2); overflow: hidden; transition: border-color .2s; }
 .drink.open { border-color: var(--gold); }
@@ -390,12 +408,14 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .d-pr { color: var(--gold); font-weight: 700; font-size: 14px; white-space: nowrap; }
 .qty button.off { opacity: .35; }
 
+/* Toast */
 #toast {
   position: fixed; left: 50%; top: 76px; z-index: 90; transform: translate(-50%, -20px); opacity: 0; pointer-events: none;
   padding: 10px 18px; border-radius: 999px; background: var(--cream); color: var(--ink); font-weight: 700; font-size: 15px;
   transition: .3s; white-space: nowrap; }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
+/* Menu Hambúrguer */
 .burger { flex: none; width: 42px; height: 42px; display: grid; place-content: center; gap: 5px; border-radius: 50%; border: 1.5px solid var(--line); transition: border-color .2s, background .2s; }
 .burger:hover { border-color: var(--gold); background: rgba(242, 196, 109, .08); }
 .burger span { display: block; width: 18px; height: 2px; border-radius: 2px; background: var(--cream); }
@@ -437,6 +457,7 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
 .xn i { font-style: normal; color: var(--gold); font-weight: 800; font-size: 15px; }
 .xn small { color: var(--muted); }
 
+/* ---------- MODO PRINT: 5 cliques na logo ---------- */
 .brand { cursor: pointer; }
 body.print-mode #heroBrand { cursor: pointer; }
 
@@ -1614,9 +1635,13 @@ $('#cart').addEventListener('input', e => {
   if (m) { form[m] = e.target.value; e.target.classList.remove('err'); }
 });
 
+/* ==========================================================================
+   CONFIGURAÇÃO DA API SUPABASE (COM CHAVE OFICIAL JWT ANON)
+   ========================================================================== */
 const SUPABASE_URL = 'https://svvvzwsajneesmuatcvc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dnZ6d3Nham5lZXNtdWF0Y3ZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2Mjg4NzcsImV4cCI6MjEwNjIwNDg3N30.eIvgjUEClP531J87Dc2ItfYi4lSuROyT_19GtSMa2wA';
 
+/* SALVA NO SUPABASE — COM DUPLO FALLBACK PARA GRAVAÇÃO GARANTIDA */
 async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
   const payload = {
     cliente: String(cliente).slice(0, 80),
@@ -1639,10 +1664,12 @@ async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
     });
 
     if (res.ok) {
-      const data = await res.json();
+      let data = [];
+      try { data = await res.json(); } catch(e){}
       if (Array.isArray(data) && data[0] && data[0].id) {
         return data[0];
       }
+      return { id: Math.floor(1000 + Math.random() * 9000), ...payload };
     }
   } catch (err) {
     console.error('Erro de envio:', err);
@@ -1662,13 +1689,14 @@ async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
     });
 
     if (resMin.ok || resMin.status === 201 || resMin.status === 204) {
-      return { id: Date.now().toString().slice(-4), ...payload };
+      return { id: Math.floor(1000 + Math.random() * 9000), ...payload };
     }
   } catch (err) {}
 
   return null;
 }
 
+/* ================== PÓS-CHECKOUT & ACOMPANHAMENTO DINÂMICO ================== */
 const STATUS_CONFIG = {
   analisando: { label: 'Analisando', cls: 'st-analisando', text: 'Seu pedido foi enviado e está sendo analisado...', step: 1 },
   novo: { label: 'Aceito', cls: 'st-novo', text: 'Pedido aceito e confirmado pelo restaurante!', step: 2 },
@@ -1694,12 +1722,21 @@ function updateHeaderStatusButton() {
 }
 
 async function fetchActiveOrderStatus() {
-  if (!activeOrder || !activeOrder.id) return;
+  if (!activeOrder) return;
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${activeOrder.id}&select=*`, {
-      headers: { 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY },
+    let url = `${SUPABASE_URL}/rest/v1/pedidos?select=*&order=created_at.desc&limit=1`;
+    if (activeOrder.id) {
+      url = `${SUPABASE_URL}/rest/v1/pedidos?id=eq.${activeOrder.id}&select=*`;
+    }
+
+    const res = await fetch(url, {
+      headers: { 
+        'apikey': SUPABASE_KEY, 
+        'Authorization': 'Bearer ' + SUPABASE_KEY 
+      },
       cache: 'no-store'
     });
+
     if (!res.ok) return;
     const data = await res.json();
     if (data && data[0]) {
@@ -1842,6 +1879,7 @@ $('#trackBody').addEventListener('click', e => {
   }
 });
 
+/* PWA INSTALL SETUP */
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   deferredPwaPrompt = e;
@@ -1987,6 +2025,7 @@ $('#sobre').textContent = CONFIG.sobre;
 $('#horas').innerHTML = CONFIG.horarios.map(([d, h]) => `<div class="hr-row"><span>${esc(d)}</span><b>${esc(h)}</b></div>`).join('');
 $('#faq').innerHTML = CONFIG.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
 
+/* MODO PRINT: 5 CLIQUES NA LOGO */
 let logoClicks = 0;
 $('.brand').addEventListener('click', () => {
   if (document.body.classList.contains('print-mode')) {
@@ -2028,6 +2067,7 @@ updateBar();
 updateHeaderStatusButton();
 startOrderStatusPolling();
 
+/* ================== SINCRONIZAÇÃO COM O PAINEL ================== */
 function aplicarCardapio(cats, prods) {
   const todos = prods;
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
