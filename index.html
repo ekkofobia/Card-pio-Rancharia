@@ -126,6 +126,7 @@ ul { padding: 0; list-style: none; }
   font-size: 12.5px; font-weight: 800; text-transform: uppercase; letter-spacing: .02em;
   transition: transform .2s, box-shadow .2s;
 }
+.btn-track-status.st-analisando { background: #fef08a; color: #854d0e; }
 .btn-track-status.st-novo { background: #fff1e8; color: #d9480f; }
 .btn-track-status.st-preparando { background: #dce8fa; color: #2b5ca8; }
 .btn-track-status.st-pronto { background: #dcfce7; color: #15803d; }
@@ -699,11 +700,13 @@ body.print-mode .print-salad small {
   <div class="wrap">
     <span class="brand">RANCHARIA</span>
     <div class="top-actions">
+      <!-- Botão de Acompanhar Pedido com cor dinâmica pelo status -->
       <button class="btn-track-status" id="btnHeaderTrack" style="display:none" type="button" aria-label="Acompanhar Pedido">
         <span class="status-dot">●</span>
         <span id="txtHeaderStatus">Pedido</span>
       </button>
 
+      <!-- Botão para Baixar e virar PWA -->
       <button class="btn-pwa" id="btnInstallPwa" type="button" aria-label="Baixar App" title="Instalar aplicativo">
         <span>↓</span><span>App</span>
       </button>
@@ -731,6 +734,7 @@ body.print-mode .print-salad small {
     </div>
   </section>
 
+  <!-- Seção de Acompanhamentos/Bebidas do ecrã inicial -->
   <section id="extras" hidden>
     <div class="wrap">
       <h2 class="sec-title">Acompanhamentos e <em>Bebidas</em></h2>
@@ -1646,7 +1650,7 @@ $('#cart').addEventListener('input', e => {
 const SUPABASE_URL = 'https://svvvzwsajneesmuatcvc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ARLDqBsmhhhfOUp6I2zKiw_9G7pQ5_O';
 
-/* ENVIO GARANTIDO COM RETURN MINIMAL PARA NÃO BARRAR NO RLS */
+/* SALVA E RETORNA A REPRESENTAÇÃO PARA CAPTURAR O ID DO PEDIDO */
 async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
@@ -1654,7 +1658,7 @@ async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
       headers: { 
         'apikey': SUPABASE_KEY, 
         'Content-Type': 'application/json', 
-        'Prefer': 'return=minimal' 
+        'Prefer': 'return=representation' 
       },
       body: JSON.stringify({ 
         cliente: String(cliente).slice(0, 80), 
@@ -1663,19 +1667,22 @@ async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
       }),
       keepalive: true
     });
-    return res.ok || res.status === 201 || res.status === 204;
-  } catch (err) {
-    return true;
-  }
+    if (res.ok) {
+      const data = await res.json();
+      return Array.isArray(data) && data[0] ? data[0] : null;
+    }
+  } catch (err) {}
+  return null;
 }
 
-/* ================== PÓS-CHECKOUT & ACOMPANHAMENTO ================== */
+/* ================== PÓS-CHECKOUT & ACOMPANHAMENTO DINÂMICO ================== */
 const STATUS_CONFIG = {
-  novo: { label: 'Aceito', cls: 'st-novo', text: 'Pedido recebido com sucesso!', step: 1 },
-  preparando: { label: 'Preparando', cls: 'st-preparando', text: 'Seu prato está sendo preparado na cozinha.', step: 2 },
-  pronto: { label: 'Pronto', cls: 'st-pronto', text: 'Pedido pronto para entrega ou retirada!', step: 3 },
-  saiu: { label: 'Saiu p/ entrega', cls: 'st-pronto', text: 'O entregador já está a caminho.', step: 4 },
-  entregue: { label: 'Entregue', cls: 'st-entregue', text: 'Pedido concluído. Bom apetite!', step: 5 },
+  analisando: { label: 'Analisando', cls: 'st-analisando', text: 'Seu pedido foi enviado e está sendo analisado...', step: 1 },
+  novo: { label: 'Aceito', cls: 'st-novo', text: 'Pedido aceito e confirmado pelo restaurante!', step: 2 },
+  preparando: { label: 'Preparando', cls: 'st-preparando', text: 'Seu prato está sendo preparado na cozinha com capricho.', step: 3 },
+  pronto: { label: 'Pronto', cls: 'st-pronto', text: 'Pedido pronto para entrega ou retirada!', step: 4 },
+  saiu: { label: 'Saiu p/ entrega', cls: 'st-pronto', text: 'O entregador já está a caminho da sua localização.', step: 5 },
+  entregue: { label: 'Entregue', cls: 'st-entregue', text: 'Pedido concluído. Bom apetite!', step: 6 },
   cancelado: { label: 'Cancelado', cls: 'st-cancelado', text: 'Este pedido foi cancelado.', step: 0 }
 };
 
@@ -1686,8 +1693,8 @@ function updateHeaderStatusButton() {
     btn.style.display = 'none';
     return;
   }
-  const st = activeOrder.status || 'novo';
-  const cfg = STATUS_CONFIG[st] || STATUS_CONFIG.novo;
+  const st = activeOrder.status || 'analisando';
+  const cfg = STATUS_CONFIG[st] || STATUS_CONFIG.analisando;
   btn.style.display = 'inline-flex';
   btn.className = `btn-track-status ${cfg.cls}`;
   $('#txtHeaderStatus').textContent = cfg.label;
@@ -1696,15 +1703,23 @@ function updateHeaderStatusButton() {
 async function fetchActiveOrderStatus() {
   if (!activeOrder) return;
   try {
-    const query = activeOrder.id ? `id=eq.${activeOrder.id}` : `cliente=eq.${encodeURIComponent(activeOrder.cliente)}`;
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?${query}&select=*&order=created_at.desc&limit=1`, {
-      headers: { 'apikey': SUPABASE_KEY }
+    let url = `${SUPABASE_URL}/rest/v1/pedidos?select=*&order=created_at.desc&limit=1`;
+    if (activeOrder.id) {
+      url = `${SUPABASE_URL}/rest/v1/pedidos?id=eq.${activeOrder.id}&select=*`;
+    } else {
+      url = `${SUPABASE_URL}/rest/v1/pedidos?cliente=eq.${encodeURIComponent(activeOrder.cliente)}&select=*&order=created_at.desc&limit=1`;
+    }
+
+    const res = await fetch(url, {
+      headers: { 'apikey': SUPABASE_KEY },
+      cache: 'no-store'
     });
     if (!res.ok) return;
     const data = await res.json();
     if (data && data[0]) {
+      const novoStatus = data[0].status || 'novo';
       activeOrder.id = data[0].id;
-      activeOrder.status = data[0].status;
+      activeOrder.status = novoStatus;
       localStorage.setItem(KEY_LAST_ORDER, JSON.stringify(activeOrder));
       updateHeaderStatusButton();
       if (current && current.id === 'postCheckout') {
@@ -1718,20 +1733,20 @@ function startOrderStatusPolling() {
   clearInterval(trackPollInterval);
   if (activeOrder && activeOrder.status !== 'entregue' && activeOrder.status !== 'cancelado') {
     fetchActiveOrderStatus();
-    trackPollInterval = setInterval(fetchActiveOrderStatus, 6000);
+    trackPollInterval = setInterval(fetchActiveOrderStatus, 4000);
   }
 }
 
 function renderPostCheckoutContent() {
   if (!activeOrder) return;
-  const st = activeOrder.status || 'novo';
-  const cfg = STATUS_CONFIG[st] || STATUS_CONFIG.novo;
+  const st = activeOrder.status || 'analisando';
+  const cfg = STATUS_CONFIG[st] || STATUS_CONFIG.analisando;
   const curStep = cfg.step;
 
   $('#trackSubtitle').textContent = cfg.text;
 
   const isEntrega = (activeOrder.detalhes || '').includes('ENTREGA');
-  const labelPasso4 = isEntrega ? 'Saiu pra Entrega' : 'Pronto para Retirada';
+  const labelPasso5 = isEntrega ? 'Saiu pra Entrega' : 'Pronto para Retirada';
 
   $('#trackBody').innerHTML = `
     <div class="track-wrap">
@@ -1746,26 +1761,31 @@ function renderPostCheckoutContent() {
       <div class="track-timeline">
         <div class="track-step ${curStep >= 1 ? (curStep === 1 ? 'current' : 'done') : ''}">
           <span class="step-dot">${curStep > 1 ? '✓' : '1'}</span>
-          <div class="step-info"><b>Pedido Aceito</b><small>Recebido e confirmado pelo restaurante</small></div>
+          <div class="step-info"><b>Analisando</b><small>Aguardando confirmação do restaurante</small></div>
         </div>
 
         <div class="track-step ${curStep >= 2 ? (curStep === 2 ? 'current' : 'done') : ''}">
           <span class="step-dot">${curStep > 2 ? '✓' : '2'}</span>
-          <div class="step-info"><b>Em Preparo</b><small>Cozinhando com capricho</small></div>
+          <div class="step-info"><b>Pedido Aceito</b><small>Confirmado e enviado para a cozinha</small></div>
         </div>
 
         <div class="track-step ${curStep >= 3 ? (curStep === 3 ? 'current' : 'done') : ''}">
           <span class="step-dot">${curStep > 3 ? '✓' : '3'}</span>
-          <div class="step-info"><b>Pronto</b><small>Embalado e finalizado</small></div>
+          <div class="step-info"><b>Preparando</b><small>Cozinhando com capricho</small></div>
         </div>
 
         <div class="track-step ${curStep >= 4 ? (curStep === 4 ? 'current' : 'done') : ''}">
           <span class="step-dot">${curStep > 4 ? '✓' : '4'}</span>
-          <div class="step-info"><b>${labelPasso4}</b><small>${isEntrega ? 'A caminho da sua localização' : 'Disponível no balcão'}</small></div>
+          <div class="step-info"><b>Pronto</b><small>Embalado e finalizado</small></div>
         </div>
 
-        <div class="track-step ${curStep >= 5 ? 'done' : ''}">
-          <span class="step-dot">${curStep >= 5 ? '✓' : '5'}</span>
+        <div class="track-step ${curStep >= 5 ? (curStep === 5 ? 'current' : 'done') : ''}">
+          <span class="step-dot">${curStep > 5 ? '✓' : '5'}</span>
+          <div class="step-info"><b>${labelPasso5}</b><small>${isEntrega ? 'A caminho da sua localização' : 'Disponível no balcão'}</small></div>
+        </div>
+
+        <div class="track-step ${curStep >= 6 ? 'done' : ''}">
+          <span class="step-dot">${curStep >= 6 ? '✓' : '6'}</span>
           <div class="step-info"><b>Entregue</b><small>Aproveite sua refeição!</small></div>
         </div>
       </div>
@@ -1936,7 +1956,7 @@ async function sendOrder() {
   msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `    CNPJ: 12.345.678/0001-90\n`;
 
-  await salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100, msg);
+  const pedidoCriado = await salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100, msg);
 
   if (btnSend) {
     btnSend.disabled = false;
@@ -1944,11 +1964,11 @@ async function sendOrder() {
   }
 
   activeOrder = {
-    id: null,
+    id: pedidoCriado ? pedidoCriado.id : null,
     cliente: form.nome.trim(),
     total: total(),
     detalhes: msg,
-    status: 'novo',
+    status: 'analisando',
     created_at: new Date().toISOString()
   };
   localStorage.setItem(KEY_LAST_ORDER, JSON.stringify(activeOrder));
@@ -2163,7 +2183,7 @@ function aplicarCardapio(cats, prods) {
 
 (async function carregarCardapio() {
   try {
-    const get = u => fetch(`${SUPABASE_URL}/rest/v1/${u}`, { headers: { apikey: SUPABASE_KEY } }).then(r => r.json());
+    const get = u => fetch(`${SUPABASE_URL}/rest/v1/${u}`, { headers: { apikey: SUPABASE_KEY }, cache: 'no-store' }).then(r => r.json());
     const [c, p] = await Promise.all([
       get('categorias?select=*&order=ordem.asc,id.asc'),
       get('produtos?select=*&order=id.asc')
@@ -2253,7 +2273,10 @@ document.addEventListener('click', e => {
 
 async function checarLoja() {
   try {
-    const r = await fetch(`${SUPABASE_URL}/rest/v1/categorias?select=id&nome=eq.__loja_fechada`, { headers: { apikey: SUPABASE_KEY } });
+    const r = await fetch(`${SUPABASE_URL}/rest/v1/categorias?select=id&nome=eq.__loja_fechada`, { 
+      headers: { apikey: SUPABASE_KEY },
+      cache: 'no-store'
+    });
     if (!r.ok) return;
     const json = await r.json();
     if (Array.isArray(json)) setLoja(json.length > 0);
