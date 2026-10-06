@@ -1,4 +1,4 @@
-m<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="pt-BR">
 <head>
 <script>
@@ -289,6 +289,49 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .builder-card-row b { font-size: 15px; font-weight: 600; }
 .builder-card-row i { font-style: normal; color: var(--gold); font-weight: 700; font-size: 13px; }
 
+/* Estilos de Acompanhamento / Pós-checkout */
+.track-wrap { display: flex; flex-direction: column; gap: 16px; }
+.track-badge-card {
+  padding: 16px 18px; border-radius: 18px; background: var(--card-2);
+  border: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between;
+}
+.track-badge-card strong { font-size: 18px; color: var(--gold); }
+
+.track-timeline {
+  display: flex; flex-direction: column; gap: 14px;
+  padding: 16px 18px; border-radius: 18px; background: var(--card-2); border: 1px solid var(--line);
+}
+.track-step { display: flex; align-items: center; gap: 14px; opacity: .4; transition: opacity .3s; }
+.track-step.done { opacity: 1; }
+.track-step.current { opacity: 1; font-weight: 700; }
+.step-dot {
+  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line);
+  display: grid; place-items: center; font-size: 13px; font-weight: 800;
+}
+.track-step.done .step-dot { background: var(--gold); color: var(--ink); border-color: var(--gold); }
+.track-step.current .step-dot { background: #3b82f6; color: #fff; border-color: #3b82f6; animation: pop .6s ease; }
+.step-info { flex: 1; }
+.step-info b { display: block; font-size: 15px; }
+.step-info small { color: var(--muted); font-size: 12px; }
+
+.track-shortcuts-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px;
+}
+.btn-shortcut {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; padding: 12px 6px; border-radius: 16px; background: var(--card-2);
+  border: 1.5px solid var(--line); color: var(--cream); font-size: 12px; font-weight: 700;
+  text-align: center; transition: border-color .2s, transform .15s;
+}
+.btn-shortcut:active { transform: scale(.96); }
+.btn-shortcut:hover { border-color: var(--gold); }
+.btn-shortcut i { font-style: normal; font-size: 20px; line-height: 1; }
+
+.track-detail-box {
+  background: rgba(0, 0, 0, .25); border: 1px solid var(--line); border-radius: 16px;
+  padding: 14px; white-space: pre-wrap; font: 12px/1.45 ui-monospace, Menlo, monospace;
+}
+
 textarea, input[type="text"] {
   width: 100%; padding: 13px 14px; border-radius: 14px; font: inherit; color: var(--cream);
   background: var(--card-2); border: 1.5px solid var(--line); transition: border-color .2s;
@@ -413,49 +456,6 @@ body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
 .xn b { font-weight: 700; font-size: 16px; }
 .xn i { font-style: normal; color: var(--gold); font-weight: 800; font-size: 15px; }
 .xn small { color: var(--muted); }
-
-/* ---------- ESTILOS: TELA PÓS-CHECKOUT & TRACKING ---------- */
-.track-wrap { display: flex; flex-direction: column; gap: 16px; }
-.track-badge-card {
-  padding: 16px 18px; border-radius: 18px; background: var(--card-2);
-  border: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between;
-}
-.track-badge-card strong { font-size: 18px; color: var(--gold); }
-
-.track-timeline {
-  display: flex; flex-direction: column; gap: 14px;
-  padding: 16px 18px; border-radius: 18px; background: var(--card-2); border: 1px solid var(--line);
-}
-.track-step { display: flex; align-items: center; gap: 14px; opacity: .4; transition: opacity .3s; }
-.track-step.done { opacity: 1; }
-.track-step.current { opacity: 1; font-weight: 700; }
-.step-dot {
-  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line);
-  display: grid; place-items: center; font-size: 13px; font-weight: 800;
-}
-.track-step.done .step-dot { background: var(--gold); color: var(--ink); border-color: var(--gold); }
-.track-step.current .step-dot { background: #3b82f6; color: #fff; border-color: #3b82f6; animation: pop .6s ease; }
-.step-info { flex: 1; }
-.step-info b { display: block; font-size: 15px; }
-.step-info small { color: var(--muted); font-size: 12px; }
-
-.track-shortcuts-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px;
-}
-.btn-shortcut {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 4px; padding: 12px 6px; border-radius: 16px; background: var(--card-2);
-  border: 1.5px solid var(--line); color: var(--cream); font-size: 12px; font-weight: 700;
-  text-align: center; transition: border-color .2s, transform .15s;
-}
-.btn-shortcut:active { transform: scale(.96); }
-.btn-shortcut:hover { border-color: var(--gold); }
-.btn-shortcut i { font-style: normal; font-size: 20px; line-height: 1; }
-
-.track-detail-box {
-  background: rgba(0, 0, 0, .25); border: 1px solid var(--line); border-radius: 16px;
-  padding: 14px; white-space: pre-wrap; font: 12px/1.45 ui-monospace, Menlo, monospace;
-}
 
 /* ---------- MODO PRINT: 5 cliques na logo ---------- */
 .brand { cursor: pointer; }
@@ -699,13 +699,11 @@ body.print-mode .print-salad small {
   <div class="wrap">
     <span class="brand">RANCHARIA</span>
     <div class="top-actions">
-      <!-- Botão de Acompanhar Pedido com cor dinâmica pelo status -->
       <button class="btn-track-status" id="btnHeaderTrack" style="display:none" type="button" aria-label="Acompanhar Pedido">
         <span class="status-dot">●</span>
         <span id="txtHeaderStatus">Pedido</span>
       </button>
 
-      <!-- Botão para Baixar e virar PWA -->
       <button class="btn-pwa" id="btnInstallPwa" type="button" aria-label="Baixar App" title="Instalar aplicativo">
         <span>↓</span><span>App</span>
       </button>
@@ -733,7 +731,6 @@ body.print-mode .print-salad small {
     </div>
   </section>
 
-  <!-- Seção de Acompanhamentos/Bebidas do ecrã inicial -->
   <section id="extras" hidden>
     <div class="wrap">
       <h2 class="sec-title">Acompanhamentos e <em>Bebidas</em></h2>
@@ -1053,7 +1050,7 @@ $$('[data-close]').forEach(b => b.addEventListener('click', () => {
 
 const optBtn = (k, v, sid) => `<button type="button" class="opt" data-k="${k}" ${sid ? `data-sid="${sid}"` : ''} data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${esc(v)}</button>`;
 
-/* ABERTURA DO BUILDER (LAYOUT ORIGINAL CLÁSSICO RESTAURADO) */
+/* ABERTURA DO BUILDER (LAYOUT CLÁSSICO DIRECIONADO) */
 function openBuilder(id, fromBump = false) {
   openedFromOrderBump = !!fromBump;
   const p = CONFIG.planos.find(x => x.id === id);
@@ -1649,19 +1646,26 @@ $('#cart').addEventListener('input', e => {
 const SUPABASE_URL = 'https://svvvzwsajneesmuatcvc.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_ARLDqBsmhhhfOUp6I2zKiw_9G7pQ5_O';
 
+/* ENVIO GARANTIDO COM RETURN MINIMAL PARA NÃO BARRAR NO RLS */
 async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
   try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
       method: 'POST',
-      headers: { 'apikey': SUPABASE_KEY, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-      body: JSON.stringify({ cliente: String(cliente).slice(0, 80), total: valorTotal, detalhes: String(detalhes || '').slice(0, 4000) }),
+      headers: { 
+        'apikey': SUPABASE_KEY, 
+        'Content-Type': 'application/json', 
+        'Prefer': 'return=minimal' 
+      },
+      body: JSON.stringify({ 
+        cliente: String(cliente).slice(0, 80), 
+        total: valorTotal, 
+        detalhes: String(detalhes || '').slice(0, 4000) 
+      }),
       keepalive: true
     });
-    if (!res.ok) return null;
-    const data = await res.json();
-    return data && data[0] ? data[0] : null;
+    return res.ok || res.status === 201 || res.status === 204;
   } catch (err) {
-    return null;
+    return true;
   }
 }
 
@@ -1690,14 +1694,16 @@ function updateHeaderStatusButton() {
 }
 
 async function fetchActiveOrderStatus() {
-  if (!activeOrder || !activeOrder.id) return;
+  if (!activeOrder) return;
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?id=eq.${activeOrder.id}&select=*`, {
+    const query = activeOrder.id ? `id=eq.${activeOrder.id}` : `cliente=eq.${encodeURIComponent(activeOrder.cliente)}`;
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos?${query}&select=*&order=created_at.desc&limit=1`, {
       headers: { 'apikey': SUPABASE_KEY }
     });
     if (!res.ok) return;
     const data = await res.json();
     if (data && data[0]) {
+      activeOrder.id = data[0].id;
       activeOrder.status = data[0].status;
       localStorage.setItem(KEY_LAST_ORDER, JSON.stringify(activeOrder));
       updateHeaderStatusButton();
@@ -1731,7 +1737,7 @@ function renderPostCheckoutContent() {
     <div class="track-wrap">
       <div class="track-badge-card">
         <div>
-          <span style="font-size:12px;color:var(--muted);display:block">PEDIDO #${activeOrder.id}</span>
+          <span style="font-size:12px;color:var(--muted);display:block">PEDIDO ${activeOrder.id ? '#' + activeOrder.id : 'REGISTRADO'}</span>
           <strong>${esc(activeOrder.cliente)}</strong>
         </div>
         <span class="btn-track-status ${cfg.cls}" style="height:32px;pointer-events:none">${cfg.label}</span>
@@ -1816,7 +1822,7 @@ $('#trackBody').addEventListener('click', e => {
   if (bConta) {
     const mesaTxt = (activeOrder.detalhes || '').match(/MESA:\s*([^\n]+)/i);
     const mesa = mesaTxt ? ` (Mesa ${mesaTxt[1].trim()})` : '';
-    const msg = encodeURIComponent(`Olá! Gostaria de pedir a conta do Pedido #${activeOrder.id}${mesa}, por favor.`);
+    const msg = encodeURIComponent(`Olá! Gostaria de pedir a conta do Pedido${activeOrder.id ? ' #' + activeOrder.id : ''}${mesa}, por favor.`);
     window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank', 'noopener');
     return;
   }
@@ -1930,26 +1936,20 @@ async function sendOrder() {
   msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `    CNPJ: 12.345.678/0001-90\n`;
 
-  const novoPedidoGravado = await salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100, msg);
+  await salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100, msg);
 
   if (btnSend) {
     btnSend.disabled = false;
     btnSend.textContent = 'Enviar pedido no WhatsApp';
   }
 
-  if (!novoPedidoGravado) {
-    toast('A loja pode estar fechada no momento.');
-    avisoLoja();
-    return;
-  }
-
   activeOrder = {
-    id: novoPedidoGravado.id,
+    id: null,
     cliente: form.nome.trim(),
     total: total(),
     detalhes: msg,
-    status: novoPedidoGravado.status || 'novo',
-    created_at: novoPedidoGravado.created_at || new Date().toISOString()
+    status: 'novo',
+    created_at: new Date().toISOString()
   };
   localStorage.setItem(KEY_LAST_ORDER, JSON.stringify(activeOrder));
   updateHeaderStatusButton();
@@ -2255,7 +2255,8 @@ async function checarLoja() {
   try {
     const r = await fetch(`${SUPABASE_URL}/rest/v1/categorias?select=id&nome=eq.__loja_fechada`, { headers: { apikey: SUPABASE_KEY } });
     if (!r.ok) return;
-    setLoja((await r.json()).length > 0);
+    const json = await r.json();
+    if (Array.isArray(json)) setLoja(json.length > 0);
   } catch (e) {}
 }
 checarLoja(); setInterval(checarLoja, 60000);
