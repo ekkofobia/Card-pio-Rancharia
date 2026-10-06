@@ -132,6 +132,7 @@ ul { padding: 0; list-style: none; }
 .btn-track-status.st-pronto { background: #dcfce7; color: #15803d; }
 .btn-track-status.st-entregue { background: #ececee; color: #52525b; }
 .btn-track-status.st-cancelado { background: #fee2e2; color: #b91c1c; }
+.btn-track-status.st-saiu { background: #e0f2fe; color: #0369a1; }
 
 .cart-btn {
   position: relative; display: inline-flex; align-items: center; gap: 8px;
@@ -290,46 +291,109 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .builder-card-row i { font-style: normal; color: var(--gold); font-weight: 700; font-size: 13px; }
 
 /* Status do Pedido */
-.track-wrap { display: flex; flex-direction: column; gap: 16px; }
-.track-badge-card {
-  padding: 16px 18px; border-radius: 18px; background: var(--card-2);
-  border: 1px solid var(--line); display: flex; align-items: center; justify-content: space-between;
-}
-.track-badge-card strong { font-size: 18px; color: var(--gold); }
+.track-wrap { display: flex; flex-direction: column; gap: 14px; }
+.track-empty { padding: 40px 10px; text-align: center; color: var(--muted); line-height: 1.5; }
+.track-note { font-size: 12.5px; color: var(--muted); text-align: center; line-height: 1.4; }
 
-.track-timeline {
-  display: flex; flex-direction: column; gap: 14px;
-  padding: 16px 18px; border-radius: 18px; background: var(--card-2); border: 1px solid var(--line);
+.ped-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: none; }
+.ped-chips::-webkit-scrollbar { display: none; }
+.ped-chip {
+  flex: 0 0 auto; min-width: 124px; max-width: 176px; text-align: left;
+  display: flex; flex-direction: column; gap: 3px; padding: 9px 12px; border-radius: 14px;
+  background: var(--card-2); border: 1.5px solid var(--line); color: var(--cream);
+  transition: border-color .2s, background .2s;
 }
-.track-step { display: flex; align-items: center; gap: 14px; opacity: .4; transition: opacity .3s; }
-.track-step.done { opacity: 1; }
-.track-step.current { opacity: 1; font-weight: 700; }
-.step-dot {
-  width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--line);
-  display: grid; place-items: center; font-size: 13px; font-weight: 800;
-}
-.track-step.done .step-dot { background: var(--gold); color: var(--ink); border-color: var(--gold); }
-.track-step.current .step-dot { background: #3b82f6; color: #fff; border-color: #3b82f6; animation: pop .6s ease; }
-.step-info { flex: 1; }
-.step-info b { display: block; font-size: 15px; }
-.step-info small { color: var(--muted); font-size: 12px; }
+.ped-chip b { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ped-chip small { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.ped-chip.on { border-color: var(--gold); background: rgba(242, 196, 109, .12); }
+.sdot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+.sdot.st-analisando { background: #fde047; }
+.sdot.st-novo { background: #fb923c; }
+.sdot.st-preparando { background: #60a5fa; }
+.sdot.st-pronto { background: #4ade80; }
+.sdot.st-saiu { background: #38bdf8; }
+.sdot.st-entregue { background: #a1a1aa; }
+.sdot.st-cancelado { background: #f87171; }
 
-.track-shortcuts-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 6px;
+.ped-card {
+  display: flex; flex-direction: column; gap: 18px; padding: 18px; border-radius: 22px;
+  background: var(--card-2); border: 1px solid var(--line); animation: pedIn .45s ease;
 }
+@keyframes pedIn { from { opacity: 0; transform: translateY(10px); } }
+.ped-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.ped-top small { display: block; font-size: 12px; letter-spacing: .04em; color: var(--muted); }
+.ped-top strong { font-size: 18px; color: var(--gold); }
+
+.ped-atual { display: flex; align-items: center; gap: 14px; }
+.ped-ico {
+  flex: none; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 29px; background: rgba(242, 196, 109, .15); border: 2px solid var(--gold);
+  animation: pedPulse 2.2s ease-out infinite;
+}
+@keyframes pedPulse {
+  0% { box-shadow: 0 0 0 0 rgba(242, 196, 109, .45); }
+  70% { box-shadow: 0 0 0 14px rgba(242, 196, 109, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(242, 196, 109, 0); }
+}
+.ped-atual h3 { font-size: 23px; line-height: 1.1; }
+.ped-atual p { margin-top: 4px; font-size: 14px; color: var(--muted); }
+
+.ped-bar { height: 12px; border-radius: 99px; overflow: hidden; background: rgba(0, 0, 0, .32); border: 1px solid var(--line); }
+.ped-bar i {
+  display: block; height: 100%; width: 0; border-radius: 99px;
+  background: linear-gradient(90deg, var(--gold-d), var(--gold), #fff3cf, var(--gold), var(--gold-d));
+  background-size: 250% 100%;
+  transition: width 1.1s cubic-bezier(.2, .8, .2, 1);
+  animation: pedFlow 1.8s linear infinite;
+}
+@keyframes pedFlow { to { background-position: -250% 0; } }
+.ped-bar-info { display: flex; justify-content: space-between; margin-top: 7px; font-size: 12px; font-weight: 600; color: var(--muted); }
+.ped-card.final .ped-bar i { background: #4ade80; animation: none; }
+.ped-card.final .ped-ico { border-color: #4ade80; background: rgba(74, 222, 128, .14); animation: none; }
+.ped-card.cancel .ped-ico { border-color: #f87171; background: rgba(248, 113, 113, .14); animation: none; }
+
+.ped-next {
+  display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 14px;
+  border: 1.5px dashed var(--line); color: var(--muted);
+}
+.ped-next > span { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.ped-next b { display: block; font-size: 14px; color: var(--cream); }
+.ped-next small { font-size: 12px; }
+
+.sanfona { border-radius: 18px; background: var(--card-2); border: 1px solid var(--line); overflow: hidden; }
+.sanfona-h {
+  width: 100%; display: flex; align-items: center; gap: 10px; padding: 14px 16px;
+  color: var(--cream); font-size: 15px; font-weight: 700; text-align: left;
+}
+.sanfona-h span { flex: 1; }
+.sanfona-h b { color: var(--gold); font-size: 15px; }
+.sanfona-h .chev { font-style: normal; font-size: 20px; line-height: 1; transition: transform .3s; }
+.sanfona.open .chev { transform: rotate(180deg); }
+.sanfona-b { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .32s ease; }
+.sanfona.open .sanfona-b { grid-template-rows: 1fr; }
+.sanfona-b > div { overflow: hidden; }
+.sanfona-b .track-detail-box { margin: 0 12px 12px; }
+.track-clear { align-self: center; padding: 8px 14px; font-size: 13px; font-weight: 600; color: var(--muted); text-decoration: underline; }
+
+.track-shortcuts-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-bottom: 10px; }
+.track-shortcuts-grid[hidden] { display: none; }
 .btn-shortcut {
   display: flex; flex-direction: column; align-items: center; justify-content: center;
-  gap: 4px; padding: 12px 6px; border-radius: 16px; background: var(--card-2);
-  border: 1.5px solid var(--line); color: var(--cream); font-size: 12px; font-weight: 700;
-  text-align: center; transition: border-color .2s, transform .15s;
+  gap: 4px; padding: 9px 2px; border-radius: 14px; background: var(--card-2);
+  border: 1.5px solid var(--line); color: var(--cream); font-size: 10.5px; font-weight: 700;
+  line-height: 1.1; text-align: center; transition: border-color .2s, transform .15s;
 }
-.btn-shortcut:active { transform: scale(.96); }
+.btn-shortcut:active { transform: scale(.95); }
 .btn-shortcut:hover { border-color: var(--gold); }
 .btn-shortcut i { font-style: normal; font-size: 20px; line-height: 1; }
 
 .track-detail-box {
-  background: rgba(0, 0, 0, .25); border: 1px solid var(--line); border-radius: 16px;
+  background: rgba(0, 0, 0, .25); border: 1px solid var(--line); border-radius: 14px;
   padding: 14px; white-space: pre-wrap; font: 12px/1.45 ui-monospace, Menlo, monospace;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ped-card, .ped-ico, .ped-bar i { animation: none; }
+  .ped-bar i, .sanfona-b { transition: none; }
 }
 
 textarea, input[type="text"] {
@@ -790,6 +854,13 @@ body.print-mode .print-salad small {
     </div>
     <div class="body" id="trackBody"></div>
     <div class="foot">
+      <div class="track-shortcuts-grid" id="trackShortcuts" aria-label="Atalhos úteis">
+        <button type="button" class="btn-shortcut" data-sc="bebidas"><i>🥤</i><span>Bebidas</span></button>
+        <button type="button" class="btn-shortcut" data-sc="conta"><i>💳</i><span>Pedir conta</span></button>
+        <button type="button" class="btn-shortcut" data-sc="limpar"><i>🧹</i><span>Limpar mesa</span></button>
+        <button type="button" class="btn-shortcut" data-sc="garcom"><i>🙋</i><span>Chamar garçom</span></button>
+        <button type="button" class="btn-shortcut" data-sc="loja"><i>💬</i><span>Falar c/ loja</span></button>
+      </div>
       <button type="button" class="btn btn--block" id="btnBackToMenu">Voltar ao Cardápio</button>
     </div>
   </div>
@@ -895,7 +966,6 @@ const brl = n => 'R$' + Number(n || 0).toFixed(2).replace('.', ',');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const KEY = 'rancharia_cart_v1';
-const KEY_LAST_ORDER = 'rancharia_last_order_v1';
 
 let cart = [];
 let uid = Date.now();
@@ -907,12 +977,6 @@ let lastFocus = null;
 let openedFromOrderBump = false;
 let deferredPwaPrompt = null;
 let trackPollInterval = null;
-let activeOrder = null;
-
-try {
-  const savedOrder = localStorage.getItem(KEY_LAST_ORDER);
-  if (savedOrder) activeOrder = JSON.parse(savedOrder);
-} catch(e){}
 
 const form = { nome: '', modo: 'local', mesa: '', bairro: '', rua: '', numero: '', pag: 'pix', troco: '', obs: '' };
 
@@ -1641,241 +1705,344 @@ $('#cart').addEventListener('input', e => {
 const SUPABASE_URL = 'https://svvvzwsajneesmuatcvc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dnZ6d3Nham5lZXNtdWF0Y3ZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2Mjg4NzcsImV4cCI6MjEwNjIwNDg3N30.eIvgjUEClP531J87Dc2ItfYi4lSuROyT_19GtSMa2wA';
 
-/* SALVA NO SUPABASE — COM DUPLO FALLBACK PARA GRAVAÇÃO GARANTIDA */
+/* ==========================================================================
+   PÓS-CHECKOUT: VÁRIOS PEDIDOS + SINCRONIZAÇÃO COM O PAINEL
+   ========================================================================== */
+const STATUS_FINAL = ['entregue', 'cancelado'];
+
+function novaRef() {
+  const al = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let buf;
+  try { buf = crypto.getRandomValues(new Uint8Array(12)); }
+  catch (e) { buf = Array.from({ length: 12 }, () => Math.floor(Math.random() * 256)); }
+  let r = '';
+  for (let i = 0; i < 12; i++) r += al[buf[i] % al.length];
+  return r;
+}
+
+/* Grava o pedido. Não precisa de permissão de leitura: o acompanhamento é feito pelo código (ref) */
 async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
-  const payload = {
+  const ref = novaRef();
+  const base = {
     cliente: String(cliente).slice(0, 80),
     total: Number(valorTotal),
     detalhes: String(detalhes || '').slice(0, 4000),
     status: 'novo'
   };
-
-  try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
-      method: 'POST',
-      headers: { 
-        'apikey': SUPABASE_KEY, 
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json', 
-        'Prefer': 'return=representation' 
-      },
-      body: JSON.stringify(payload),
-      cache: 'no-store'
-    });
-
-    if (res.ok) {
-      let data = [];
-      try { data = await res.json(); } catch(e){}
-      if (Array.isArray(data) && data[0] && data[0].id) {
-        return data[0];
-      }
-      return { id: Math.floor(1000 + Math.random() * 9000), ...payload };
-    }
-  } catch (err) {
-    console.error('Erro de envio:', err);
+  const tentativas = [{ ...base, ref }, base]; // 2ª: banco ainda sem a coluna "ref"
+  for (let i = 0; i < tentativas.length; i++) {
+    try {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
+        method: 'POST',
+        headers: {
+          'apikey': SUPABASE_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_KEY,
+          'Content-Type': 'application/json',
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(tentativas[i]),
+        cache: 'no-store'
+      });
+      if (res.ok) return { ref, sincroniza: i === 0 };
+      console.error('Erro ao gravar pedido:', res.status, await res.text());
+    } catch (err) { console.error('Erro de envio:', err); }
   }
-
-  try {
-    const resMin = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
-      method: 'POST',
-      headers: { 
-        'apikey': SUPABASE_KEY, 
-        'Authorization': 'Bearer ' + SUPABASE_KEY,
-        'Content-Type': 'application/json', 
-        'Prefer': 'return=minimal' 
-      },
-      body: JSON.stringify(payload),
-      cache: 'no-store'
-    });
-
-    if (resMin.ok || resMin.status === 201 || resMin.status === 204) {
-      return { id: Math.floor(1000 + Math.random() * 9000), ...payload };
-    }
-  } catch (err) {}
-
   return null;
 }
 
-/* ================== PÓS-CHECKOUT & ACOMPANHAMENTO DINÂMICO ================== */
-const STATUS_CONFIG = {
-  analisando: { label: 'Analisando', cls: 'st-analisando', text: 'Seu pedido foi enviado e está sendo analisado...', step: 1 },
-  novo: { label: 'Aceito', cls: 'st-novo', text: 'Pedido aceito e confirmado pelo restaurante!', step: 2 },
-  preparando: { label: 'Preparando', cls: 'st-preparando', text: 'Seu prato está sendo preparado na cozinha com capricho.', step: 3 },
-  pronto: { label: 'Pronto', cls: 'st-pronto', text: 'Pedido pronto para entrega ou retirada!', step: 4 },
-  saiu: { label: 'Saiu p/ entrega', cls: 'st-pronto', text: 'O entregador já está a caminho da sua localização.', step: 5 },
-  entregue: { label: 'Entregue', cls: 'st-entregue', text: 'Pedido concluído. Bom apetite!', step: 6 },
-  cancelado: { label: 'Cancelado', cls: 'st-cancelado', text: 'Este pedido foi cancelado.', step: 0 }
-};
+/* ---------- Estado dos pedidos (vários por vez) ---------- */
+const KEY_ORDERS = 'rancharia_orders_v2';
+let orders = [];
+let selectedRef = null;
+let syncErro = false;
+let comprovanteAberto = false;
+let renderSig = '';
+const pctAnterior = {};
 
+try {
+  orders = JSON.parse(localStorage.getItem(KEY_ORDERS) || '[]');
+  if (!Array.isArray(orders)) orders = [];
+  const limite = Date.now() - 24 * 3600 * 1000;
+  orders = orders.filter(o => o && o.ref && new Date(o.created_at).getTime() > limite).slice(0, 15);
+} catch (e) { orders = []; }
+selectedRef = orders[0] ? orders[0].ref : null;
+
+function saveOrders() { try { localStorage.setItem(KEY_ORDERS, JSON.stringify(orders)); } catch (e) {} }
+const ordersAtivos = () => orders.filter(o => !STATUS_FINAL.includes(o.status));
+const selOrder = () => orders.find(o => o.ref === selectedRef) || orders[0] || null;
+const codigoPedido = o => '#' + String(o.ref || '').slice(0, 4);
+const horaPedido = o => new Date(o.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+function modoPedido(o) {
+  if (o.modo) return o.modo;
+  const d = o.detalhes || '';
+  if (/MESA:/i.test(d)) return 'local';
+  if (d.includes('ENTREGA')) return 'entregar';
+  return 'retirar';
+}
+const isEntrega = o => modoPedido(o) === 'entregar';
+
+/* Etapa que o cliente enxerga (novo + ainda não impresso = analisando; impresso = aceito) */
+function chaveStatus(o) {
+  const st = o.status || 'novo';
+  if (st === 'novo') return o.impresso ? 'aceito' : 'analisando';
+  if (st === 'saiu' && !isEntrega(o)) return 'pronto';
+  return st;
+}
+
+function infoEtapa(key, o) {
+  const m = modoPedido(o);
+  const pronto = m === 'entregar'
+    ? { label: 'Pronto', short: 'Pronto', icon: '📦', desc: 'Embalado e finalizado', cls: 'st-pronto' }
+    : m === 'local'
+      ? { label: 'Pronto', short: 'Pronto', icon: '📦', desc: 'Levando até a sua mesa', cls: 'st-pronto' }
+      : { label: 'Pronto para retirada', short: 'Pronto', icon: '🛎️', desc: 'Disponível no balcão', cls: 'st-pronto' };
+  const T = {
+    analisando: { label: 'Analisando', short: 'Analisando', icon: '🕒', desc: 'Aguardando confirmação do restaurante', cls: 'st-analisando' },
+    aceito: { label: 'Pedido aceito', short: 'Aceito', icon: '✅', desc: 'Confirmado e enviado para a cozinha', cls: 'st-novo' },
+    preparando: { label: 'Preparando', short: 'Preparando', icon: '👨‍🍳', desc: 'Cozinhando com capricho', cls: 'st-preparando' },
+    pronto,
+    saiu: { label: 'Saiu pra entrega', short: 'A caminho', icon: '🛵', desc: 'A caminho da sua localização', cls: 'st-saiu' },
+    entregue: { label: 'Entregue', short: 'Entregue', icon: '🎉', desc: 'Aproveite sua refeição!', cls: 'st-entregue' },
+    cancelado: { label: 'Cancelado', short: 'Cancelado', icon: '✖️', desc: 'Este pedido foi cancelado.', cls: 'st-cancelado' }
+  };
+  return T[key] || T.analisando;
+}
+
+function fluxoPedido(o) {
+  return isEntrega(o)
+    ? ['analisando', 'aceito', 'preparando', 'pronto', 'saiu', 'entregue']
+    : ['analisando', 'aceito', 'preparando', 'pronto', 'entregue'];
+}
+
+/* ---------- Botão do topo ---------- */
 function updateHeaderStatusButton() {
   const btn = $('#btnHeaderTrack');
   if (!btn) return;
-  if (!activeOrder || !activeOrder.id) {
-    btn.style.display = 'none';
-    return;
-  }
-  const st = activeOrder.status || 'novo';
-  const cfg = STATUS_CONFIG[st] || STATUS_CONFIG.novo;
+  if (!orders.length) { btn.style.display = 'none'; return; }
+  const ativos = ordersAtivos();
+  const o = ativos[0] || orders[0];
+  const inf = infoEtapa(chaveStatus(o), o);
   btn.style.display = 'inline-flex';
-  btn.className = `btn-track-status ${cfg.cls}`;
-  $('#txtHeaderStatus').textContent = cfg.label;
+  btn.className = `btn-track-status ${inf.cls}`;
+  $('#txtHeaderStatus').textContent = ativos.length > 1 ? `${ativos.length} pedidos` : inf.short;
 }
 
-async function fetchActiveOrderStatus() {
-  if (!activeOrder) return;
+/* ---------- Sincronização (consulta só o status pelo código do pedido) ---------- */
+async function sincronizarPedidos() {
+  const alvo = orders.filter(o => o.sync && !STATUS_FINAL.includes(o.status));
+  if (!alvo.length) { clearInterval(trackPollInterval); return; }
   try {
-    let url = `${SUPABASE_URL}/rest/v1/pedidos?select=*&order=created_at.desc&limit=1`;
-    if (activeOrder.id) {
-      url = `${SUPABASE_URL}/rest/v1/pedidos?id=eq.${activeOrder.id}&select=*`;
-    }
-
-    const res = await fetch(url, {
-      headers: { 
-        'apikey': SUPABASE_KEY, 
-        'Authorization': 'Bearer ' + SUPABASE_KEY 
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/status_pedidos`, {
+      method: 'POST',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json'
       },
+      body: JSON.stringify({ refs: alvo.map(o => o.ref) }),
       cache: 'no-store'
     });
-
-    if (!res.ok) return;
-    const data = await res.json();
-    if (data && data[0]) {
-      const novoStatus = data[0].status || 'novo';
-      activeOrder.status = novoStatus;
-      localStorage.setItem(KEY_LAST_ORDER, JSON.stringify(activeOrder));
-      updateHeaderStatusButton();
-      if (current && current.id === 'postCheckout') {
-        renderPostCheckoutContent();
-      }
+    if (!res.ok) {
+      if (res.status === 404) { syncErro = true; clearInterval(trackPollInterval); renderPostCheckoutContent(); }
+      return;
     }
-  } catch(e){}
+    const linhas = await res.json();
+    syncErro = false;
+    let mudou = false;
+    (linhas || []).forEach(r => {
+      const o = orders.find(x => x.ref === r.ref);
+      if (!o) return;
+      const st = r.status || 'novo';
+      const imp = !!r.impresso;
+      if (o.status !== st || !!o.impresso !== imp) { o.status = st; o.impresso = imp; mudou = true; }
+    });
+    if (mudou) {
+      saveOrders();
+      updateHeaderStatusButton();
+      if (current && current.id === 'postCheckout') renderPostCheckoutContent();
+    }
+    if (!ordersAtivos().some(o => o.sync)) clearInterval(trackPollInterval);
+  } catch (e) {}
 }
 
 function startOrderStatusPolling() {
   clearInterval(trackPollInterval);
-  if (activeOrder && activeOrder.id && activeOrder.status !== 'entregue' && activeOrder.status !== 'cancelado') {
-    fetchActiveOrderStatus();
-    trackPollInterval = setInterval(fetchActiveOrderStatus, 3500);
+  if (orders.some(o => o.sync && !STATUS_FINAL.includes(o.status))) {
+    sincronizarPedidos();
+    trackPollInterval = setInterval(sincronizarPedidos, 3500);
   }
 }
+document.addEventListener('visibilitychange', () => { if (!document.hidden) startOrderStatusPolling(); });
 
+/* ---------- Tela "Acompanhar pedido" ---------- */
 function renderPostCheckoutContent() {
-  if (!activeOrder || !activeOrder.id) return;
-  const st = activeOrder.status || 'novo';
-  const cfg = STATUS_CONFIG[st] || STATUS_CONFIG.novo;
-  const curStep = cfg.step;
+  const body = $('#trackBody');
+  const atalhos = $('#trackShortcuts');
+  const o = selOrder();
 
-  $('#trackSubtitle').textContent = cfg.text;
+  if (!o) {
+    $('#trackSubtitle').textContent = 'Nenhum pedido ativo';
+    if (atalhos) atalhos.hidden = true;
+    body.innerHTML = '<div class="track-empty">Você ainda não fez nenhum pedido.<br>Quando fizer, acompanhe tudo por aqui.</div>';
+    return;
+  }
+  if (atalhos) atalhos.hidden = false;
 
-  const isEntrega = (activeOrder.detalhes || '').includes('ENTREGA');
-  const labelPasso5 = isEntrega ? 'Saiu pra Entrega' : 'Pronto para Retirada';
+  const sig = [selectedRef, syncErro, orders.map(x => x.ref + x.status + (x.impresso ? 1 : 0)).join('|')].join('#');
+  if (sig === renderSig) return;
+  renderSig = sig;
 
-  $('#trackBody').innerHTML = `
+  const key = chaveStatus(o);
+  const inf = infoEtapa(key, o);
+  const fluxo = fluxoPedido(o);
+  const cancelado = key === 'cancelado';
+  const idx = Math.max(0, fluxo.indexOf(key));
+  const fim = key === 'entregue';
+  const pct = cancelado ? 100 : fim ? 100 : Math.max(8, Math.round(idx / (fluxo.length - 1) * 100));
+  const proxKey = (!cancelado && !fim) ? fluxo[idx + 1] : null;
+  const prox = proxKey ? infoEtapa(proxKey, o) : null;
+
+  $('#trackSubtitle').textContent = inf.desc;
+
+  const chips = orders.length > 1 ? `
+    <div class="ped-chips" role="tablist" aria-label="Seus pedidos">
+      ${orders.map(x => {
+        const ix = infoEtapa(chaveStatus(x), x);
+        return `<button type="button" role="tab" class="ped-chip ${x.ref === o.ref ? 'on' : ''}" data-ref="${x.ref}" aria-selected="${x.ref === o.ref}">
+          <b>${esc(x.cliente)}</b>
+          <small><i class="sdot ${ix.cls}"></i>${horaPedido(x)} · ${ix.short}</small>
+        </button>`;
+      }).join('')}
+    </div>` : '';
+
+  const aviso = syncErro
+    ? '<p class="track-note">⚠️ Atualização automática indisponível no momento.</p>'
+    : (!o.sync && !STATUS_FINAL.includes(o.status))
+      ? '<p class="track-note">⚠️ Este pedido não tem acompanhamento automático. Fale com a loja pelo atalho 💬 abaixo.</p>'
+      : '';
+
+  const temConcluidos = orders.some(x => STATUS_FINAL.includes(x.status));
+
+  body.innerHTML = `
     <div class="track-wrap">
-      <div class="track-badge-card">
+      ${chips}
+      <section class="ped-card ${fim ? 'final' : ''} ${cancelado ? 'cancel' : ''}">
+        <div class="ped-top">
+          <div>
+            <small>PEDIDO ${codigoPedido(o)} · ${horaPedido(o)}</small>
+            <strong>${esc(o.cliente)}</strong>
+          </div>
+          <span class="btn-track-status ${inf.cls}" style="height:32px;pointer-events:none">${inf.short}</span>
+        </div>
+
+        <div class="ped-atual">
+          <div class="ped-ico" aria-hidden="true">${inf.icon}</div>
+          <div>
+            <h3>${inf.label}</h3>
+            <p>${inf.desc}</p>
+          </div>
+        </div>
+
+        ${cancelado ? '' : `
         <div>
-          <span style="font-size:12px;color:var(--muted);display:block">PEDIDO #${activeOrder.id}</span>
-          <strong>${esc(activeOrder.cliente)}</strong>
-        </div>
-        <span class="btn-track-status ${cfg.cls}" style="height:32px;pointer-events:none">${cfg.label}</span>
+          <div class="ped-bar" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}"><i data-pct="${pct}" style="width:${pctAnterior[o.ref] || 0}%"></i></div>
+          <div class="ped-bar-info"><span>Etapa ${idx + 1} de ${fluxo.length}</span><span>${pct}%</span></div>
+        </div>`}
+
+        ${prox ? `
+        <div class="ped-next">
+          <span>A seguir</span>
+          <div><b>${prox.icon} ${prox.label}</b><small>${prox.desc}</small></div>
+        </div>` : ''}
+      </section>
+
+      ${aviso}
+
+      <div class="sanfona ${comprovanteAberto ? 'open' : ''}" id="sanfona">
+        <button type="button" class="sanfona-h" data-a="sanfona" aria-expanded="${comprovanteAberto}">
+          <span>🧾 Comprovante do pedido</span>
+          <b>${brl(o.total)}</b>
+          <i class="chev" aria-hidden="true">⌄</i>
+        </button>
+        <div class="sanfona-b"><div>
+          <div class="track-detail-box">${esc((o.detalhes || '').replace(/\*/g, ''))}</div>
+        </div></div>
       </div>
 
-      <div class="track-timeline">
-        <div class="track-step ${curStep >= 1 ? (curStep === 1 ? 'current' : 'done') : ''}">
-          <span class="step-dot">${curStep > 1 ? '✓' : '1'}</span>
-          <div class="step-info"><b>Analisando</b><small>Aguardando confirmação do restaurante</small></div>
-        </div>
-
-        <div class="track-step ${curStep >= 2 ? (curStep === 2 ? 'current' : 'done') : ''}">
-          <span class="step-dot">${curStep > 2 ? '✓' : '2'}</span>
-          <div class="step-info"><b>Pedido Aceito</b><small>Confirmado e enviado para a cozinha</small></div>
-        </div>
-
-        <div class="track-step ${curStep >= 3 ? (curStep === 3 ? 'current' : 'done') : ''}">
-          <span class="step-dot">${curStep > 3 ? '✓' : '3'}</span>
-          <div class="step-info"><b>Preparando</b><small>Cozinhando com capricho</small></div>
-        </div>
-
-        <div class="track-step ${curStep >= 4 ? (curStep === 4 ? 'current' : 'done') : ''}">
-          <span class="step-dot">${curStep > 4 ? '✓' : '4'}</span>
-          <div class="step-info"><b>Pronto</b><small>Embalado e finalizado</small></div>
-        </div>
-
-        <div class="track-step ${curStep >= 5 ? (curStep === 5 ? 'current' : 'done') : ''}">
-          <span class="step-dot">${curStep > 5 ? '✓' : '5'}</span>
-          <div class="step-info"><b>${labelPasso5}</b><small>${isEntrega ? 'A caminho da sua localização' : 'Disponível no balcão'}</small></div>
-        </div>
-
-        <div class="track-step ${curStep >= 6 ? 'done' : ''}">
-          <span class="step-dot">${curStep >= 6 ? '✓' : '6'}</span>
-          <div class="step-info"><b>Entregue</b><small>Aproveite sua refeição!</small></div>
-        </div>
-      </div>
-
-      <div class="msec">
-        <h3 style="font-size:16px;margin-bottom:8px">Atalhos Úteis</h3>
-        <div class="track-shortcuts-grid">
-          <button type="button" class="btn-shortcut" id="btnShortcutBebidas">
-            <i>🥤</i><span>Bebidas</span>
-          </button>
-          <button type="button" class="btn-shortcut" id="btnShortcutConta">
-            <i>💳</i><span>Pedir Conta</span>
-          </button>
-          <button type="button" class="btn-shortcut" id="btnShortcutLimpar">
-            <i>🧹</i><span>Limpar Mesa</span>
-          </button>
-        </div>
-      </div>
-
-      <div>
-        <h3 style="font-size:14px;color:var(--muted);margin-bottom:6px">Comprovante do Pedido</h3>
-        <div class="track-detail-box">${esc((activeOrder.detalhes || '').replace(/\*/g, ''))}</div>
-      </div>
+      ${temConcluidos ? '<button type="button" class="track-clear" data-a="limpar-concluidos">Limpar pedidos concluídos</button>' : ''}
     </div>
   `;
+
+  const barra = $('.ped-bar i', body);
+  if (barra) {
+    const alvoPct = Number(barra.dataset.pct);
+    requestAnimationFrame(() => requestAnimationFrame(() => { barra.style.width = alvoPct + '%'; }));
+    pctAnterior[o.ref] = alvoPct;
+  }
 }
 
 function openPostCheckout() {
-  if (!activeOrder || !activeOrder.id) return;
+  if (!orders.length) { toast('Você ainda não fez nenhum pedido.'); return; }
+  if (!selOrder()) selectedRef = orders[0].ref;
+  renderSig = '';
   renderPostCheckoutContent();
   openSheet($('#postCheckout'));
+  syncErro = false;
   startOrderStatusPolling();
 }
 
-$('#btnHeaderTrack').addEventListener('click', openPostCheckout);
+$('#btnHeaderTrack').addEventListener('click', () => {
+  const a = ordersAtivos()[0];
+  if (a) selectedRef = a.ref;
+  openPostCheckout();
+});
 $('#btnBackToMenu').addEventListener('click', () => closeSheet($('#postCheckout')));
 
 $('#trackBody').addEventListener('click', e => {
-  const bBebidas = e.target.closest('#btnShortcutBebidas');
-  if (bBebidas) {
-    closeSheet($('#postCheckout'));
-    const extrasSec = $('#extras');
-    if (extrasSec && !extrasSec.hidden) {
-      extrasSec.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      openCart();
-      step = 'drinks';
-      renderCart();
-    }
+  const chip = e.target.closest('.ped-chip');
+  if (chip) { selectedRef = chip.dataset.ref; renderSig = ''; renderPostCheckoutContent(); return; }
+
+  const sf = e.target.closest('[data-a="sanfona"]');
+  if (sf) {
+    comprovanteAberto = !comprovanteAberto;
+    $('#sanfona').classList.toggle('open', comprovanteAberto);
+    sf.setAttribute('aria-expanded', comprovanteAberto);
     return;
   }
 
-  const bConta = e.target.closest('#btnShortcutConta');
-  if (bConta) {
-    const mesaTxt = (activeOrder.detalhes || '').match(/MESA:\s*([^\n]+)/i);
-    const mesa = mesaTxt ? ` (Mesa ${mesaTxt[1].trim()})` : '';
-    const msg = encodeURIComponent(`Olá! Gostaria de pedir a conta do Pedido #${activeOrder.id}${mesa}, por favor.`);
-    window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank', 'noopener');
-    return;
+  if (e.target.closest('[data-a="limpar-concluidos"]')) {
+    orders = orders.filter(x => !STATUS_FINAL.includes(x.status));
+    if (!orders.find(x => x.ref === selectedRef)) selectedRef = orders[0] ? orders[0].ref : null;
+    saveOrders(); renderSig = ''; renderPostCheckoutContent(); updateHeaderStatusButton();
   }
+});
 
-  const bLimpar = e.target.closest('#btnShortcutLimpar');
-  if (bLimpar) {
-    const mesaTxt = (activeOrder.detalhes || '').match(/MESA:\s*([^\n]+)/i);
-    const mesa = mesaTxt ? ` da Mesa ${mesaTxt[1].trim()}` : '';
-    const msg = encodeURIComponent(`Olá! Por favor, poderiam recolher/limpar os pratos${mesa}? Obrigado!`);
-    window.open(`https://wa.me/${CONFIG.whatsapp}?text=${msg}`, '_blank', 'noopener');
-    return;
+/* Atalhos fixos (rodapé da tela) */
+$('#trackShortcuts').addEventListener('click', e => {
+  const b = e.target.closest('[data-sc]');
+  if (!b) return;
+  const o = selOrder();
+  const mesaTxt = o ? (o.detalhes || '').match(/MESA:\s*([^\n]+)/i) : null;
+  const mesa = mesaTxt ? mesaTxt[1].trim() : '';
+  const quem = o ? ` (pedido de ${o.cliente} ${codigoPedido(o)})` : '';
+  const zap = txt => window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(txt)}`, '_blank', 'noopener');
+
+  switch (b.dataset.sc) {
+    case 'bebidas':
+      closeSheet($('#postCheckout'));
+      const extrasSec = $('#extras');
+      if (extrasSec && !extrasSec.hidden) extrasSec.scrollIntoView({ behavior: 'smooth' });
+      else { openCart(); step = 'drinks'; renderCart(); }
+      break;
+    case 'conta':
+      zap(`Olá! Gostaria de pedir a conta${mesa ? ' da Mesa ' + mesa : ''}${quem}, por favor.`); break;
+    case 'limpar':
+      zap(`Olá! Por favor, poderiam recolher/limpar os pratos${mesa ? ' da Mesa ' + mesa : ''}${quem}? Obrigado!`); break;
+    case 'garcom':
+      zap(`Olá! Preciso de um garçom${mesa ? ' na Mesa ' + mesa : ''}${quem}, por favor.`); break;
+    case 'loja':
+      zap(`Olá! Tenho uma dúvida sobre meu pedido${quem}.`); break;
   }
 });
 
@@ -1985,21 +2152,29 @@ async function sendOrder() {
     btnSend.textContent = 'Enviar pedido no WhatsApp';
   }
 
-  if (!pedidoCriado || !pedidoCriado.id) {
+  if (!pedidoCriado || !pedidoCriado.ref) {
     toast('Falha ao registrar pedido. Tente novamente.');
     return;
   }
 
-  activeOrder = {
-    id: pedidoCriado.id,
+  const novoPedido = {
+    ref: pedidoCriado.ref,
+    sync: pedidoCriado.sincroniza,
     cliente: form.nome.trim(),
     total: total(),
     detalhes: msg,
+    modo: form.modo,
     status: 'novo',
-    created_at: pedidoCriado.created_at || new Date().toISOString()
+    impresso: false,
+    created_at: new Date().toISOString()
   };
-  localStorage.setItem(KEY_LAST_ORDER, JSON.stringify(activeOrder));
+  orders.unshift(novoPedido);
+  orders = orders.slice(0, 15);
+  selectedRef = novoPedido.ref;
+  saveOrders();
+  renderSig = '';
   updateHeaderStatusButton();
+  startOrderStatusPolling();
 
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
   setTimeout(() => {
