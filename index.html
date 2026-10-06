@@ -197,7 +197,7 @@ section { padding: 46px 0; scroll-margin-top: 62px; }
 .final { text-align: center; padding-bottom: 130px; }
 .final .sec-title { font-size: 32px; }
 .final .btn { margin-top: 22px; min-height: 60px; padding: 0 34px; font-size: 19px; }
-footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
+footer { position: relative; padding: 26px 0 120px; text-align: center; color: var(--muted); font-size: 14px; border-top: 1px solid var(--line); }
 .final + footer { padding-top: 26px; }
 
 /* Scroll reveal */
@@ -298,13 +298,13 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .ped-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: none; }
 .ped-chips::-webkit-scrollbar { display: none; }
 .ped-chip {
-  flex: 0 0 auto; min-width: 124px; max-width: 176px; text-align: left;
-  display: flex; flex-direction: column; gap: 3px; padding: 9px 12px; border-radius: 14px;
+  flex: 0 0 auto; min-width: 118px; max-width: 168px; text-align: left;
+  display: flex; flex-direction: column; gap: 1px; padding: 6px 12px; border-radius: 13px;
   background: var(--card-2); border: 1.5px solid var(--line); color: var(--cream);
   transition: border-color .2s, background .2s;
 }
-.ped-chip b { font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.ped-chip small { font-size: 11.5px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.ped-chip b { font-size: 13.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ped-chip small { font-size: 11px; line-height: 1.25; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .ped-chip.on { border-color: var(--gold); background: rgba(242, 196, 109, .12); }
 .sdot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
 .sdot.st-analisando { background: #fde047; }
@@ -327,7 +327,7 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .ped-atual { display: flex; align-items: center; gap: 14px; }
 .ped-ico {
   flex: none; width: 60px; height: 60px; border-radius: 50%; display: grid; place-items: center;
-  font-size: 29px; background: rgba(242, 196, 109, .15); border: 2px solid var(--gold);
+  color: var(--gold); background: rgba(242, 196, 109, .15); border: 2px solid var(--gold);
   animation: pedPulse 2.2s ease-out infinite;
 }
 @keyframes pedPulse {
@@ -349,16 +349,8 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 @keyframes pedFlow { to { background-position: -250% 0; } }
 .ped-bar-info { display: flex; justify-content: space-between; margin-top: 7px; font-size: 12px; font-weight: 600; color: var(--muted); }
 .ped-card.final .ped-bar i { background: #4ade80; animation: none; }
-.ped-card.final .ped-ico { border-color: #4ade80; background: rgba(74, 222, 128, .14); animation: none; }
-.ped-card.cancel .ped-ico { border-color: #f87171; background: rgba(248, 113, 113, .14); animation: none; }
-
-.ped-next {
-  display: flex; align-items: center; gap: 12px; padding: 10px 14px; border-radius: 14px;
-  border: 1.5px dashed var(--line); color: var(--muted);
-}
-.ped-next > span { font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
-.ped-next b { display: block; font-size: 14px; color: var(--cream); }
-.ped-next small { font-size: 12px; }
+.ped-card.final .ped-ico { color: #4ade80; border-color: #4ade80; background: rgba(74, 222, 128, .14); animation: none; }
+.ped-card.cancel .ped-ico { color: #f87171; border-color: #f87171; background: rgba(248, 113, 113, .14); animation: none; }
 
 .sanfona { border-radius: 18px; background: var(--card-2); border: 1px solid var(--line); overflow: hidden; }
 .sanfona-h {
@@ -367,8 +359,6 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 }
 .sanfona-h span { flex: 1; }
 .sanfona-h b { color: var(--gold); font-size: 15px; }
-.sanfona-h .chev { font-style: normal; font-size: 20px; line-height: 1; transition: transform .3s; }
-.sanfona.open .chev { transform: rotate(180deg); }
 .sanfona-b { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .32s ease; }
 .sanfona.open .sanfona-b { grid-template-rows: 1fr; }
 .sanfona-b > div { overflow: hidden; }
@@ -390,6 +380,39 @@ footer { padding: 26px 0 120px; text-align: center; color: var(--muted); font-si
 .track-detail-box {
   background: rgba(0, 0, 0, .25); border: 1px solid var(--line); border-radius: 14px;
   padding: 14px; white-space: pre-wrap; font: 12px/1.45 ui-monospace, Menlo, monospace;
+}
+
+/* Ícones de status (SVG animado) */
+.sv { display: block; overflow: visible; }
+.ped-ico .sv { width: 34px; height: 34px; }
+.trk-ico .sv { width: 24px; height: 24px; }
+.btn-track-status.trk-ico { position: relative; width: 40px; height: 40px; padding: 0; gap: 0; justify-content: center; border-radius: 50%; }
+.trk-badge {
+  position: absolute; top: -7px; right: -9px; padding: 1px 5px; border-radius: 99px;
+  background: var(--bg); color: var(--gold); border: 1.5px solid var(--gold);
+  font-size: 9.5px; font-weight: 800; line-height: 1.3; letter-spacing: .02em; text-transform: none;
+}
+.sv-hand { transform-origin: 12px 12px; animation: svSpin 3s linear infinite; }
+.sv-hand2 { transform-origin: 12px 12px; animation: svSpin 12s linear infinite; }
+@keyframes svSpin { to { transform: rotate(360deg); } }
+.sv-draw { stroke-dasharray: 20; stroke-dashoffset: 20; animation: svDraw 2.2s ease-in-out infinite; }
+@keyframes svDraw { 0% { stroke-dashoffset: 20; opacity: 1; } 40%, 85% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: 0; } }
+.sv-steam { opacity: 0; animation: svSteam 1.8s ease-in-out infinite; }
+.sv-steam.s2 { animation-delay: .3s; } .sv-steam.s3 { animation-delay: .6s; }
+@keyframes svSteam { 0% { opacity: 0; transform: translateY(2px); } 50% { opacity: 1; } 100% { opacity: 0; transform: translateY(-3px); } }
+.sv-bounce { animation: svBounce 1.4s ease-in-out infinite; }
+@keyframes svBounce { 50% { transform: translateY(-1.8px); } }
+.sv-ride { animation: svRide .45s ease-in-out infinite alternate; }
+@keyframes svRide { from { transform: translateX(-.8px); } to { transform: translateX(.8px); } }
+.sv-speed { animation: svSpeed .9s ease-in-out infinite; }
+@keyframes svSpeed { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+.sv-pop { transform-origin: 12px 12px; animation: svPop 1.6s ease-in-out infinite; }
+@keyframes svPop { 50% { transform: scale(1.06); } }
+.sv-spark { transform-origin: 12px 12px; animation: svSpark 1.6s ease-in-out infinite; }
+@keyframes svSpark { 0%, 100% { opacity: .2; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  .sv * { animation: none !important; }
+  .sv-draw { stroke-dashoffset: 0; } .sv-steam { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) {
   .ped-card, .ped-ico, .ped-bar i { animation: none; }
@@ -505,7 +528,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 
 #lojaBar{position:fixed;left:0;right:0;bottom:0;z-index:9998;background:#7a1f1f;color:#fff;text-align:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));font-weight:600;font-size:15px;box-shadow:0 -6px 20px #0006}
 #lojaBar[hidden],#lojaModal[hidden]{display:none}
-body.fechada #cartBar{display:none!important}body.fechada{padding-bottom:70px}
+body.fechada #cartBar{display:none!important}.mk-line{position:absolute;right:14px;bottom:88px;font-size:10.5px;line-height:1;white-space:nowrap;color:var(--muted);opacity:.85}.mk-line a{color:var(--gold);font-weight:700;text-decoration:underline}body.print-mode .mk-line{display:none}body.fechada{padding-bottom:70px}
 #lojaModal{position:fixed;inset:0;z-index:9999;background:#000a;display:grid;place-items:center;padding:24px}
 #lojaModal>div{background:#341d0f;color:#f7ecd8;border:1px solid rgba(242,196,109,.4);border-radius:22px;padding:24px;max-width:340px;text-align:center;line-height:1.4}
 #lojaModal b{display:block;font-size:22px;margin-bottom:8px;color:#f2c46d}
@@ -764,8 +787,8 @@ body.print-mode .print-salad small {
     <span class="brand">RANCHARIA</span>
     <div class="top-actions">
       <button class="btn-track-status" id="btnHeaderTrack" style="display:none" type="button" aria-label="Acompanhar Pedido">
-        <span class="status-dot">●</span>
-        <span id="txtHeaderStatus">Pedido</span>
+        <span id="svgHeaderStatus" class="trk-svg"></span>
+        <span id="txtHeaderStatus" class="trk-badge"></span>
       </button>
 
       <button class="btn-pwa" id="btnInstallPwa" type="button" aria-label="Baixar App" title="Instalar aplicativo">
@@ -811,7 +834,7 @@ body.print-mode .print-salad small {
   </section>
 </main>
 
-<footer><div class="wrap">Rancharia · Pedidos pelo WhatsApp</div></footer>
+<footer><div class="wrap">Rancharia · Pedidos pelo WhatsApp</div><div class="mk-line">Tenha um site assim. <a id="mkFoot" target="_blank" rel="noopener">Quero um site assim</a></div></footer>
 
 <button id="cartBar" aria-label="Ver pedido">
   <span class="info">
@@ -1816,16 +1839,35 @@ function fluxoPedido(o) {
 }
 
 /* ---------- Botão do topo ---------- */
+/* Ícones SVG animados por status */
+function svgStatus(key) {
+  const S = {
+    analisando: '<circle cx="12" cy="12" r="9"/><g class="sv-hand"><path d="M12 12V6.5"/></g><g class="sv-hand2"><path d="M12 12l3 2"/></g>',
+    aceito: '<circle cx="12" cy="12" r="9"/><path class="sv-draw" d="M8 12.5l3 3 5-6"/>',
+    preparando: '<path d="M5 12h14v5a3 3 0 0 1-3 3H8a3 3 0 0 1-3-3z"/><path d="M3.5 12h17"/><path class="sv-steam s1" d="M9 9.5c-1.2-1.2 1.2-2.2 0-3.8"/><path class="sv-steam s2" d="M12.5 9.5c-1.2-1.2 1.2-2.2 0-3.8"/><path class="sv-steam s3" d="M16 9.5c-1.2-1.2 1.2-2.2 0-3.8"/>',
+    pronto: '<g class="sv-bounce"><path d="M5.5 8h13l-1 12h-11z"/><path d="M9 8V7a3 3 0 0 1 6 0v1"/></g>',
+    saiu: '<g class="sv-ride"><circle cx="6" cy="17" r="2.6"/><circle cx="18.5" cy="17" r="2.6"/><path d="M8.6 17H13l2-7h3"/><path d="M6 17l-1.5-5h4"/></g><path class="sv-speed" d="M1.5 9h3M1 12.5h2.5"/>',
+    entregue: '<circle class="sv-pop" cx="12" cy="12" r="9"/><path class="sv-draw" d="M8 12.5l3 3 5-6"/><path class="sv-spark" d="M12 .8v2M21.2 4.6l-1.4 1.4M2.8 4.6l1.4 1.4"/>',
+    cancelado: '<circle cx="12" cy="12" r="9"/><path d="M9 9l6 6M15 9l-6 6"/>'
+  };
+  return `<svg class="sv sv-${key}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${S[key] || S.analisando}</svg>`;
+}
+
+/* ---------- Botão do topo (ícone animado + número do pedido) ---------- */
 function updateHeaderStatusButton() {
   const btn = $('#btnHeaderTrack');
   if (!btn) return;
   if (!orders.length) { btn.style.display = 'none'; return; }
   const ativos = ordersAtivos();
   const o = ativos[0] || orders[0];
-  const inf = infoEtapa(chaveStatus(o), o);
+  const key = chaveStatus(o);
+  const inf = infoEtapa(key, o);
+  const sig = key + o.ref;
   btn.style.display = 'inline-flex';
-  btn.className = `btn-track-status ${inf.cls}`;
-  $('#txtHeaderStatus').textContent = ativos.length > 1 ? `${ativos.length} pedidos` : inf.short;
+  btn.className = `btn-track-status trk-ico ${inf.cls}`;
+  btn.setAttribute('aria-label', `Pedido ${codigoPedido(o)}: ${inf.label}`);
+  if (btn.dataset.sig !== sig) { $('#svgHeaderStatus').innerHTML = svgStatus(key); btn.dataset.sig = sig; }
+  $('#txtHeaderStatus').textContent = codigoPedido(o);
 }
 
 /* ---------- Sincronização (consulta só o status pelo código do pedido) ---------- */
@@ -1900,8 +1942,6 @@ function renderPostCheckoutContent() {
   const idx = Math.max(0, fluxo.indexOf(key));
   const fim = key === 'entregue';
   const pct = cancelado ? 100 : fim ? 100 : Math.max(8, Math.round(idx / (fluxo.length - 1) * 100));
-  const proxKey = (!cancelado && !fim) ? fluxo[idx + 1] : null;
-  const prox = proxKey ? infoEtapa(proxKey, o) : null;
 
   $('#trackSubtitle').textContent = inf.desc;
 
@@ -1937,7 +1977,7 @@ function renderPostCheckoutContent() {
         </div>
 
         <div class="ped-atual">
-          <div class="ped-ico" aria-hidden="true">${inf.icon}</div>
+          <div class="ped-ico" aria-hidden="true">${svgStatus(key)}</div>
           <div>
             <h3>${inf.label}</h3>
             <p>${inf.desc}</p>
@@ -1950,11 +1990,6 @@ function renderPostCheckoutContent() {
           <div class="ped-bar-info"><span>Etapa ${idx + 1} de ${fluxo.length}</span><span>${pct}%</span></div>
         </div>`}
 
-        ${prox ? `
-        <div class="ped-next">
-          <span>A seguir</span>
-          <div><b>${prox.icon} ${prox.label}</b><small>${prox.desc}</small></div>
-        </div>` : ''}
       </section>
 
       ${aviso}
@@ -1963,7 +1998,6 @@ function renderPostCheckoutContent() {
         <button type="button" class="sanfona-h" data-a="sanfona" aria-expanded="${comprovanteAberto}">
           <span>🧾 Comprovante do pedido</span>
           <b>${brl(o.total)}</b>
-          <i class="chev" aria-hidden="true">⌄</i>
         </button>
         <div class="sanfona-b"><div>
           <div class="track-detail-box">${esc((o.detalhes || '').replace(/\*/g, ''))}</div>
@@ -1997,7 +2031,7 @@ $('#btnHeaderTrack').addEventListener('click', () => {
   if (a) selectedRef = a.ref;
   openPostCheckout();
 });
-$('#btnBackToMenu').addEventListener('click', () => closeSheet($('#postCheckout')));
+$('#btnBackToMenu').addEventListener('click', () => { closeSheet($('#postCheckout')); renderExtras(); });
 
 $('#trackBody').addEventListener('click', e => {
   const chip = e.target.closest('.ped-chip');
@@ -2179,8 +2213,10 @@ async function sendOrder() {
   window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(msg)}`, '_blank', 'noopener');
   setTimeout(() => {
     cart = []; save(); form.obs = '';
+    draft = null; openDrink = null; step = 'list'; openedFromOrderBump = false;
     closeSheet($('#cart'), false); updateBar(); toast('Pedido enviado com sucesso!');
     renderPlates();
+    renderExtras();
     openPostCheckout();
   }, 700);
 }
@@ -2196,6 +2232,8 @@ $('#plates').addEventListener('click', e => {
 
 $('#cartBar').addEventListener('click', openCart);
 $('#menuBtn').addEventListener('click', () => openSheet($('#menu')));
+const mkUrl = `https://wa.me/${CONFIG.criador.whatsapp}?text=${encodeURIComponent(CONFIG.criador.msg)}`;
+['#mkBtn', '#mkFoot'].forEach(q => { const el = $(q); if (el) el.href = mkUrl; });
 $('#sobre').textContent = CONFIG.sobre;
 $('#horas').innerHTML = CONFIG.horarios.map(([d, h]) => `<div class="hr-row"><span>${esc(d)}</span><b>${esc(h)}</b></div>`).join('');
 $('#faq').innerHTML = CONFIG.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
