@@ -1618,14 +1618,14 @@ const SUPABASE_URL = 'https://svvvzwsajneesmuatcvc.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InN2dnZ6d3Nham5lZXNtdWF0Y3ZjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA2Mjg4NzcsImV4cCI6MjEwNjIwNDg3N30.eIvgjUEClP531J87Dc2ItfYi4lSuROyT_19GtSMa2wA';
 
 async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
-  try {
-    const payload = {
-      cliente: String(cliente).slice(0, 80),
-      total: Number(valorTotal),
-      detalhes: String(detalhes || '').slice(0, 4000),
-      status: 'novo'
-    };
+  const payload = {
+    cliente: String(cliente).slice(0, 80),
+    total: Number(valorTotal),
+    detalhes: String(detalhes || '').slice(0, 4000),
+    status: 'novo'
+  };
 
+  try {
     const res = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
       method: 'POST',
       headers: { 
@@ -1647,6 +1647,25 @@ async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
   } catch (err) {
     console.error('Erro de envio:', err);
   }
+
+  try {
+    const resMin = await fetch(`${SUPABASE_URL}/rest/v1/pedidos`, {
+      method: 'POST',
+      headers: { 
+        'apikey': SUPABASE_KEY, 
+        'Authorization': 'Bearer ' + SUPABASE_KEY,
+        'Content-Type': 'application/json', 
+        'Prefer': 'return=minimal' 
+      },
+      body: JSON.stringify(payload),
+      cache: 'no-store'
+    });
+
+    if (resMin.ok || resMin.status === 201 || resMin.status === 204) {
+      return { id: Date.now().toString().slice(-4), ...payload };
+    }
+  } catch (err) {}
+
   return null;
 }
 
