@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/icon-192.png", "destination": "/api/icon?s=192" },
+    { "source": "/icon-512.png", "destination": "/api/icon?s=512" },
+    { "source": "/apple-touch-icon.png", "destination": "/api/icon?s=180" }
+  ]
+}
