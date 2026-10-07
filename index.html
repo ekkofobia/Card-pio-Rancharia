@@ -1909,11 +1909,23 @@ function updateHeaderStatusButton() {
 }
 
 /* ---------- Sincronização (consulta só o status pelo código do pedido) ---------- */
+const syncInfo = { ultima: null, erro: '' };
+
+function atualizaNotaSync() {
+  const el = $('#syncNote');
+  if (!el) return;
+  const hora = syncInfo.ultima ? new Date(syncInfo.ultima).toLocaleTimeString('pt-BR') : '';
+  el.innerHTML = (syncInfo.erro
+    ? `⚠️ Sem atualização (${syncInfo.erro}). `
+    : (hora ? `Atualizado às ${hora}. ` : 'Buscando atualização… ')) +
+    '<button type="button" class="track-clear" data-a="sync-now" style="padding:0 0 0 4px;font-size:12.5px">Atualizar agora</button>';
+}
+
 async function sincronizarPedidos() {
   const alvo = orders.filter(o => o.sync && !STATUS_FINAL.includes(o.status));
-  if (!alvo.length) { clearInterval(trackPollInterval); return; }
+  if (!alvo.length) return;
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/status_pedidos`, {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/status_pedidos?_=${Date.now()}`, {
       method: 'POST',
       headers: {
         'apikey': SUPABASE_KEY,
@@ -1924,37 +1936,48 @@ async function sincronizarPedidos() {
       cache: 'no-store'
     });
     if (!res.ok) {
-      if (res.status === 404) { syncErro = true; clearInterval(trackPollInterval); renderPostCheckoutContent(); }
-      return;
+      syncInfo.erro = res.status === 404 ? 'falta rodar o SQL no Supabase' : 'erro ' + res.status;
+    } else {
+      const linhas = await res.json();
+      syncInfo.erro = ''; syncInfo.ultima = Date.now();
+      let mudou = false;
+      (linhas || []).forEach(r => {
+        const o = orders.find(x => x.ref === r.ref);
+        if (!o) return;
+        const st = r.status || 'novo';
+        const imp = !!r.impresso;
+        const mot = r.motivo || '';
+        if (o.status !== st || !!o.impresso !== imp || (o.motivo || '') !== mot) { o.status = st; o.impresso = imp; o.motivo = mot; mudou = true; }
+      });
+      if (mudou) {
+        saveOrders();
+        updateHeaderStatusButton();
+        if (current && current.id === 'postCheckout') renderPostCheckoutContent();
+      }
     }
-    const linhas = await res.json();
-    syncErro = false;
-    let mudou = false;
-    (linhas || []).forEach(r => {
-      const o = orders.find(x => x.ref === r.ref);
-      if (!o) return;
-      const st = r.status || 'novo';
-      const imp = !!r.impresso;
-      const mot = r.motivo || '';
-      if (o.status !== st || !!o.impresso !== imp || (o.motivo || '') !== mot) { o.status = st; o.impresso = imp; o.motivo = mot; mudou = true; }
-    });
-    if (mudou) {
-      saveOrders();
-      updateHeaderStatusButton();
-      if (current && current.id === 'postCheckout') renderPostCheckoutContent();
-    }
-    if (!ordersAtivos().some(o => o.sync)) clearInterval(trackPollInterval);
-  } catch (e) {}
+  } catch (e) {
+    syncInfo.erro = 'sem conexão';
+  }
+  syncErro = !!syncInfo.erro;
+  atualizaNotaSync();
+}
+
+/* Ciclo com setTimeout: o iPhone pausa timers em segundo plano, então retomamos ao voltar pro app */
+async function loopSync() {
+  clearTimeout(trackPollInterval);
+  if (!orders.some(o => o.sync && !STATUS_FINAL.includes(o.status))) return;
+  await sincronizarPedidos();
+  trackPollInterval = setTimeout(loopSync, syncInfo.erro ? 10000 : 3500);
 }
 
 function startOrderStatusPolling() {
-  clearInterval(trackPollInterval);
-  if (orders.some(o => o.sync && !STATUS_FINAL.includes(o.status))) {
-    sincronizarPedidos();
-    trackPollInterval = setInterval(sincronizarPedidos, 3500);
-  }
+  clearTimeout(trackPollInterval);
+  loopSync();
 }
 document.addEventListener('visibilitychange', () => { if (!document.hidden) startOrderStatusPolling(); });
+window.addEventListener('pageshow', startOrderStatusPolling);
+window.addEventListener('focus', startOrderStatusPolling);
+window.addEventListener('online', startOrderStatusPolling);
 
 /* ---------- Tela "Acompanhar pedido" ---------- */
 function renderPostCheckoutContent() {
@@ -1996,9 +2019,7 @@ function renderPostCheckoutContent() {
       }).join('')}
     </div>` : '';
 
-  const aviso = syncErro
-    ? '<p class="track-note">⚠️ Atualização automática indisponível no momento.</p>'
-    : (!o.sync && !STATUS_FINAL.includes(o.status))
+  const aviso = (!o.sync && !STATUS_FINAL.includes(o.status))
       ? '<p class="track-note">⚠️ Este pedido não tem acompanhamento automático. Fale com a loja pelo atalho 💬 abaixo.</p>'
       : '';
 
@@ -2033,6 +2054,7 @@ function renderPostCheckoutContent() {
       </section>
 
       ${aviso}
+      ${o.sync && !STATUS_FINAL.includes(o.status) ? '<p class="track-note" id="syncNote"></p>' : ''}
 
       <div class="sanfona ${comprovanteAberto ? 'open' : ''}" id="sanfona">
         <button type="button" class="sanfona-h" data-a="sanfona" aria-expanded="${comprovanteAberto}">
@@ -2048,6 +2070,7 @@ function renderPostCheckoutContent() {
     </div>
   `;
 
+  atualizaNotaSync();
   const barra = $('.ped-bar i', body);
   if (barra) {
     const alvoPct = Number(barra.dataset.pct);
@@ -2074,6 +2097,8 @@ $('#btnBackToMenu').addEventListener('click', () => { closeSheet($('#postCheckou
 $('#trackBody').addEventListener('click', e => {
   const chip = e.target.closest('.ped-chip');
   if (chip) { selectedRef = chip.dataset.ref; saveSel(); renderSig = ''; renderPostCheckoutContent(); updateHeaderStatusButton(); return; }
+
+  if (e.target.closest('[data-a="sync-now"]')) { syncInfo.erro = ''; $('#syncNote').textContent = 'Atualizando…'; sincronizarPedidos(); return; }
 
   const sf = e.target.closest('[data-a="sanfona"]');
   if (sf) {
