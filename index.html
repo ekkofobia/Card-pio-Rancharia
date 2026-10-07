@@ -1294,7 +1294,7 @@ function syncBuilder() {
     if ((sub.exibicao === 'checklist' || !sub.exibicao) && sub.max_escolha > 0) {
       const selMap = d.subSelections[sub.id] || {};
       const countItens = Object.values(selMap).reduce((s, v) => s + (typeof v === 'object' ? v.qty : v), 0);
-      if (countItens === 0 && sub.itens.length > 0) {
+      if (countItens < minDe(sub) && sub.itens.length > 0) {
         faltaChecklist = true;
       }
     }
@@ -1405,21 +1405,31 @@ $('#bFoot').addEventListener('click', e => {
   if (e.target.closest('#addBtn')) tryAdd();
 });
 
+/* mínimo obrigatório da subcategoria (configurado no painel) */
+function minDe(sub) {
+  const mn = sub.min_escolha !== undefined && sub.min_escolha !== null ? Number(sub.min_escolha) : 1;
+  return Math.max(0, Math.min(mn, sub.max_escolha || 4));
+}
+
 function tryAdd() {
   const d = draft;
   if (d.proteinas.length < d.plano.escolhe) return;
 
   let faltas = [];
+  let abaixoMin = [];
   (d.subcategorias || []).forEach(sub => {
     if ((sub.exibicao === 'checklist' || !sub.exibicao) && sub.max_escolha > 0) {
       const selMap = d.subSelections[sub.id] || {};
       const countItens = Object.values(selMap).reduce((s, v) => s + (typeof v === 'object' ? v.qty : v), 0);
+      if (countItens < minDe(sub) && sub.itens.length > 0) { abaixoMin.push(`${minDe(sub) - countItens} de ${sub.nome}`); }
       const faltaN = sub.max_escolha - countItens;
       if (faltaN > 0) {
         faltas.push(`${faltaN} ${esc(sub.nome)}`);
       }
     }
   });
+
+  if (abaixoMin.length) { toast('Escolha pelo menos: ' + abaixoMin.join(' e ')); return; }
 
   if (faltas.length) {
     askMoreG(faltas);
@@ -1897,7 +1907,8 @@ async function sincronizarPedidos() {
       if (!o) return;
       const st = r.status || 'novo';
       const imp = !!r.impresso;
-      if (o.status !== st || !!o.impresso !== imp) { o.status = st; o.impresso = imp; mudou = true; }
+      const mot = r.motivo || '';
+      if (o.status !== st || !!o.impresso !== imp || (o.motivo || '') !== mot) { o.status = st; o.impresso = imp; o.motivo = mot; mudou = true; }
     });
     if (mudou) {
       saveOrders();
@@ -1931,7 +1942,7 @@ function renderPostCheckoutContent() {
   }
   if (atalhos) atalhos.hidden = false;
 
-  const sig = [selectedRef, syncErro, orders.map(x => x.ref + x.status + (x.impresso ? 1 : 0)).join('|')].join('#');
+  const sig = [selectedRef, syncErro, orders.map(x => x.ref + x.status + (x.impresso ? 1 : 0) + (x.motivo || '')).join('|')].join('#');
   if (sig === renderSig) return;
   renderSig = sig;
 
@@ -1943,7 +1954,8 @@ function renderPostCheckoutContent() {
   const fim = key === 'entregue';
   const pct = cancelado ? 100 : fim ? 100 : Math.max(8, Math.round(idx / (fluxo.length - 1) * 100));
 
-  $('#trackSubtitle').textContent = inf.desc;
+  const descTxt = (cancelado && o.motivo) ? `Motivo: ${o.motivo}` : inf.desc;
+  $('#trackSubtitle').textContent = descTxt;
 
   const chips = orders.length > 1 ? `
     <div class="ped-chips" role="tablist" aria-label="Seus pedidos">
@@ -1980,7 +1992,7 @@ function renderPostCheckoutContent() {
           <div class="ped-ico" aria-hidden="true">${svgStatus(key)}</div>
           <div>
             <h3>${inf.label}</h3>
-            <p>${inf.desc}</p>
+            <p>${esc(descTxt)}</p>
           </div>
         </div>
 
@@ -2294,6 +2306,7 @@ function aplicarCardapio(cats, prods) {
     c.tipo = j.tipo || c.tipo || (norm(c.nome).includes('guarni') || norm(c.nome).includes('salada') ? 'item' : /bebida|refri|suco|cerveja/.test(norm(c.nome)) ? 'ambos' : 'principal');
     c.exibicao = j.exibicao || c.exibicao || (norm(c.nome).includes('guarni') ? 'checklist' : /bebida|refri|suco|cerveja/.test(norm(c.nome)) ? 'min' : 'prato');
     c.max_escolha = j.max_escolha !== undefined ? Number(j.max_escolha) : 4;
+    c.min_escolha = j.min_escolha !== undefined ? Number(j.min_escolha) : 1;
     c.parents = j.parents || c.parents || [];
     c.item_order = j.item_order || [];
     c.substituto = j.substituto || '';
@@ -2322,6 +2335,7 @@ function aplicarCardapio(cats, prods) {
     nome: c.nome,
     exibicao: c.exibicao,
     max_escolha: c.max_escolha,
+    min_escolha: c.min_escolha,
     parents: c.parents,
     substituto: c.substituto,
     apartir_de: c.apartir_de,
