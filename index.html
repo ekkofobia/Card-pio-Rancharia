@@ -176,6 +176,7 @@ section { padding: 46px 0; scroll-margin-top: 62px; }
 .sec-title { font-size: 26px; font-weight: 700; line-height: 1.15; }
 .sec-title em { font-style: normal; color: var(--gold); }
 .sec-sub { margin-top: 8px; color: var(--muted); max-width: 46ch; }
+#extras .sec-sub { margin-top: 4px; margin-bottom: 20px; }
 
 /* Cards de prato */
 #pratos { padding-top: 0; }
@@ -442,12 +443,15 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
   .ped-bar i, .sanfona-b { transition: none; }
 }
 
-textarea, input[type="text"] {
+textarea, input[type="text"], select.sel {
   width: 100%; padding: 13px 14px; border-radius: 14px; font: inherit; color: var(--cream);
   background: var(--card-2); border: 1.5px solid var(--line); transition: border-color .2s;
 }
 textarea { resize: none; min-height: 72px; }
-textarea:focus, input:focus { outline: none; border-color: var(--gold); }
+textarea:focus, input:focus, select.sel:focus { outline: none; border-color: var(--gold); }
+select.sel { appearance: none; -webkit-appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--gold) 50%), linear-gradient(135deg, var(--gold) 50%, transparent 50%); background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 36px; }
+.total.ent { margin-bottom: 4px; font-size: 15px; color: var(--muted); }
+.total.ent b { color: var(--cream); font-size: 15px; }
 ::placeholder { color: #9d8a70; }
 .lbl { display: block; margin-bottom: 6px; font-weight: 600; font-size: 15px; }
 .err { border-color: #ff7a6b !important; }
@@ -516,6 +520,9 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .d-row:first-child { border-top: 0; padding-top: 2px; }
 .d-row b { font-weight: 500; font-size: 15px; flex: 1; min-width: 0; }
 .d-pr { color: var(--gold); font-weight: 700; font-size: 14px; white-space: nowrap; }
+.d-row .qty { flex: none; margin-left: auto; gap: 2px; }
+.d-row .qty button { width: 30px; height: 30px; font-size: 18px; }
+.d-row .qty output { min-width: 21px; font-size: 14px; }
 .qty button.off { opacity: .35; }
 
 /* Toast */
@@ -551,7 +558,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 
 #lojaBar{position:fixed;left:0;right:0;bottom:0;z-index:9998;background:#7a1f1f;color:#fff;text-align:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));font-weight:600;font-size:15px;box-shadow:0 -6px 20px #0006}
 #lojaBar[hidden],#lojaModal[hidden]{display:none}
-body.fechada #cartBar{display:none!important}.mk-line{position:absolute;right:14px;bottom:88px;font-size:10.5px;line-height:1;white-space:nowrap;color:var(--muted);opacity:.85}.mk-line a{color:var(--gold);font-weight:700;text-decoration:underline}body.print-mode .mk-line{display:none}body.fechada{padding-bottom:70px}
+body.fechada #cartBar{display:none!important}.mk-line{position:absolute;left:0;right:0;bottom:100px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 14px;white-space:nowrap}.mk-line span{color:#fff;font-weight:800;font-size:12.5px;line-height:1}.mk-line a{display:inline-flex;align-items:center;min-height:28px;padding:0 13px;border-radius:999px;background:var(--gold);color:#2a1509;font-weight:800;font-size:11.5px;text-decoration:none}body.print-mode .mk-line{display:none}body.fechada{padding-bottom:70px}
 #lojaModal{position:fixed;inset:0;z-index:9999;background:#000a;display:grid;place-items:center;padding:24px}
 #lojaModal>div{background:#341d0f;color:#f7ecd8;border:1px solid rgba(242,196,109,.4);border-radius:22px;padding:24px;max-width:340px;text-align:center;line-height:1.4}
 #lojaModal b{display:block;font-size:22px;margin-bottom:8px;color:#f2c46d}
@@ -857,7 +864,7 @@ body.print-mode .print-salad small {
   </section>
 </main>
 
-<footer><div class="wrap">Rancharia · Pedidos pelo WhatsApp</div><div class="mk-line">Tenha um site assim. <a id="mkFoot" target="_blank" rel="noopener">Quero um site assim</a></div></footer>
+<footer><div class="wrap">Rancharia · Pedidos pelo WhatsApp</div><div class="mk-line"><span>Tenha um site assim.</span><a id="mkFoot" target="_blank" rel="noopener">Quero um site assim</a></div></footer>
 
 <button id="cartBar" aria-label="Ver pedido">
   <span class="info">
@@ -1028,8 +1035,25 @@ const form = { nome: '', modo: 'local', mesa: '', bairro: '', rua: '', numero: '
 
 function save() { try { localStorage.setItem(KEY, JSON.stringify(cart)); } catch (e) {} }
 const itemTotal = it => it.preco * it.qty;
+const BAIRROS = [
+  ['Água Bela', 8], ['Alto da Aliança', 8], ['Alto da Maravilha', 7], ['Alto do Alencar', 7], ['Alto do Cruzeiro', 7],
+  ['Angari', 7], ['Antônio Conselheiro', 8], ['Antônio Guilhermino', 8], ['Argemiro', 8], ['Cajueiro', 7],
+  ['Castelo Branco', 7], ['Centenário', 6], ['Centro', 6], ['Country Club', 8], ['Dom José Rodrigues', 8],
+  ['Dom Tomás', 9], ['Expedito Nascimento', 9], ['Jardim Flórida', 7], ['Jardim Novo Encontro', 9], ['Jardim Primavera', 8],
+  ['Jardim São Paulo', 7], ['Jardim Universitário', 7], ['Jardim Vitória', 8], ['João Paulo II', 8], ['João XXIII', 7],
+  ['Lomanto Júnior', 6], ['Malhada da Areia', 9], ['Maringá', 7], ['Monte Castelo', 6], ['Monte Serrat', 6],
+  ['Mussambê', 9], ['Nossa Senhora da Penha', 7], ['Nossa Senhora das Grotas', 8], ['Nova Esperança', 8], ['Nova Vitória', 9],
+  ['Novo Encontro', 9], ['Padre Vicente', 7], ['Palmares', 7], ['Parque Jatobá', 8], ['Parque Residencial', 7],
+  ['Pedra do Lord', 9], ['Piranga', 6], ['Piranga I', 7], ['Piranga II', 7], ['Quidé', 7],
+  ['Quidezinho', 8], ['Reta do Angari', 7], ['Santo Antônio', 6], ['São Geraldo', 6], ['Sol Levante', 8],
+  ['Sol Nascente', 8], ['Tabuleiro', 9], ['Tancredo Neves', 8], ['Vila Tiradentes', 6]
+]; // taxas de exemplo (R$ 6 a 9), troque quando tiver os valores reais
+
 const total = () => cart.reduce((s, it) => s + itemTotal(it), 0);
 const count = () => cart.reduce((s, it) => s + it.qty, 0);
+const bairroOk = () => BAIRROS.find(b => b[0] === form.bairro);
+const taxaEntrega = () => (form.modo === 'entregar' && bairroOk()) ? bairroOk()[1] : 0;
+const totalGeral = () => total() + taxaEntrega();
 
 function setMoney(el, to) {
   if (!el) return;
@@ -1683,22 +1707,23 @@ function renderCart() {
       <div class="field" id="fMesaW" ${form.modo === 'local' ? '' : 'hidden'}>
         <input id="fMesa" type="text" placeholder="Número da mesa — ex.: 12" value="${esc(form.mesa)}"></div>
       <div class="field" id="fEndW" ${ent ? '' : 'hidden'}>
-        <input id="fBairro" type="text" placeholder="Bairro" value="${esc(form.bairro)}" style="margin-bottom:8px">
+        <select id="fBairro" class="sel" style="margin-bottom:8px"><option value="" ${bairroOk() ? '' : 'selected'} disabled>Selecione o bairro</option>${BAIRROS.map(b => `<option value="${esc(b[0])}" ${b[0] === form.bairro ? 'selected' : ''}>${esc(b[0])} · ${brl(b[1])}</option>`).join('')}</select>
         <div style="display:flex;gap:8px">
           <input id="fRua" type="text" placeholder="Rua" value="${esc(form.rua)}" style="flex:2">
           <input id="fNumero" type="text" placeholder="Nº" value="${esc(form.numero)}" style="flex:1;min-width:0">
         </div>
-        <p class="note">A taxa de entrega é combinada no WhatsApp.</p></div>
+        <p class="note">Escolha o bairro para ver a taxa de entrega.</p></div>
       <div class="field" id="fPagW" ${ent ? '' : 'hidden'}><span class="lbl">Pagamento</span>
         <div class="seg">${seg('pag', [['pix', 'Pix'], ['cartao', 'Cartão'], ['dinheiro', 'Dinheiro']], form.pag)}</div></div>
       <div class="field" id="fTrocoW" ${ent && form.pag === 'dinheiro' ? '' : 'hidden'}>
         <input id="fTroco" type="text" placeholder="Troco para? — ex.: 50" value="${esc(form.troco)}"></div>
       <div class="field"><textarea id="fObs" maxlength="200" placeholder="Observação (opcional)">${esc(form.obs)}</textarea></div>`;
-    foot.innerHTML = `<div class="total">
+    foot.innerHTML = `<div class="total ent" id="cEntregaRow" ${taxaEntrega() ? '' : 'hidden'}><span>Entrega${form.bairro ? ' · ' + esc(form.bairro) : ''}</span><b id="cEntrega">${brl(taxaEntrega())}</b></div>
+    <div class="total">
       <span style="display:flex;align-items:baseline;gap:16px">
         <button type="button" class="link vp-btn" data-a="toggleItems" style="padding:0">Ver pedido</button>
       </span>
-      <span style="text-align:right"><small style="display:block;color:var(--muted);font-size:13px;font-weight:600">Total</small><b id="cTotal" style="font-size:24px">${brl(total())}</b></span>
+      <span style="text-align:right"><small style="display:block;color:var(--muted);font-size:13px;font-weight:600">Total</small><b id="cTotal" style="font-size:24px">${brl(totalGeral())}</b></span>
     </div>
       <button class="btn btn--block" data-a="send">Enviar pedido no WhatsApp</button>`;
   }
@@ -1721,6 +1746,7 @@ $('#cart').addEventListener('click', e => {
     $('#fEndW').hidden = form.modo !== 'entregar';
     $('#fPagW').hidden = form.modo !== 'entregar';
     $('#fTrocoW').hidden = !(form.modo === 'entregar' && form.pag === 'dinheiro');
+    atualizaTotaisCheckout();
     return;
   }
   const a = t.dataset.a, it = cart.find(x => x.uid === +t.dataset.u);
@@ -1753,7 +1779,18 @@ $('#cart').addEventListener('click', e => {
 $('#cart').addEventListener('input', e => {
   const m = { fNome: 'nome', fMesa: 'mesa', fBairro: 'bairro', fRua: 'rua', fNumero: 'numero', fTroco: 'troco', fObs: 'obs' }[e.target.id];
   if (m) { form[m] = e.target.value; e.target.classList.remove('err'); }
+  if (e.target.id === 'fBairro') atualizaTotaisCheckout();
 });
+
+function atualizaTotaisCheckout() {
+  const row = $('#cEntregaRow');
+  if (!row) return;
+  const taxa = taxaEntrega();
+  row.hidden = !taxa;
+  row.querySelector('span').textContent = 'Entrega' + (form.bairro ? ' · ' + form.bairro : '');
+  $('#cEntrega').textContent = brl(taxa);
+  $('#cTotal').textContent = brl(totalGeral());
+}
 
 /* ==========================================================================
    CONFIGURAÇÃO DA API SUPABASE (COM CHAVE OFICIAL JWT ANON)
@@ -2190,7 +2227,7 @@ async function sendOrder() {
   let bad = null;
   if (!form.nome.trim()) bad = $('#fNome');
   else if (form.modo === 'local' && !form.mesa.trim()) bad = $('#fMesa');
-  else if (form.modo === 'entregar' && !form.bairro.trim()) bad = $('#fBairro');
+  else if (form.modo === 'entregar' && !bairroOk()) bad = $('#fBairro');
   else if (form.modo === 'entregar' && !form.rua.trim()) bad = $('#fRua');
   if (bad) { bad.classList.add('err'); bad.focus(); shake(bad); toast('Preencha os campos em destaque'); return; }
 
@@ -2250,7 +2287,8 @@ async function sendOrder() {
   });
 
   msg += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `Total: ${brl(total())}${ent ? ' (+ taxa a combinar)' : ''}\n`;
+  if (ent) msg += `Entrega (${form.bairro}): ${brl(taxaEntrega())}\n`;
+  msg += `Total: ${brl(totalGeral())}\n`;
 
   if (ent) {
     msg += `Pagamento: ${pag}`;
@@ -2265,7 +2303,7 @@ async function sendOrder() {
   msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `    CNPJ: 12.345.678/0001-90\n`;
 
-  const pedidoCriado = await salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100, msg);
+  const pedidoCriado = await salvarPedidoSupabase(form.nome.trim(), Math.round(totalGeral() * 100) / 100, msg);
 
   if (btnSend) {
     btnSend.disabled = false;
@@ -2281,7 +2319,7 @@ async function sendOrder() {
     ref: pedidoCriado.ref,
     sync: pedidoCriado.sincroniza,
     cliente: form.nome.trim(),
-    total: total(),
+    total: totalGeral(),
     detalhes: msg,
     modo: form.modo,
     status: 'novo',
