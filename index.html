@@ -390,17 +390,17 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
 #cart .field { margin-bottom: 16px; }
 #fObs { min-height: 73px; height: 73px; }
 .fsum { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; margin-bottom: 10px; }
-.vp-ico { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid var(--line); background: var(--card-2); color: var(--gold); transition: border-color .2s, transform .15s; }
-.vp-ico:active { transform: scale(.94); }
+.vp-ico { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 13px 0 10px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card-2); color: var(--gold); font-size: 13px; font-weight: 700; transition: border-color .2s, transform .15s; }
+.vp-ico span { color: var(--cream); }
+.vp-ico:active { transform: scale(.95); }
 .vp-ico:hover { border-color: var(--gold); }
-.vp-ico svg { width: 20px; height: 20px; }
-.fs-right { display: grid; justify-items: end; gap: 1px; }
-.fs-ent { display: inline-flex; align-items: baseline; gap: 6px; font-size: 13px; color: var(--muted); }
+.vp-ico svg { width: 19px; height: 19px; flex: none; }
+.fs-right { display: grid; grid-template-columns: auto auto; justify-content: end; align-items: baseline; column-gap: 8px; }
+.fs-ent { grid-column: 2; display: inline-flex; align-items: baseline; gap: 6px; font-size: 13px; color: var(--muted); }
 .fs-ent[hidden] { display: none; }
 .fs-ent b { color: var(--cream); font-size: 14px; }
-.fs-tot { display: inline-flex; align-items: baseline; gap: 8px; }
-.fs-tot small { color: var(--muted); font-size: 13px; font-weight: 600; }
-.fs-tot b { font-size: 24px; }
+.fs-tl { font-size: 39px; font-weight: 800; line-height: 1; color: var(--gold); }
+.fs-right #cTotal { font-size: 24px; color: var(--gold); }
 
 /* Seletor de bairro (no estilo da página) */
 .sel-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 13px 14px; border-radius: 14px; font: inherit; text-align: left; color: var(--cream); background: var(--card-2); border: 1.5px solid var(--line); transition: border-color .2s; }
@@ -1761,10 +1761,10 @@ function renderCart() {
         <input id="fTroco" type="text" placeholder="Troco para? — ex.: 50" value="${esc(form.troco)}"></div>
       <div class="field"><textarea id="fObs" maxlength="200" placeholder="Observação (opcional)">${esc(form.obs)}</textarea></div>`;
     foot.innerHTML = `<div class="fsum">
-      <button type="button" class="vp-ico" data-a="toggleItems" aria-label="Ver pedido" title="Ver pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></button>
+      <button type="button" class="vp-ico" data-a="toggleItems" aria-label="Ver pedido" title="Ver pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span>Pedido</span></button>
       <div class="fs-right">
         <span class="fs-ent" id="cEntregaRow" ${taxaEntrega() ? '' : 'hidden'}>Entrega <b id="cEntrega">${brl(taxaEntrega())}</b></span>
-        <span class="fs-tot"><small>Total</small><b id="cTotal">${brl(totalGeral())}</b></span>
+        <small class="fs-tl">Total</small><b id="cTotal">${brl(totalGeral())}</b>
       </div>
     </div>
       <button class="btn btn--block" data-a="send">Enviar pedido no WhatsApp</button>`;
