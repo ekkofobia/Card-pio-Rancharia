@@ -385,6 +385,26 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
 }
 
 
+
+/* Checkout compacto (sem rolagem) */
+#cart .field { margin-bottom: 9px; }
+#cart .seg .opt { min-height: 44px; }
+#cart input[type="text"], #cart .sel-btn { padding-top: 11px; padding-bottom: 11px; }
+#cart #step-body, #cart .body { padding-top: 14px; padding-bottom: 12px; }
+#fObs { min-height: 54px; height: 54px; }
+.fsum { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; margin-bottom: 10px; }
+.vp-ico { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid var(--line); background: var(--card-2); color: var(--gold); transition: border-color .2s, transform .15s; }
+.vp-ico:active { transform: scale(.94); }
+.vp-ico:hover { border-color: var(--gold); }
+.vp-ico svg { width: 20px; height: 20px; }
+.fs-right { display: grid; justify-items: end; gap: 1px; }
+.fs-ent { display: inline-flex; align-items: baseline; gap: 6px; font-size: 13px; color: var(--muted); }
+.fs-ent[hidden] { display: none; }
+.fs-ent b { color: var(--cream); font-size: 14px; }
+.fs-tot { display: inline-flex; align-items: baseline; gap: 8px; }
+.fs-tot small { color: var(--muted); font-size: 13px; font-weight: 600; }
+.fs-tot b { font-size: 24px; }
+
 /* Seletor de bairro (no estilo da página) */
 .sel-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 13px 14px; border-radius: 14px; font: inherit; text-align: left; color: var(--cream); background: var(--card-2); border: 1.5px solid var(--line); transition: border-color .2s; }
 .sel-btn:focus-visible, .sel-btn:hover { border-color: var(--gold); }
@@ -613,7 +633,7 @@ body.print-mode main {
   height: 100dvh; 
   max-height: 100dvh;
   overflow: hidden; 
-  padding: 4px 8px 6px !important;
+  padding: calc(30px + env(safe-area-inset-top, 0px)) 8px 6px !important;
   display: flex; 
   flex-direction: column; 
   justify-content: flex-start;
@@ -1729,28 +1749,28 @@ function renderCart() {
     const ent = form.modo === 'entregar';
     body.innerHTML = `
       <div class="field"><input id="fNome" type="text" placeholder="Seu nome" value="${esc(form.nome)}"></div>
-      <div class="field"><span class="lbl">Como quer receber?</span>
+      <div class="field">
         <div class="seg">${seg('modo', [['local', 'Comer aqui'], ['retirar', 'Retirar'], ['entregar', 'Entrega']], form.modo)}</div></div>
       <div class="field" id="fMesaW" ${form.modo === 'local' ? '' : 'hidden'}>
         <input id="fMesa" type="text" placeholder="Número da mesa — ex.: 12" value="${esc(form.mesa)}"></div>
       <div class="field" id="fEndW" ${ent ? '' : 'hidden'}>
-        <button type="button" id="fBairro" class="sel-btn ${bairroOk() ? '' : 'vazio'}" data-a="bairro"><span class="sel-v">${bairroOk() ? esc(form.bairro) : 'Selecione o bairro'}</span>${bairroOk() ? `<small>${brl(bairroOk()[1])}</small>` : ''}</button>
+        <button type="button" id="fBairro" class="sel-btn ${bairroOk() ? '' : 'vazio'}" data-a="bairro" style="margin-bottom:8px"><span class="sel-v">${bairroOk() ? esc(form.bairro) : 'Selecione o bairro'}</span>${bairroOk() ? `<small>${brl(bairroOk()[1])}</small>` : ''}</button>
         <div style="display:flex;gap:8px">
           <input id="fRua" type="text" placeholder="Rua" value="${esc(form.rua)}" style="flex:2">
           <input id="fNumero" type="text" placeholder="Nº" value="${esc(form.numero)}" style="flex:1;min-width:0">
         </div>
-        <p class="note">Escolha o bairro para ver a taxa de entrega.</p></div>
-      <div class="field" id="fPagW" ${ent ? '' : 'hidden'}><span class="lbl">Pagamento</span>
+        </div>
+      <div class="field" id="fPagW" ${ent ? '' : 'hidden'}>
         <div class="seg">${seg('pag', [['pix', 'Pix'], ['cartao', 'Cartão'], ['dinheiro', 'Dinheiro']], form.pag)}</div></div>
       <div class="field" id="fTrocoW" ${ent && form.pag === 'dinheiro' ? '' : 'hidden'}>
         <input id="fTroco" type="text" placeholder="Troco para? — ex.: 50" value="${esc(form.troco)}"></div>
       <div class="field"><textarea id="fObs" maxlength="200" placeholder="Observação (opcional)">${esc(form.obs)}</textarea></div>`;
-    foot.innerHTML = `<div class="total ent" id="cEntregaRow" ${taxaEntrega() ? '' : 'hidden'}><span>Entrega${form.bairro ? ' · ' + esc(form.bairro) : ''}</span><b id="cEntrega">${brl(taxaEntrega())}</b></div>
-    <div class="total">
-      <span style="display:flex;align-items:baseline;gap:16px">
-        <button type="button" class="link vp-btn" data-a="toggleItems" style="padding:0">Ver pedido</button>
-      </span>
-      <span style="text-align:right"><small style="display:block;color:var(--muted);font-size:13px;font-weight:600">Total</small><b id="cTotal" style="font-size:24px">${brl(totalGeral())}</b></span>
+    foot.innerHTML = `<div class="fsum">
+      <button type="button" class="vp-ico" data-a="toggleItems" aria-label="Ver pedido" title="Ver pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg></button>
+      <div class="fs-right">
+        <span class="fs-ent" id="cEntregaRow" ${taxaEntrega() ? '' : 'hidden'}>Entrega <b id="cEntrega">${brl(taxaEntrega())}</b></span>
+        <span class="fs-tot"><small>Total</small><b id="cTotal">${brl(totalGeral())}</b></span>
+      </div>
     </div>
       <button class="btn btn--block" data-a="send">Enviar pedido no WhatsApp</button>`;
   }
@@ -1852,7 +1872,6 @@ function atualizaTotaisCheckout() {
   if (!row) return;
   const taxa = taxaEntrega();
   row.hidden = !taxa;
-  row.querySelector('span').textContent = 'Entrega' + (form.bairro ? ' · ' + form.bairro : '');
   $('#cEntrega').textContent = brl(taxa);
   $('#cTotal').textContent = brl(totalGeral());
 }
