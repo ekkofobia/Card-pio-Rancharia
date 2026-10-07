@@ -25,7 +25,8 @@ window.EDITAVEL = {
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Rancharia">
-<link rel="manifest" href="data:application/manifest+json,%7B%22name%22%3A%22Rancharia%20Delivery%22%2C%22short_name%22%3A%22Rancharia%22%2C%22start_url%22%3A%22.%22%2C%22display%22%3A%22standalone%22%2C%22background_color%22%3A%22%232a1509%22%2C%22theme_color%22%3A%22%232a1509%22%7D">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@400;500;600;700;800&family=Yellowtail&display=swap" rel="stylesheet">
@@ -2123,34 +2124,6 @@ $('#trackShortcuts').addEventListener('click', e => {
   const standalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   if (standalone()) { btn.style.display = 'none'; return; }
 
-  // manifest gerado na hora, com ícones (o antigo, em data:, impedia o Chrome de oferecer a instalação)
-  try {
-    const mkIcon = size => {
-      const c = document.createElement('canvas'); c.width = c.height = size;
-      const g = c.getContext('2d');
-      g.fillStyle = '#2a1509'; g.fillRect(0, 0, size, size);
-      g.fillStyle = '#f2c46d'; g.font = `900 ${Math.round(size * .62)}px Impact, "Arial Black", sans-serif`;
-      g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('R', size / 2, size * .54);
-      return c.toDataURL('image/png');
-    };
-    const i192 = mkIcon(192), i512 = mkIcon(512);
-    const base = location.origin + location.pathname;
-    const man = {
-      name: 'Rancharia Delivery', short_name: 'Rancharia', id: base, start_url: base,
-      scope: base.replace(/[^/]*$/, ''), display: 'standalone', orientation: 'portrait',
-      background_color: '#2a1509', theme_color: '#2a1509', lang: 'pt-BR',
-      icons: [
-        { src: i192, sizes: '192x192', type: 'image/png', purpose: 'any' },
-        { src: i512, sizes: '512x512', type: 'image/png', purpose: 'any' },
-        { src: i512, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
-      ]
-    };
-    const url = URL.createObjectURL(new Blob([JSON.stringify(man)], { type: 'application/manifest+json' }));
-    let link = document.querySelector('link[rel="manifest"]');
-    if (!link) { link = document.createElement('link'); link.rel = 'manifest'; document.head.appendChild(link); }
-    link.href = url;
-    const ai = document.createElement('link'); ai.rel = 'apple-touch-icon'; ai.href = mkIcon(180); document.head.appendChild(ai);
-  } catch (e) {}
   if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
 
   window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPwaPrompt = e; });
