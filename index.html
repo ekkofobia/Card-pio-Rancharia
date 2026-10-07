@@ -387,11 +387,8 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
 
 
 /* Checkout compacto (sem rolagem) */
-#cart .field { margin-bottom: 9px; }
-#cart .seg .opt { min-height: 44px; }
-#cart input[type="text"], #cart .sel-btn { padding-top: 11px; padding-bottom: 11px; }
-#cart #step-body, #cart .body { padding-top: 14px; padding-bottom: 12px; }
-#fObs { min-height: 54px; height: 54px; }
+#cart .field { margin-bottom: 16px; }
+#fObs { min-height: 73px; height: 73px; }
 .fsum { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; margin-bottom: 10px; }
 .vp-ico { width: 38px; height: 38px; display: grid; place-items: center; border-radius: 50%; border: 1.5px solid var(--line); background: var(--card-2); color: var(--gold); transition: border-color .2s, transform .15s; }
 .vp-ico:active { transform: scale(.94); }
@@ -592,7 +589,8 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .faq details p { padding: 0 0 10px; color: var(--muted); font-size: 13px; line-height: 1.4; }
 .pills { display: flex; flex-wrap: nowrap; gap: 6px; }
 .pill { flex: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 0 6px; border-radius: 999px; border: 1.5px solid var(--gold); color: var(--gold); font-weight: 600; font-size: 12px; text-decoration: none; }
-.mk { padding: 12px 14px; text-align: center; border-radius: 16px; background: var(--card-2); border: 1px solid var(--gold); }
+.mk-foot { display: flex; justify-content: center; padding: 10px 20px calc(14px + env(safe-area-inset-bottom)); }
+.mk-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0 22px; border-radius: 999px; background: var(--gold); color: #2a1509; font-weight: 800; font-size: 14px; text-decoration: none; }
 .mk p { margin-bottom: 10px; font-size: 17px; font-weight: 700; }
 .hrs { display: grid; gap: 3px; }
 .hr-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
@@ -600,7 +598,7 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 
 #lojaBar{position:fixed;left:0;right:0;bottom:0;z-index:9998;background:#7a1f1f;color:#fff;text-align:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));font-weight:600;font-size:15px;box-shadow:0 -6px 20px #0006}
 #lojaBar[hidden],#lojaModal[hidden]{display:none}
-body.fechada #cartBar{display:none!important}.mk-line{position:absolute;left:0;right:0;bottom:100px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 14px;white-space:nowrap}.mk-line span{color:#fff;font-weight:800;font-size:12.5px;line-height:1}.mk-line a{display:inline-flex;align-items:center;min-height:28px;padding:0 13px;border-radius:999px;background:var(--gold);color:#2a1509;font-weight:800;font-size:11.5px;text-decoration:none}body.print-mode .mk-line{display:none}body.fechada{padding-bottom:70px}
+body.fechada #cartBar{display:none!important}.mk-line{position:absolute;left:0;right:0;bottom:100px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 14px;white-space:nowrap}.mk-line span{color:#fff;font-weight:800;font-size:12.5px;line-height:1}.mk-line a{color:var(--gold);font-weight:800;font-size:12.5px;text-decoration:underline;text-underline-offset:3px}body.print-mode .mk-line{display:none}body.fechada{padding-bottom:70px}
 #lojaModal{position:fixed;inset:0;z-index:9999;background:#000a;display:grid;place-items:center;padding:24px}
 #lojaModal>div{background:#341d0f;color:#f7ecd8;border:1px solid rgba(242,196,109,.4);border-radius:22px;padding:24px;max-width:340px;text-align:center;line-height:1.4}
 #lojaModal b{display:block;font-size:22px;margin-bottom:8px;color:#f2c46d}
@@ -906,7 +904,7 @@ body.print-mode .print-salad small {
   </section>
 </main>
 
-<footer><div class="wrap">Rancharia · Pedidos pelo WhatsApp</div><div class="mk-line"><span>Tenha um site assim.</span><a id="mkFoot" target="_blank" rel="noopener">Quero um site assim</a></div></footer>
+<footer><div class="wrap">© 2026 Rancharia · Todos os direitos reservados</div><div class="mk-line"><a id="mkFoot" target="_blank" rel="noopener">Criar site</a></div></footer>
 
 <button id="cartBar" aria-label="Ver pedido">
   <span class="info">
@@ -987,11 +985,8 @@ body.print-mode .print-salad small {
       <div class="msec"><h3>Horário de funcionamento</h3><div class="hrs" id="horas"></div></div>
       <div class="msec"><h3>Perguntas frequentes</h3><div class="faq" id="faq"></div></div>
       <div class="msec"><div class="pills" id="sites"></div></div>
-      <div class="mk">
-        <p>Tenha um site assim.</p>
-        <a class="btn btn--block" id="mkBtn" target="_blank" rel="noopener" style="min-height:44px">Quero um site assim</a>
-      </div>
     </div>
+    <div class="mk-foot"><a id="mkBtn" class="mk-pill" target="_blank" rel="noopener">Criar site</a></div>
   </div>
 </div>
 
@@ -1749,7 +1744,7 @@ function renderCart() {
     const ent = form.modo === 'entregar';
     body.innerHTML = `
       <div class="field"><input id="fNome" type="text" placeholder="Seu nome" value="${esc(form.nome)}"></div>
-      <div class="field">
+      <div class="field"><span class="lbl">Como quer receber?</span>
         <div class="seg">${seg('modo', [['local', 'Comer aqui'], ['retirar', 'Retirar'], ['entregar', 'Entrega']], form.modo)}</div></div>
       <div class="field" id="fMesaW" ${form.modo === 'local' ? '' : 'hidden'}>
         <input id="fMesa" type="text" placeholder="Número da mesa — ex.: 12" value="${esc(form.mesa)}"></div>
@@ -1760,7 +1755,7 @@ function renderCart() {
           <input id="fNumero" type="text" placeholder="Nº" value="${esc(form.numero)}" style="flex:1;min-width:0">
         </div>
         </div>
-      <div class="field" id="fPagW" ${ent ? '' : 'hidden'}>
+      <div class="field" id="fPagW" ${ent ? '' : 'hidden'}><span class="lbl">Pagamento</span>
         <div class="seg">${seg('pag', [['pix', 'Pix'], ['cartao', 'Cartão'], ['dinheiro', 'Dinheiro']], form.pag)}</div></div>
       <div class="field" id="fTrocoW" ${ent && form.pag === 'dinheiro' ? '' : 'hidden'}>
         <input id="fTroco" type="text" placeholder="Troco para? — ex.: 50" value="${esc(form.troco)}"></div>
