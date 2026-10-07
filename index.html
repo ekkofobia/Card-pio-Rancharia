@@ -382,13 +382,35 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
   padding: 14px; white-space: pre-wrap; font: 12px/1.45 ui-monospace, Menlo, monospace;
 }
 
+/* Ícones dos atalhos (mesmo estilo dos de status) */
+.btn-shortcut i { color: var(--gold); display: block; }
+.btn-shortcut .sv { width: 24px; height: 24px; }
+.sv-bub { opacity: 0; animation: svBub 2s ease-in infinite; } .sv-bub.b2 { animation-delay: 1s; }
+@keyframes svBub { 0% { opacity: 0; transform: translateY(2px); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(-4px); } }
+.sv-slide { animation: svSlide 1.8s ease-in-out infinite; }
+@keyframes svSlide { 0%, 100% { transform: translateX(0); } 50% { transform: translateX(7px); } }
+.sv-sweep { transform-origin: 14px 3px; animation: svSweep 1.6s ease-in-out infinite; }
+@keyframes svSweep { 0%, 100% { transform: rotate(-8deg); } 50% { transform: rotate(8deg); } }
+.sv-ring { transform-origin: 12px 4px; animation: svRing 2.4s ease-in-out infinite; }
+@keyframes svRing { 0%, 55%, 100% { transform: rotate(0); } 10% { transform: rotate(14deg); } 20% { transform: rotate(-12deg); } 30% { transform: rotate(8deg); } 40% { transform: rotate(-5deg); } }
+.sv-dot { animation: svDot 1.2s ease-in-out infinite; } .sv-dot.d2 { animation-delay: .2s; } .sv-dot.d3 { animation-delay: .4s; }
+@keyframes svDot { 0%, 100% { opacity: .25; } 50% { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .sv-bub { opacity: 1; } }
+
+/* Ajuda de instalação do app */
+#pwaHelp { position: fixed; inset: 0; z-index: 95; display: none; align-items: flex-end; justify-content: center; background: rgba(0, 0, 0, .55); padding: 14px; }
+#pwaHelp.open { display: flex; }
+.pwa-card { width: 100%; max-width: 420px; background: var(--card-2); border: 1px solid var(--line); border-radius: 22px; padding: 20px; color: var(--cream); animation: pedIn .3s ease; }
+.pwa-card h3 { font-size: 20px; margin-bottom: 10px; color: var(--gold); }
+.pwa-card ol { margin: 0 0 16px; padding-left: 20px; display: grid; gap: 8px; font-size: 15px; line-height: 1.4; }
+
 /* Ícones de status (SVG animado) */
 .sv { display: block; overflow: visible; }
 .ped-ico .sv { width: 34px; height: 34px; }
 .trk-ico .sv { width: 24px; height: 24px; }
 .btn-track-status.trk-ico { position: relative; width: 40px; height: 40px; padding: 0; gap: 0; justify-content: center; border-radius: 50%; }
 .trk-badge {
-  position: absolute; top: -7px; right: -9px; padding: 1px 5px; border-radius: 99px;
+  position: absolute; top: -9px; right: -6px; z-index: 2; max-width: 92px; padding: 1px 6px; border-radius: 99px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   background: var(--bg); color: var(--gold); border: 1.5px solid var(--gold);
   font-size: 9.5px; font-weight: 800; line-height: 1.3; letter-spacing: .02em; text-transform: none;
 }
@@ -499,7 +521,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 #toast {
   position: fixed; left: 50%; top: 76px; z-index: 90; transform: translate(-50%, -20px); opacity: 0; pointer-events: none;
   padding: 10px 18px; border-radius: 999px; background: var(--cream); color: var(--ink); font-weight: 700; font-size: 15px;
-  transition: .3s; white-space: nowrap; }
+  transition: .3s; white-space: normal; width: max-content; max-width: calc(100vw - 28px); text-align: center; line-height: 1.3; border-radius: 18px; }
 #toast.show { opacity: 1; transform: translate(-50%, 0); }
 
 /* Menu Hambúrguer */
@@ -878,11 +900,11 @@ body.print-mode .print-salad small {
     <div class="body" id="trackBody"></div>
     <div class="foot">
       <div class="track-shortcuts-grid" id="trackShortcuts" aria-label="Atalhos úteis">
-        <button type="button" class="btn-shortcut" data-sc="bebidas"><i>🥤</i><span>Bebidas</span></button>
-        <button type="button" class="btn-shortcut" data-sc="conta"><i>💳</i><span>Pedir conta</span></button>
-        <button type="button" class="btn-shortcut" data-sc="limpar"><i>🧹</i><span>Limpar mesa</span></button>
-        <button type="button" class="btn-shortcut" data-sc="garcom"><i>🙋</i><span>Chamar garçom</span></button>
-        <button type="button" class="btn-shortcut" data-sc="loja"><i>💬</i><span>Falar c/ loja</span></button>
+        <button type="button" class="btn-shortcut" data-sc="bebidas"><i><svg class="sv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10l-1.2 12.2a1.5 1.5 0 0 1-1.5 1.3H9.7a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M6 7h12"/><path d="M13 7l1.4-4 2.4-.6"/><path class="sv-bub" d="M10.5 16h.01"/><path class="sv-bub b2" d="M13.2 14h.01"/></svg></i><span>Bebidas</span></button>
+        <button type="button" class="btn-shortcut" data-sc="conta"><i><svg class="sv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path class="sv-slide" d="M7 15h4"/></svg></i><span>Pedir conta</span></button>
+        <button type="button" class="btn-shortcut" data-sc="limpar"><i><svg class="sv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="sv-sweep"><path d="M14 3l-3.5 8"/><path d="M7.5 11h8l1.5 9H6z"/><path d="M10 15l-.5 5M13 15l.3 5"/></g></svg></i><span>Limpar mesa</span></button>
+        <button type="button" class="btn-shortcut" data-sc="garcom"><i><svg class="sv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="sv-ring"><path d="M6 17h12l-1.5-2.5V10a4.5 4.5 0 0 0-9 0v4.5z"/></g><path d="M12 4V3"/><path d="M10.2 20a2 2 0 0 0 3.6 0"/></svg></i><span>Chamar garçom</span></button>
+        <button type="button" class="btn-shortcut" data-sc="loja"><i><svg class="sv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path class="sv-dot" d="M8.5 10h.01"/><path class="sv-dot d2" d="M12 10h.01"/><path class="sv-dot d3" d="M15.5 10h.01"/></svg></i><span>Falar c/ loja</span></button>
       </div>
       <button type="button" class="btn btn--block" id="btnBackToMenu">Voltar ao Cardápio</button>
     </div>
@@ -1798,9 +1820,14 @@ try {
   const limite = Date.now() - 24 * 3600 * 1000;
   orders = orders.filter(o => o && o.ref && new Date(o.created_at).getTime() > limite).slice(0, 15);
 } catch (e) { orders = []; }
-selectedRef = orders[0] ? orders[0].ref : null;
+try {
+  const sv = localStorage.getItem('rancharia_sel_v1');
+  selectedRef = (sv && orders.find(o => o.ref === sv)) ? sv : (orders[0] ? orders[0].ref : null);
+} catch (e) { selectedRef = orders[0] ? orders[0].ref : null; }
 
-function saveOrders() { try { localStorage.setItem(KEY_ORDERS, JSON.stringify(orders)); } catch (e) {} }
+function saveSel() { try { localStorage.setItem('rancharia_sel_v1', selectedRef || ''); } catch (e) {} }
+function saveOrders() { try { localStorage.setItem(KEY_ORDERS, JSON.stringify(orders)); } catch (e) {} saveSel(); }
+const nomeCurto = o => { const n = String(o.cliente || '').trim().split(/\s+/)[0] || 'Pedido'; return n.length > 9 ? n.slice(0, 8) + '…' : n; };
 const ordersAtivos = () => orders.filter(o => !STATUS_FINAL.includes(o.status));
 const selOrder = () => orders.find(o => o.ref === selectedRef) || orders[0] || null;
 const codigoPedido = o => '#' + String(o.ref || '').slice(0, 4);
@@ -1868,16 +1895,16 @@ function updateHeaderStatusButton() {
   const btn = $('#btnHeaderTrack');
   if (!btn) return;
   if (!orders.length) { btn.style.display = 'none'; return; }
-  const ativos = ordersAtivos();
-  const o = ativos[0] || orders[0];
+  const o = selOrder();
   const key = chaveStatus(o);
   const inf = infoEtapa(key, o);
   const sig = key + o.ref;
   btn.style.display = 'inline-flex';
   btn.className = `btn-track-status trk-ico ${inf.cls}`;
-  btn.setAttribute('aria-label', `Pedido ${codigoPedido(o)}: ${inf.label}`);
+  btn.setAttribute('aria-label', `Pedido de ${o.cliente}: ${inf.label}`);
+  btn.title = `${o.cliente} · ${inf.label}`;
   if (btn.dataset.sig !== sig) { $('#svgHeaderStatus').innerHTML = svgStatus(key); btn.dataset.sig = sig; }
-  $('#txtHeaderStatus').textContent = codigoPedido(o);
+  $('#txtHeaderStatus').textContent = nomeCurto(o);
 }
 
 /* ---------- Sincronização (consulta só o status pelo código do pedido) ---------- */
@@ -2039,15 +2066,13 @@ function openPostCheckout() {
 }
 
 $('#btnHeaderTrack').addEventListener('click', () => {
-  const a = ordersAtivos()[0];
-  if (a) selectedRef = a.ref;
   openPostCheckout();
 });
 $('#btnBackToMenu').addEventListener('click', () => { closeSheet($('#postCheckout')); renderExtras(); });
 
 $('#trackBody').addEventListener('click', e => {
   const chip = e.target.closest('.ped-chip');
-  if (chip) { selectedRef = chip.dataset.ref; renderSig = ''; renderPostCheckoutContent(); return; }
+  if (chip) { selectedRef = chip.dataset.ref; saveSel(); renderSig = ''; renderPostCheckoutContent(); updateHeaderStatusButton(); return; }
 
   const sf = e.target.closest('[data-a="sanfona"]');
   if (sf) {
@@ -2093,24 +2118,75 @@ $('#trackShortcuts').addEventListener('click', e => {
 });
 
 /* PWA INSTALL SETUP */
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPwaPrompt = e;
-  $('#btnInstallPwa').style.display = 'inline-flex';
-});
+(function setupPwa() {
+  const btn = $('#btnInstallPwa');
+  const standalone = () => window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  if (standalone()) { btn.style.display = 'none'; return; }
 
-$('#btnInstallPwa').addEventListener('click', async () => {
-  if (deferredPwaPrompt) {
-    deferredPwaPrompt.prompt();
-    const { outcome } = await deferredPwaPrompt.userChoice;
-    if (outcome === 'accepted') {
-      $('#btnInstallPwa').style.display = 'none';
+  // manifest gerado na hora, com ícones (o antigo, em data:, impedia o Chrome de oferecer a instalação)
+  try {
+    const mkIcon = size => {
+      const c = document.createElement('canvas'); c.width = c.height = size;
+      const g = c.getContext('2d');
+      g.fillStyle = '#2a1509'; g.fillRect(0, 0, size, size);
+      g.fillStyle = '#f2c46d'; g.font = `900 ${Math.round(size * .62)}px Impact, "Arial Black", sans-serif`;
+      g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('R', size / 2, size * .54);
+      return c.toDataURL('image/png');
+    };
+    const i192 = mkIcon(192), i512 = mkIcon(512);
+    const base = location.origin + location.pathname;
+    const man = {
+      name: 'Rancharia Delivery', short_name: 'Rancharia', id: base, start_url: base,
+      scope: base.replace(/[^/]*$/, ''), display: 'standalone', orientation: 'portrait',
+      background_color: '#2a1509', theme_color: '#2a1509', lang: 'pt-BR',
+      icons: [
+        { src: i192, sizes: '192x192', type: 'image/png', purpose: 'any' },
+        { src: i512, sizes: '512x512', type: 'image/png', purpose: 'any' },
+        { src: i512, sizes: '512x512', type: 'image/png', purpose: 'maskable' }
+      ]
+    };
+    const url = URL.createObjectURL(new Blob([JSON.stringify(man)], { type: 'application/manifest+json' }));
+    let link = document.querySelector('link[rel="manifest"]');
+    if (!link) { link = document.createElement('link'); link.rel = 'manifest'; document.head.appendChild(link); }
+    link.href = url;
+    const ai = document.createElement('link'); ai.rel = 'apple-touch-icon'; ai.href = mkIcon(180); document.head.appendChild(ai);
+  } catch (e) {}
+  if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+
+  window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPwaPrompt = e; });
+  window.addEventListener('appinstalled', () => { btn.style.display = 'none'; deferredPwaPrompt = null; toast('App instalado!'); });
+
+  btn.addEventListener('click', async () => {
+    if (deferredPwaPrompt) {
+      deferredPwaPrompt.prompt();
+      const { outcome } = await deferredPwaPrompt.userChoice;
+      if (outcome === 'accepted') btn.style.display = 'none';
+      deferredPwaPrompt = null;
+      return;
     }
-    deferredPwaPrompt = null;
-  } else {
-    toast('Para instalar, toque em Compartilhar e "Adicionar à Tela de Início"');
+    abrirAjudaPwa();
+  });
+})();
+
+function abrirAjudaPwa() {
+  const ua = navigator.userAgent;
+  const ios = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  const embutido = /FBAN|FBAV|Instagram|Line\/|MicroMessenger|WhatsApp|TikTok/i.test(ua);
+  const passos = embutido
+    ? ['Abra este site no <b>Chrome</b> ou no <b>Safari</b> (menu ⋮ → “Abrir no navegador”).', 'Depois toque em <b>App</b> de novo.']
+    : ios
+      ? ['Toque em <b>Compartilhar</b> (quadrado com seta pra cima).', 'Escolha <b>Adicionar à Tela de Início</b>.']
+      : ['Toque no menu <b>⋮</b> do navegador.', 'Escolha <b>Instalar app</b> ou <b>Adicionar à tela inicial</b>.'];
+  let m = $('#pwaHelp');
+  if (!m) {
+    m = document.createElement('div'); m.id = 'pwaHelp';
+    m.innerHTML = '<div class="pwa-card" role="dialog" aria-modal="true"><h3>Instalar o app</h3><ol id="pwaSteps"></ol><button type="button" class="btn btn--block" id="pwaOk">Entendi</button></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', e => { if (e.target === m || e.target.id === 'pwaOk') m.classList.remove('open'); });
   }
-});
+  $('#pwaSteps').innerHTML = passos.map(p => `<li>${p}</li>`).join('');
+  m.classList.add('open');
+}
 
 async function sendOrder() {
   let bad = null;
