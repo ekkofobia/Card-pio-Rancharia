@@ -308,6 +308,10 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
 .ped-chip b { font-size: 13.5px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .ped-chip small { font-size: 11px; line-height: 1.25; color: var(--muted); display: flex; align-items: center; gap: 6px; }
 .ped-chip.on { border-color: var(--gold); background: rgba(242, 196, 109, .12); }
+.ped-chip { position: relative; }
+.ped-chip.tem-x { padding-right: 34px; }
+.chip-x { position: absolute; top: 4px; right: 5px; width: 24px; height: 24px; display: grid; place-items: center; border-radius: 50%; font-size: 19px; line-height: 1; color: #f87171; background: rgba(248, 113, 113, .14); }
+.chip-x:active { transform: scale(.9); }
 .sdot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
 .sdot.st-analisando { background: #fde047; }
 .sdot.st-novo { background: #fb923c; }
@@ -2193,11 +2197,12 @@ function renderPostCheckoutContent() {
   const descTxt = (cancelado && o.motivo) ? `Motivo: ${o.motivo}` : inf.desc;
   $('#trackSubtitle').textContent = descTxt;
 
-  const chips = orders.length > 1 ? `
+  const chips = (orders.length > 1 || orders.some(x => x.teste)) ? `
     <div class="ped-chips" role="tablist" aria-label="Seus pedidos">
       ${orders.map(x => {
         const ix = infoEtapa(chaveStatus(x), x);
-        return `<button type="button" role="tab" class="ped-chip ${x.ref === o.ref ? 'on' : ''}" data-ref="${x.ref}" aria-selected="${x.ref === o.ref}">
+        return `<button type="button" role="tab" class="ped-chip ${x.ref === o.ref ? 'on' : ''} ${x.teste ? 'tem-x' : ''}" data-ref="${x.ref}" aria-selected="${x.ref === o.ref}">
+          ${x.teste ? `<span class="chip-x" data-del-teste="${x.ref}" role="button" aria-label="Apagar pedido de teste">×</span>` : ''}
           <b>${esc(x.cliente)}</b>
           <small><i class="sdot ${ix.cls}"></i>${horaPedido(x)} · ${ix.short}</small>
         </button>`;
@@ -2280,6 +2285,14 @@ $('#btnHeaderTrack').addEventListener('click', () => {
 $('#btnBackToMenu').addEventListener('click', () => { closeSheet($('#postCheckout')); renderExtras(); });
 
 $('#trackBody').addEventListener('click', e => {
+  const delT = e.target.closest('[data-del-teste]');
+  if (delT) {
+    const ref = delT.dataset.delTeste;
+    orders = orders.filter(x => x.ref !== ref);
+    if (!orders.find(x => x.ref === selectedRef)) selectedRef = orders[0] ? orders[0].ref : null;
+    saveOrders(); renderSig = ''; renderPostCheckoutContent(); updateHeaderStatusButton();
+    return;
+  }
   const chip = e.target.closest('.ped-chip');
   if (chip) { selectedRef = chip.dataset.ref; saveSel(); renderSig = ''; renderPostCheckoutContent(); updateHeaderStatusButton(); return; }
 
