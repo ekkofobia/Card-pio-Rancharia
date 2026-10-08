@@ -405,6 +405,14 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
 
 /* Modo ADM */
 .adm-grid { display: grid; gap: 10px; margin-bottom: 16px; }
+.adm-ver { margin: 0 0 12px; font-size: 13px; color: var(--muted); }
+.adm-h { margin: 6px 0 10px; font-size: 12.5px; letter-spacing: .07em; text-transform: uppercase; color: var(--muted); }
+.adm-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.adm-chip { padding: 8px 13px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card-2); color: var(--cream); font-size: 13.5px; font-weight: 700; }
+.adm-chip.on { border-color: var(--gold); background: rgba(242, 196, 109, .15); color: var(--gold); }
+.adm-grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 16px; }
+.adm-mini { min-height: 46px; padding: 8px 10px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--card-2); color: var(--cream); font-size: 13.5px; font-weight: 700; line-height: 1.2; }
+.adm-mini:active { transform: scale(.97); }
 .adm-sec { background: var(--card-2) !important; color: var(--cream) !important; border: 1.5px solid var(--line) !important; box-shadow: none !important; }
 .adm-grid .btn[disabled] { opacity: .45; }
 .adm-out { display: grid; gap: 6px; }
@@ -854,6 +862,7 @@ body.print-mode .print-salad small {
   .sheet .panel { border-radius: 26px; border-bottom: 1px solid var(--line); max-height: 88vh; }
 }
 </style>
+<script>window.__erros=[];window.addEventListener('error',function(e){window.__erros.push((e.message||'erro')+' @linha '+(e.lineno||'?'))});window.addEventListener('unhandledrejection',function(e){window.__erros.push('promise: '+String((e.reason&&e.reason.message)||e.reason))});</script>
 </head>
 <body class="lock">
 
@@ -964,11 +973,41 @@ body.print-mode .print-salad small {
   <div class="panel">
     <div class="head"><h2 id="admTitle">Modo ADM<small>Ferramentas de teste do site</small></h2><button class="x" type="button" data-close aria-label="Fechar">×</button></div>
     <div class="body">
+      <p class="adm-ver" id="admVer"></p>
+
+      <h4 class="adm-h">Painel</h4>
       <div class="adm-grid">
         <button class="btn btn--block" type="button" id="admEnviar">Enviar pedido de teste</button>
         <button class="btn btn--block adm-sec" type="button" id="admTestes">Rodar testes do site</button>
         <button class="btn btn--block adm-sec" type="button" id="admRelatorio" disabled>Enviar relatório ao painel</button>
       </div>
+
+      <h4 class="adm-h">Simular pedido (só neste aparelho)</h4>
+      <div class="adm-chips" id="admModo">
+        <button type="button" class="adm-chip" data-modo="local">Comer aqui</button>
+        <button type="button" class="adm-chip" data-modo="retirar">Retirar</button>
+        <button type="button" class="adm-chip on" data-modo="entregar">Entrega</button>
+      </div>
+      <div class="adm-chips" id="admStatus">
+        <button type="button" class="adm-chip" data-st="analisando">Analisando</button>
+        <button type="button" class="adm-chip" data-st="aceito">Aceito</button>
+        <button type="button" class="adm-chip" data-st="preparando">Preparando</button>
+        <button type="button" class="adm-chip" data-st="pronto">Pronto</button>
+        <button type="button" class="adm-chip" data-st="saiu">Saiu</button>
+        <button type="button" class="adm-chip" data-st="entregue">Entregue</button>
+        <button type="button" class="adm-chip" data-st="cancelado">Cancelado</button>
+      </div>
+      <div class="adm-grid"><button class="btn btn--block adm-sec" type="button" id="admVerTela">Abrir tela do pedido</button></div>
+
+      <h4 class="adm-h">Ferramentas</h4>
+      <div class="adm-grid2" id="admFerr">
+        <button type="button" class="adm-mini" data-tool="zap">Testar WhatsApp da loja</button>
+        <button type="button" class="adm-mini" data-tool="copiar">Copiar diagnóstico</button>
+        <button type="button" class="adm-mini" data-tool="atualizar">Forçar atualização do site</button>
+        <button type="button" class="adm-mini" data-tool="limpar-teste">Limpar pedidos de teste</button>
+        <button type="button" class="adm-mini" data-tool="limpar-tudo" style="grid-column:1/-1">Limpar dados deste aparelho</button>
+      </div>
+
       <div class="adm-out" id="admOut"></div>
     </div>
   </div>
@@ -1918,7 +1957,9 @@ function novaRef() {
 }
 
 /* Grava o pedido. Não precisa de permissão de leitura: o acompanhamento é feito pelo código (ref) */
+let ultimoErroSave = null;
 async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
+  ultimoErroSave = null;
   const ref = novaRef();
   const base = {
     cliente: String(cliente).slice(0, 80),
@@ -1941,8 +1982,10 @@ async function salvarPedidoSupabase(cliente, valorTotal, detalhes) {
         cache: 'no-store'
       });
       if (res.ok) return { ref, sincroniza: i === 0 };
-      console.error('Erro ao gravar pedido:', res.status, await res.text());
-    } catch (err) { console.error('Erro de envio:', err); }
+      const tx = await res.text();
+      ultimoErroSave = { status: res.status, texto: tx.slice(0, 140) };
+      console.error('Erro ao gravar pedido:', res.status, tx);
+    } catch (err) { ultimoErroSave = { status: 0, texto: '' }; console.error('Erro de envio:', err); }
   }
   return null;
 }
@@ -2134,7 +2177,7 @@ function renderPostCheckoutContent() {
   }
   if (atalhos) atalhos.hidden = false;
 
-  const sig = [selectedRef, syncErro, orders.map(x => x.ref + x.status + (x.impresso ? 1 : 0) + (x.motivo || '')).join('|')].join('#');
+  const sig = [selectedRef, syncErro, orders.map(x => x.ref + x.status + (x.impresso ? 1 : 0) + (x.motivo || '') + (x.modo || '')).join('|')].join('#');
   if (sig === renderSig) return;
   renderSig = sig;
   renderAtalhos(o);
@@ -2161,7 +2204,7 @@ function renderPostCheckoutContent() {
       }).join('')}
     </div>` : '';
 
-  const aviso = (!o.sync && !STATUS_FINAL.includes(o.status))
+  const aviso = (!o.sync && !o.teste && !STATUS_FINAL.includes(o.status))
       ? '<p class="track-note">⚠️ Este pedido não tem acompanhamento automático. Fale com a loja pelo atalho 💬 abaixo.</p>'
       : '';
 
@@ -2326,7 +2369,8 @@ $('#trackShortcuts').addEventListener('click', e => {
 });
 
 /* ===== MODO ADM: 5 toques em "Menu" ===== */
-let admTaps = 0, admUltimo = 0, admRelatorio = '';
+const SITE_VERSION = 'v17';
+let admTaps = 0, admUltimo = 0, admRelatorio = '', admModo = 'entregar';
 $('#mTitle').addEventListener('click', () => {
   const agora = Date.now();
   admTaps = (agora - admUltimo < 1500) ? admTaps + 1 : 1;
@@ -2334,12 +2378,19 @@ $('#mTitle').addEventListener('click', () => {
   if (admTaps >= 5) { admTaps = 0; abrirAdmin(); }
 });
 
+function atualizaAdmVer() {
+  const n = (window.__erros || []).length;
+  $('#admVer').textContent = `Site ${SITE_VERSION} · ${n} erro(s) capturado(s) nesta sessão`;
+}
+
 function abrirAdmin() {
   closeSheet($('#menu'), false);
   setTimeout(() => {
     $('#admOut').innerHTML = '';
     admRelatorio = '';
     $('#admRelatorio').disabled = true;
+    atualizaAdmVer();
+    $$('#admModo .adm-chip').forEach(b => b.classList.toggle('on', b.dataset.modo === admModo));
     openSheet($('#adminSheet'));
   }, 200);
 }
@@ -2350,6 +2401,16 @@ function admLinha(txt, cls) {
   d.textContent = txt;
   $('#admOut').appendChild(d);
   d.scrollIntoView({ block: 'nearest' });
+}
+
+function explicaErro(e) {
+  if (!e) return 'erro desconhecido';
+  const dica = e.status === 0 ? 'sem conexão'
+    : (e.status === 401 || e.status === 403) ? 'sem permissão para gravar (política do banco)'
+    : e.status === 404 ? 'tabela ou função não encontrada'
+    : e.status === 400 || e.status === 409 || e.status === 422 ? 'dados recusados pelo banco (regra ou coluna)'
+    : 'falha no servidor';
+  return `HTTP ${e.status} — ${dica}${e.texto ? ' · ' + e.texto : ''}`;
 }
 
 function montaPedidoTeste() {
@@ -2371,8 +2432,9 @@ $('#admEnviar').addEventListener('click', async () => {
   const btn = $('#admEnviar');
   btn.disabled = true;
   const { linhas, total } = montaPedidoTeste();
-  const r = await salvarPedidoSupabase('ADM', 0, `[ADM] Adm: mensagem teste\n${linhas.join('\n')}\nTotal: ${brl(total)}`);
-  admLinha(r ? `✓ Pedido de teste enviado ao painel (${linhas.length} itens, ${brl(total)})` : '✗ Falha ao enviar o pedido de teste', r ? 'ok' : 'bad');
+  // total simbólico: alguns bancos recusam pedido com total 0; o painel ignora pedidos ADM nas contas
+  const r = await salvarPedidoSupabase('ADM', 0.01, `[ADM] Adm: mensagem teste\n${linhas.join('\n')}\nTotal: ${brl(total)}`);
+  admLinha(r ? `✓ Pedido de teste enviado ao painel (${linhas.length} itens, ${brl(total)})` : `✗ Falha ao enviar o pedido de teste — ${explicaErro(ultimoErroSave)}`, r ? 'ok' : 'bad');
   btn.disabled = false;
 });
 
@@ -2381,10 +2443,12 @@ async function admTestes() {
   const add = (nome, ok, info) => res.push({ nome, ok, info });
   const H = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
   const http = async (nome, url, opt) => {
-    try { const r = await fetch(url, { cache: 'no-store', ...opt }); add(nome, r.ok, 'HTTP ' + r.status); return r; }
+    const t0 = performance.now();
+    try { const r = await fetch(url, { cache: 'no-store', ...opt }); add(nome, r.ok, `HTTP ${r.status} · ${Math.round(performance.now() - t0)} ms`); return r; }
     catch (e) { add(nome, false, 'sem conexão'); return null; }
   };
 
+  add('Versão do site', true, SITE_VERSION);
   add('Internet', navigator.onLine, navigator.onLine ? 'online' : 'offline');
   await http('Supabase · ler cardápio', `${SUPABASE_URL}/rest/v1/categorias?select=id&limit=1`, { headers: H });
   await http('Supabase · status do pedido (SQL)', `${SUPABASE_URL}/rest/v1/rpc/status_pedidos`, { method: 'POST', headers: H, body: JSON.stringify({ refs: [] }) });
@@ -2416,7 +2480,14 @@ async function admTestes() {
   const st = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   add('Tela', true, `${innerWidth}x${innerHeight} @${devicePixelRatio}x${st ? ' (app instalado)' : ''}`);
   add('Pedidos neste aparelho', true, `${orders.length} guardados${syncInfo.erro ? ', sync: ' + syncInfo.erro : ''}`);
+  const er = window.__erros || [];
+  add('Erros do site nesta sessão', er.length === 0, er.length ? er.slice(-3).join(' | ') : 'nenhum');
+  add('Último erro ao gravar pedido', !ultimoErroSave, ultimoErroSave ? explicaErro(ultimoErroSave) : 'nenhum');
   return res;
+}
+
+function textoDiagnostico(res) {
+  return res.map(r => `${r.ok ? '✓' : '✗'} ${r.nome} — ${r.info}`).join('\n') + `\nAparelho: ${navigator.userAgent.slice(0, 90)}`;
 }
 
 $('#admTestes').addEventListener('click', async () => {
@@ -2426,9 +2497,7 @@ $('#admTestes').addEventListener('click', async () => {
   const res = await admTestes();
   res.forEach(r => admLinha(`${r.ok ? '✓' : '✗'} ${r.nome} — ${r.info}`, r.ok ? 'ok' : 'bad'));
   const falhas = res.filter(r => !r.ok).length;
-  admRelatorio = `[ADM] Adm: relatório de testes (${falhas ? falhas + ' falha(s)' : 'tudo ok'})\n` +
-    res.map(r => `${r.ok ? '✓' : '✗'} ${r.nome} — ${r.info}`).join('\n') +
-    `\nAparelho: ${navigator.userAgent.slice(0, 90)}`;
+  admRelatorio = `[ADM] Adm: relatório de testes (${falhas ? falhas + ' falha(s)' : 'tudo ok'})\n` + textoDiagnostico(res);
   $('#admRelatorio').disabled = false;
   btn.disabled = false; btn.textContent = 'Rodar testes do site';
 });
@@ -2437,9 +2506,98 @@ $('#admRelatorio').addEventListener('click', async () => {
   const btn = $('#admRelatorio');
   if (!admRelatorio) return;
   btn.disabled = true;
-  const r = await salvarPedidoSupabase('ADM', 0, admRelatorio);
-  admLinha(r ? '✓ Relatório enviado ao painel' : '✗ Falha ao enviar o relatório', r ? 'ok' : 'bad');
-  btn.disabled = !r ? false : true;
+  const r = await salvarPedidoSupabase('ADM', 0.01, admRelatorio);
+  admLinha(r ? '✓ Relatório enviado ao painel' : `✗ Falha ao enviar o relatório — ${explicaErro(ultimoErroSave)}`, r ? 'ok' : 'bad');
+  btn.disabled = !!r;
+});
+
+/* ---- Simulação de pedido (só neste aparelho, não vai pro painel) ---- */
+function pedidoFicticio() {
+  let o = orders.find(x => x.teste);
+  if (!o) {
+    o = { ref: 'TESTE' + novaRef().slice(0, 7), sync: false, teste: true, cliente: 'Teste ADM', total: 22, detalhes: '', modo: admModo, status: 'novo', impresso: false, created_at: new Date().toISOString() };
+    orders.unshift(o);
+  }
+  o.modo = admModo;
+  o.detalhes = '*RANCHARIA*\n' + (admModo === 'local' ? '*MESA: 5*' : admModo === 'entregar' ? '*ENTREGA*' : '*RETIRADA*') + '\n*NOME:* Teste ADM\n' +
+    (admModo === 'entregar' ? 'Endereço: Rua Teste, nº 1 - Centro\n' : '') + '1x Gourmet — R$22,00\n';
+  return o;
+}
+
+function refrescaPedidos() {
+  saveOrders(); renderSig = '';
+  updateHeaderStatusButton();
+  if (current && current.id === 'postCheckout') renderPostCheckoutContent();
+}
+
+const STATUS_TESTE = { analisando: 'novo', aceito: 'novo', preparando: 'preparando', pronto: 'pronto', saiu: 'saiu', entregue: 'entregue', cancelado: 'cancelado' };
+
+$('#admModo').addEventListener('click', e => {
+  const b = e.target.closest('[data-modo]');
+  if (!b) return;
+  admModo = b.dataset.modo;
+  $$('#admModo .adm-chip').forEach(x => x.classList.toggle('on', x === b));
+  if (orders.some(x => x.teste)) { pedidoFicticio(); refrescaPedidos(); admLinha(`Pedido fictício agora é: ${b.textContent}`, 'ok'); }
+});
+
+$('#admStatus').addEventListener('click', e => {
+  const b = e.target.closest('[data-st]');
+  if (!b) return;
+  const o = pedidoFicticio();
+  const k = b.dataset.st;
+  o.status = STATUS_TESTE[k];
+  o.impresso = k !== 'analisando';
+  o.motivo = k === 'cancelado' ? 'Sem estoque do prato (teste)' : '';
+  selectedRef = o.ref;
+  refrescaPedidos();
+  admLinha(`Status simulado: ${b.textContent} (${admModo === 'local' ? 'comer aqui' : admModo === 'retirar' ? 'retirada' : 'entrega'})`, 'ok');
+});
+
+$('#admVerTela').addEventListener('click', () => {
+  const o = pedidoFicticio();
+  selectedRef = o.ref; refrescaPedidos();
+  closeSheet($('#adminSheet'), false);
+  setTimeout(() => openPostCheckout(), 250);
+});
+
+/* ---- Ferramentas ---- */
+async function copiaTxt(t) {
+  try { await navigator.clipboard.writeText(t); return true; } catch (e) {}
+  try {
+    const ta = document.createElement('textarea'); ta.value = t; ta.style.cssText = 'position:fixed;opacity:0';
+    document.body.appendChild(ta); ta.select(); const ok = document.execCommand('copy'); ta.remove(); return ok;
+  } catch (e) { return false; }
+}
+
+$('#admFerr').addEventListener('click', async e => {
+  const b = e.target.closest('[data-tool]');
+  if (!b) return;
+  const t = b.dataset.tool;
+  if (t === 'zap') {
+    window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent('Teste do modo ADM · site ' + SITE_VERSION)}`, '_blank', 'noopener');
+    admLinha('✓ WhatsApp da loja aberto com mensagem de teste', 'ok');
+  } else if (t === 'copiar') {
+    b.disabled = true;
+    const res = await admTestes();
+    const ok = await copiaTxt(`Diagnóstico Rancharia ${SITE_VERSION}\n` + textoDiagnostico(res));
+    admLinha(ok ? '✓ Diagnóstico copiado (cole onde quiser)' : '✗ Não consegui copiar', ok ? 'ok' : 'bad');
+    b.disabled = false;
+  } else if (t === 'atualizar') {
+    if (!confirm('Limpar o cache do site neste aparelho e recarregar?')) return;
+    try { const rs = await navigator.serviceWorker.getRegistrations(); await Promise.all(rs.map(r => r.unregister())); } catch (e) {}
+    try { const ks = await caches.keys(); await Promise.all(ks.map(k => caches.delete(k))); } catch (e) {}
+    location.reload();
+  } else if (t === 'limpar-teste') {
+    const antes = orders.length;
+    orders = orders.filter(x => !x.teste);
+    if (!orders.find(x => x.ref === selectedRef)) selectedRef = orders[0] ? orders[0].ref : null;
+    refrescaPedidos();
+    admLinha(`✓ ${antes - orders.length} pedido(s) de teste removido(s) deste aparelho`, 'ok');
+  } else if (t === 'limpar-tudo') {
+    if (!confirm('Apagar pedidos, carrinho e preferências guardados neste aparelho?')) return;
+    Object.keys(localStorage).filter(k => k.startsWith('rancharia')).forEach(k => localStorage.removeItem(k));
+    location.reload();
+  }
 });
 
 /* PWA INSTALL SETUP */
