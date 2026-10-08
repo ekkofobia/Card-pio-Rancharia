@@ -176,6 +176,7 @@ section { padding: 46px 0; scroll-margin-top: 62px; }
 .sec-title { font-size: 26px; font-weight: 700; line-height: 1.15; }
 .sec-title em { font-style: normal; color: var(--gold); }
 .sec-sub { margin-top: 8px; color: var(--muted); max-width: 46ch; }
+#extras .sec-sub { margin-top: 4px; margin-bottom: 20px; }
 
 /* Cards de prato */
 #pratos { padding-top: 0; }
@@ -383,6 +384,55 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
   padding: 14px; white-space: pre-wrap; font: 12px/1.45 ui-monospace, Menlo, monospace;
 }
 
+
+
+/* Checkout compacto (sem rolagem) */
+#cart .field { margin-bottom: 16px; }
+#fObs { min-height: 73px; height: 73px; }
+.fsum { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px; margin-bottom: 10px; }
+.vp-ico { display: inline-flex; align-items: center; gap: 6px; height: 38px; padding: 0 13px 0 10px; border-radius: 999px; border: 1.5px solid var(--line); background: var(--card-2); color: var(--gold); font-size: 13px; font-weight: 700; transition: border-color .2s, transform .15s; }
+.vp-ico span { color: var(--cream); }
+.vp-ico:active { transform: scale(.95); }
+.vp-ico:hover { border-color: var(--gold); }
+.vp-ico svg { width: 19px; height: 19px; flex: none; }
+.fs-right { display: grid; grid-template-columns: auto auto; justify-content: end; align-items: baseline; column-gap: 8px; }
+.fs-ent { grid-column: 2; display: inline-flex; align-items: baseline; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: -10px; }
+.fs-ent[hidden] { display: none; }
+.fs-ent b { color: var(--cream); font-size: 14px; }
+.fs-tl { font-size: 39px; font-weight: 800; line-height: 1; color: var(--gold); }
+.fs-right #cTotal { font-size: 24px; color: #fff; }
+
+
+/* Modo ADM */
+.adm-grid { display: grid; gap: 10px; margin-bottom: 16px; }
+.adm-sec { background: var(--card-2) !important; color: var(--cream) !important; border: 1.5px solid var(--line) !important; box-shadow: none !important; }
+.adm-grid .btn[disabled] { opacity: .45; }
+.adm-out { display: grid; gap: 6px; }
+.adm-line { padding: 9px 12px; border-radius: 12px; background: var(--card-2); border: 1px solid var(--line); font-size: 14px; line-height: 1.35; word-break: break-word; }
+.adm-line.ok { border-color: rgba(74, 222, 128, .5); }
+.adm-line.bad { border-color: rgba(248, 113, 113, .7); color: #fecaca; }
+
+/* Seletor de bairro (no estilo da página) */
+.sel-btn { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; padding: 13px 14px; border-radius: 14px; font: inherit; text-align: left; color: var(--cream); background: var(--card-2); border: 1.5px solid var(--line); transition: border-color .2s; }
+.sel-btn:focus-visible, .sel-btn:hover { border-color: var(--gold); }
+.sel-btn.vazio .sel-v { color: #9d8a70; }
+.sel-btn .sel-v { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sel-btn small { color: var(--gold); font-weight: 800; font-size: 14px; white-space: nowrap; }
+.sel-btn::after { content: ''; flex: none; width: 8px; height: 8px; margin: -3px 2px 0 2px; border-right: 2px solid var(--gold); border-bottom: 2px solid var(--gold); transform: rotate(45deg); }
+#bairroSheet .body { padding-top: 14px; }
+#bairroBusca { margin-bottom: 10px; }
+.bairro-item { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 13px 14px; margin-bottom: 8px; border-radius: 14px; background: var(--card-2); border: 1.5px solid var(--line); color: var(--cream); font: inherit; font-size: 16px; text-align: left; transition: border-color .15s, background .15s; }
+.bairro-item b { font-weight: 800; color: var(--gold); white-space: nowrap; font-size: 15px; }
+.bairro-item:active { transform: scale(.985); }
+.bairro-item.on { border-color: var(--gold); background: rgba(242, 196, 109, .13); }
+.bairro-vazio { padding: 26px 8px; text-align: center; color: var(--muted); }
+
+/* Ícones novos dos atalhos */
+.sv-pulse { transform-origin: 12px 10px; animation: svPulse 1.4s ease-in-out infinite; }
+@keyframes svPulse { 0%, 100% { transform: scale(.65); } 50% { transform: scale(1.1); } }
+.sv-write { animation: svWrite 1.2s ease-in-out infinite; }
+@keyframes svWrite { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(1.2px, -1.2px); } }
+
 /* Ícones dos atalhos (mesmo estilo dos de status) */
 .btn-shortcut i { color: var(--gold); display: block; }
 .btn-shortcut .sv { width: 24px; height: 24px; }
@@ -442,12 +492,15 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
   .ped-bar i, .sanfona-b { transition: none; }
 }
 
-textarea, input[type="text"] {
+textarea, input[type="text"], select.sel {
   width: 100%; padding: 13px 14px; border-radius: 14px; font: inherit; color: var(--cream);
   background: var(--card-2); border: 1.5px solid var(--line); transition: border-color .2s;
 }
 textarea { resize: none; min-height: 72px; }
-textarea:focus, input:focus { outline: none; border-color: var(--gold); }
+textarea:focus, input:focus, select.sel:focus { outline: none; border-color: var(--gold); }
+select.sel { appearance: none; -webkit-appearance: none; background-image: linear-gradient(45deg, transparent 50%, var(--gold) 50%), linear-gradient(135deg, var(--gold) 50%, transparent 50%); background-position: calc(100% - 20px) 50%, calc(100% - 14px) 50%; background-size: 6px 6px; background-repeat: no-repeat; padding-right: 36px; }
+.total.ent { margin-bottom: 4px; font-size: 15px; color: var(--muted); }
+.total.ent b { color: var(--cream); font-size: 15px; }
 ::placeholder { color: #9d8a70; }
 .lbl { display: block; margin-bottom: 6px; font-weight: 600; font-size: 15px; }
 .err { border-color: #ff7a6b !important; }
@@ -516,6 +569,9 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .d-row:first-child { border-top: 0; padding-top: 2px; }
 .d-row b { font-weight: 500; font-size: 15px; flex: 1; min-width: 0; }
 .d-pr { color: var(--gold); font-weight: 700; font-size: 14px; white-space: nowrap; }
+.d-row .qty { flex: none; margin-left: auto; gap: 2px; }
+.d-row .qty button { width: 30px; height: 30px; font-size: 18px; }
+.d-row .qty output { min-width: 21px; font-size: 14px; }
 .qty button.off { opacity: .35; }
 
 /* Toast */
@@ -543,7 +599,8 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 .faq details p { padding: 0 0 10px; color: var(--muted); font-size: 13px; line-height: 1.4; }
 .pills { display: flex; flex-wrap: nowrap; gap: 6px; }
 .pill { flex: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 0 6px; border-radius: 999px; border: 1.5px solid var(--gold); color: var(--gold); font-weight: 600; font-size: 12px; text-decoration: none; }
-.mk { padding: 12px 14px; text-align: center; border-radius: 16px; background: var(--card-2); border: 1px solid var(--gold); }
+.mk-foot { display: flex; justify-content: center; padding: 10px 20px calc(14px + env(safe-area-inset-bottom)); }
+.mk-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0 22px; border-radius: 999px; background: var(--gold); color: #2a1509; font-weight: 800; font-size: 14px; text-decoration: none; }
 .mk p { margin-bottom: 10px; font-size: 17px; font-weight: 700; }
 .hrs { display: grid; gap: 3px; }
 .hr-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
@@ -551,7 +608,7 @@ textarea:focus, input:focus { outline: none; border-color: var(--gold); }
 
 #lojaBar{position:fixed;left:0;right:0;bottom:0;z-index:9998;background:#7a1f1f;color:#fff;text-align:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));font-weight:600;font-size:15px;box-shadow:0 -6px 20px #0006}
 #lojaBar[hidden],#lojaModal[hidden]{display:none}
-body.fechada #cartBar{display:none!important}.mk-line{position:absolute;right:14px;bottom:88px;font-size:10.5px;line-height:1;white-space:nowrap;color:var(--muted);opacity:.85}.mk-line a{color:var(--gold);font-weight:700;text-decoration:underline}body.print-mode .mk-line{display:none}body.fechada{padding-bottom:70px}
+body.fechada #cartBar{display:none!important}.mk-line{position:absolute;left:0;right:0;bottom:100px;display:flex;align-items:center;justify-content:center;gap:10px;padding:0 14px;white-space:nowrap}.mk-line span{color:#fff;font-weight:800;font-size:12.5px;line-height:1}.mk-line a{color:var(--gold);font-weight:800;font-size:12.5px;text-decoration:underline;text-underline-offset:3px}body.print-mode .mk-line{display:none}body.fechada{padding-bottom:70px}
 #lojaModal{position:fixed;inset:0;z-index:9999;background:#000a;display:grid;place-items:center;padding:24px}
 #lojaModal>div{background:#341d0f;color:#f7ecd8;border:1px solid rgba(242,196,109,.4);border-radius:22px;padding:24px;max-width:340px;text-align:center;line-height:1.4}
 #lojaModal b{display:block;font-size:22px;margin-bottom:8px;color:#f2c46d}
@@ -584,7 +641,7 @@ body.print-mode main {
   height: 100dvh; 
   max-height: 100dvh;
   overflow: hidden; 
-  padding: 4px 8px 6px !important;
+  padding: calc(30px + env(safe-area-inset-top, 0px)) 8px 6px !important;
   display: flex; 
   flex-direction: column; 
   justify-content: flex-start;
@@ -857,7 +914,7 @@ body.print-mode .print-salad small {
   </section>
 </main>
 
-<footer><div class="wrap">Rancharia · Pedidos pelo WhatsApp</div><div class="mk-line">Tenha um site assim. <a id="mkFoot" target="_blank" rel="noopener">Quero um site assim</a></div></footer>
+<footer><div class="wrap">© 2026 Rancharia · Todos os direitos reservados</div><div class="mk-line"><a id="mkFoot" target="_blank" rel="noopener">Criar site</a></div></footer>
 
 <button id="cartBar" aria-label="Ver pedido">
   <span class="info">
@@ -891,6 +948,32 @@ body.print-mode .print-salad small {
   </div>
 </div>
 
+<div class="sheet" id="bairroSheet" role="dialog" aria-modal="true" aria-labelledby="bsTitle" hidden>
+  <div class="back" data-close></div>
+  <div class="panel">
+    <div class="head"><h2 id="bsTitle">Escolha seu bairro<small>Taxa de entrega por bairro</small></h2><button class="x" type="button" data-close aria-label="Fechar">×</button></div>
+    <div class="body">
+      <input id="bairroBusca" type="text" placeholder="Buscar bairro…" autocomplete="off">
+      <div id="bairroLista"></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet sheet--full" id="adminSheet" role="dialog" aria-modal="true" aria-labelledby="admTitle" hidden>
+  <div class="back" data-close></div>
+  <div class="panel">
+    <div class="head"><h2 id="admTitle">Modo ADM<small>Ferramentas de teste do site</small></h2><button class="x" type="button" data-close aria-label="Fechar">×</button></div>
+    <div class="body">
+      <div class="adm-grid">
+        <button class="btn btn--block" type="button" id="admEnviar">Enviar pedido de teste</button>
+        <button class="btn btn--block adm-sec" type="button" id="admTestes">Rodar testes do site</button>
+        <button class="btn btn--block adm-sec" type="button" id="admRelatorio" disabled>Enviar relatório ao painel</button>
+      </div>
+      <div class="adm-out" id="admOut"></div>
+    </div>
+  </div>
+</div>
+
 <div class="sheet sheet--full" id="postCheckout" role="dialog" aria-modal="true" aria-labelledby="trackTitle" hidden>
   <div class="back" data-close></div>
   <div class="panel">
@@ -900,13 +983,7 @@ body.print-mode .print-salad small {
     </div>
     <div class="body" id="trackBody"></div>
     <div class="foot">
-      <div class="track-shortcuts-grid" id="trackShortcuts" aria-label="Atalhos úteis">
-        <button type="button" class="btn-shortcut" data-sc="bebidas"><i><svg class="sv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 7h10l-1.2 12.2a1.5 1.5 0 0 1-1.5 1.3H9.7a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M6 7h12"/><path d="M13 7l1.4-4 2.4-.6"/><path class="sv-bub" d="M10.5 16h.01"/><path class="sv-bub b2" d="M13.2 14h.01"/></svg></i><span>Bebidas</span></button>
-        <button type="button" class="btn-shortcut" data-sc="conta"><i><svg class="sv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path class="sv-slide" d="M7 15h4"/></svg></i><span>Pedir conta</span></button>
-        <button type="button" class="btn-shortcut" data-sc="limpar"><i><svg class="sv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="sv-sweep"><path d="M14 3l-3.5 8"/><path d="M7.5 11h8l1.5 9H6z"/><path d="M10 15l-.5 5M13 15l.3 5"/></g></svg></i><span>Limpar mesa</span></button>
-        <button type="button" class="btn-shortcut" data-sc="garcom"><i><svg class="sv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g class="sv-ring"><path d="M6 17h12l-1.5-2.5V10a4.5 4.5 0 0 0-9 0v4.5z"/></g><path d="M12 4V3"/><path d="M10.2 20a2 2 0 0 0 3.6 0"/></svg></i><span>Chamar garçom</span></button>
-        <button type="button" class="btn-shortcut" data-sc="loja"><i><svg class="sv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path class="sv-dot" d="M8.5 10h.01"/><path class="sv-dot d2" d="M12 10h.01"/><path class="sv-dot d3" d="M15.5 10h.01"/></svg></i><span>Falar c/ loja</span></button>
-      </div>
+      <div class="track-shortcuts-grid" id="trackShortcuts" aria-label="Atalhos úteis"></div>
       <button type="button" class="btn btn--block" id="btnBackToMenu">Voltar ao Cardápio</button>
     </div>
   </div>
@@ -933,11 +1010,8 @@ body.print-mode .print-salad small {
       <div class="msec"><h3>Horário de funcionamento</h3><div class="hrs" id="horas"></div></div>
       <div class="msec"><h3>Perguntas frequentes</h3><div class="faq" id="faq"></div></div>
       <div class="msec"><div class="pills" id="sites"></div></div>
-      <div class="mk">
-        <p>Tenha um site assim.</p>
-        <a class="btn btn--block" id="mkBtn" target="_blank" rel="noopener" style="min-height:44px">Quero um site assim</a>
-      </div>
     </div>
+    <div class="mk-foot"><a id="mkBtn" class="mk-pill" target="_blank" rel="noopener">Criar site</a></div>
   </div>
 </div>
 
@@ -1028,8 +1102,25 @@ const form = { nome: '', modo: 'local', mesa: '', bairro: '', rua: '', numero: '
 
 function save() { try { localStorage.setItem(KEY, JSON.stringify(cart)); } catch (e) {} }
 const itemTotal = it => it.preco * it.qty;
+const BAIRROS = [
+  ['Água Bela', 8], ['Alto da Aliança', 8], ['Alto da Maravilha', 7], ['Alto do Alencar', 7], ['Alto do Cruzeiro', 7],
+  ['Angari', 7], ['Antônio Conselheiro', 8], ['Antônio Guilhermino', 8], ['Argemiro', 8], ['Cajueiro', 7],
+  ['Castelo Branco', 7], ['Centenário', 6], ['Centro', 6], ['Country Club', 8], ['Dom José Rodrigues', 8],
+  ['Dom Tomás', 9], ['Expedito Nascimento', 9], ['Jardim Flórida', 7], ['Jardim Novo Encontro', 9], ['Jardim Primavera', 8],
+  ['Jardim São Paulo', 7], ['Jardim Universitário', 7], ['Jardim Vitória', 8], ['João Paulo II', 8], ['João XXIII', 7],
+  ['Lomanto Júnior', 6], ['Malhada da Areia', 9], ['Maringá', 7], ['Monte Castelo', 6], ['Monte Serrat', 6],
+  ['Mussambê', 9], ['Nossa Senhora da Penha', 7], ['Nossa Senhora das Grotas', 8], ['Nova Esperança', 8], ['Nova Vitória', 9],
+  ['Novo Encontro', 9], ['Padre Vicente', 7], ['Palmares', 7], ['Parque Jatobá', 8], ['Parque Residencial', 7],
+  ['Pedra do Lord', 9], ['Piranga', 6], ['Piranga I', 7], ['Piranga II', 7], ['Quidé', 7],
+  ['Quidezinho', 8], ['Reta do Angari', 7], ['Santo Antônio', 6], ['São Geraldo', 6], ['Sol Levante', 8],
+  ['Sol Nascente', 8], ['Tabuleiro', 9], ['Tancredo Neves', 8], ['Vila Tiradentes', 6]
+]; // taxas de exemplo (R$ 6 a 9), troque quando tiver os valores reais
+
 const total = () => cart.reduce((s, it) => s + itemTotal(it), 0);
 const count = () => cart.reduce((s, it) => s + it.qty, 0);
+const bairroOk = () => BAIRROS.find(b => b[0] === form.bairro);
+const taxaEntrega = () => (form.modo === 'entregar' && bairroOk()) ? bairroOk()[1] : 0;
+const totalGeral = () => total() + taxaEntrega();
 
 function setMoney(el, to) {
   if (!el) return;
@@ -1683,22 +1774,23 @@ function renderCart() {
       <div class="field" id="fMesaW" ${form.modo === 'local' ? '' : 'hidden'}>
         <input id="fMesa" type="text" placeholder="Número da mesa — ex.: 12" value="${esc(form.mesa)}"></div>
       <div class="field" id="fEndW" ${ent ? '' : 'hidden'}>
-        <input id="fBairro" type="text" placeholder="Bairro" value="${esc(form.bairro)}" style="margin-bottom:8px">
+        <button type="button" id="fBairro" class="sel-btn ${bairroOk() ? '' : 'vazio'}" data-a="bairro" style="margin-bottom:8px"><span class="sel-v">${bairroOk() ? esc(form.bairro) : 'Selecione o bairro'}</span>${bairroOk() ? `<small>${brl(bairroOk()[1])}</small>` : ''}</button>
         <div style="display:flex;gap:8px">
           <input id="fRua" type="text" placeholder="Rua" value="${esc(form.rua)}" style="flex:2">
           <input id="fNumero" type="text" placeholder="Nº" value="${esc(form.numero)}" style="flex:1;min-width:0">
         </div>
-        <p class="note">A taxa de entrega é combinada no WhatsApp.</p></div>
+        </div>
       <div class="field" id="fPagW" ${ent ? '' : 'hidden'}><span class="lbl">Pagamento</span>
         <div class="seg">${seg('pag', [['pix', 'Pix'], ['cartao', 'Cartão'], ['dinheiro', 'Dinheiro']], form.pag)}</div></div>
       <div class="field" id="fTrocoW" ${ent && form.pag === 'dinheiro' ? '' : 'hidden'}>
         <input id="fTroco" type="text" placeholder="Troco para? — ex.: 50" value="${esc(form.troco)}"></div>
       <div class="field"><textarea id="fObs" maxlength="200" placeholder="Observação (opcional)">${esc(form.obs)}</textarea></div>`;
-    foot.innerHTML = `<div class="total">
-      <span style="display:flex;align-items:baseline;gap:16px">
-        <button type="button" class="link vp-btn" data-a="toggleItems" style="padding:0">Ver pedido</button>
-      </span>
-      <span style="text-align:right"><small style="display:block;color:var(--muted);font-size:13px;font-weight:600">Total</small><b id="cTotal" style="font-size:24px">${brl(total())}</b></span>
+    foot.innerHTML = `<div class="fsum">
+      <button type="button" class="vp-ico" data-a="toggleItems" aria-label="Ver pedido" title="Ver pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span>Pedido</span></button>
+      <div class="fs-right">
+        <span class="fs-ent" id="cEntregaRow" ${taxaEntrega() ? '' : 'hidden'}>Entrega <b id="cEntrega">${brl(taxaEntrega())}</b></span>
+        <small class="fs-tl">Total</small><b id="cTotal">${brl(totalGeral())}</b>
+      </div>
     </div>
       <button class="btn btn--block" data-a="send">Enviar pedido no WhatsApp</button>`;
   }
@@ -1721,9 +1813,11 @@ $('#cart').addEventListener('click', e => {
     $('#fEndW').hidden = form.modo !== 'entregar';
     $('#fPagW').hidden = form.modo !== 'entregar';
     $('#fTrocoW').hidden = !(form.modo === 'entregar' && form.pag === 'dinheiro');
+    atualizaTotaisCheckout();
     return;
   }
   const a = t.dataset.a, it = cart.find(x => x.uid === +t.dataset.u);
+  if (a === 'bairro') { abrirBairros(); return; }
   if (a === 'dtoggle') {
     openDrink = openDrink === t.dataset.d ? null : t.dataset.d;
     renderCart(); return;
@@ -1753,7 +1847,54 @@ $('#cart').addEventListener('click', e => {
 $('#cart').addEventListener('input', e => {
   const m = { fNome: 'nome', fMesa: 'mesa', fBairro: 'bairro', fRua: 'rua', fNumero: 'numero', fTroco: 'troco', fObs: 'obs' }[e.target.id];
   if (m) { form[m] = e.target.value; e.target.classList.remove('err'); }
+  if (e.target.id === 'fBairro') atualizaTotaisCheckout();
 });
+
+/* ---------- Seletor de bairro ---------- */
+const semAcento = t => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+
+function desenhaBairros(filtro) {
+  const q = semAcento(filtro || '').trim();
+  const lista = BAIRROS.filter(b => !q || semAcento(b[0]).includes(q));
+  $('#bairroLista').innerHTML = lista.length
+    ? lista.map(b => `<button type="button" class="bairro-item ${b[0] === form.bairro ? 'on' : ''}" data-bairro="${esc(b[0])}"><span>${esc(b[0])}</span><b>${brl(b[1])}</b></button>`).join('')
+    : '<p class="bairro-vazio">Nenhum bairro encontrado.</p>';
+}
+
+function abrirBairros() {
+  const el = $('#bairroSheet');
+  $('#bairroBusca').value = '';
+  desenhaBairros('');
+  el.hidden = false;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.classList.add('open');
+    const on = $('.bairro-item.on', el);
+    if (on) on.scrollIntoView({ block: 'center' });
+  }));
+}
+
+$('#bairroBusca').addEventListener('input', e => desenhaBairros(e.target.value));
+$('#bairroLista').addEventListener('click', e => {
+  const it = e.target.closest('[data-bairro]');
+  if (!it) return;
+  form.bairro = it.dataset.bairro;
+  const btn = $('#fBairro');
+  if (btn) {
+    btn.classList.remove('vazio', 'err');
+    btn.innerHTML = `<span class="sel-v">${esc(form.bairro)}</span><small>${brl(bairroOk()[1])}</small>`;
+  }
+  atualizaTotaisCheckout();
+  closeSheet($('#bairroSheet'), false);
+});
+
+function atualizaTotaisCheckout() {
+  const row = $('#cEntregaRow');
+  if (!row) return;
+  const taxa = taxaEntrega();
+  row.hidden = !taxa;
+  $('#cEntrega').textContent = brl(taxa);
+  $('#cTotal').textContent = brl(totalGeral());
+}
 
 /* ==========================================================================
    CONFIGURAÇÃO DA API SUPABASE (COM CHAVE OFICIAL JWT ANON)
@@ -1996,6 +2137,7 @@ function renderPostCheckoutContent() {
   const sig = [selectedRef, syncErro, orders.map(x => x.ref + x.status + (x.impresso ? 1 : 0) + (x.motivo || '')).join('|')].join('#');
   if (sig === renderSig) return;
   renderSig = sig;
+  renderAtalhos(o);
 
   const key = chaveStatus(o);
   const inf = infoEtapa(key, o);
@@ -2115,7 +2257,35 @@ $('#trackBody').addEventListener('click', e => {
   }
 });
 
-/* Atalhos fixos (rodapé da tela) */
+/* Atalhos fixos (rodapé da tela) — mudam conforme o tipo do pedido */
+const SVG_AT = d => `<svg class="sv" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${d}</svg>`;
+const ICONES_AT = {
+  bebidas: '<path d="M7 7h10l-1.2 12.2a1.5 1.5 0 0 1-1.5 1.3H9.7a1.5 1.5 0 0 1-1.5-1.3z"/><path d="M6 7h12"/><path d="M13 7l1.4-4 2.4-.6"/><path class="sv-bub" d="M10.5 16h.01"/><path class="sv-bub b2" d="M13.2 14h.01"/>',
+  conta: '<rect x="3" y="5.5" width="18" height="13" rx="2.5"/><path d="M3 10h18"/><path class="sv-slide" d="M7 15h4"/>',
+  limpar: '<g class="sv-sweep"><path d="M14 3l-3.5 8"/><path d="M7.5 11h8l1.5 9H6z"/><path d="M10 15l-.5 5M13 15l.3 5"/></g>',
+  garcom: '<g class="sv-ring"><path d="M6 17h12l-1.5-2.5V10a4.5 4.5 0 0 0-9 0v4.5z"/></g><path d="M12 4V3"/><path d="M10.2 20a2 2 0 0 0 3.6 0"/>',
+  loja: '<path d="M4 6.5A2.5 2.5 0 0 1 6.5 4h11A2.5 2.5 0 0 1 20 6.5v7a2.5 2.5 0 0 1-2.5 2.5H11l-4.5 4v-4h0A2.5 2.5 0 0 1 4 13.5z"/><path class="sv-dot" d="M8.5 10h.01"/><path class="sv-dot d2" d="M12 10h.01"/><path class="sv-dot d3" d="M15.5 10h.01"/>',
+  chegando: '<path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle class="sv-pulse" cx="12" cy="10" r="2.4"/>',
+  cheguei: '<g class="sv-bounce"><path d="M4 9l1.5-5h13L20 9"/><path d="M4 9a2.6 2.6 0 0 0 5.3 0 2.6 2.6 0 0 0 5.4 0A2.6 2.6 0 0 0 20 9"/></g><path d="M5.5 12.5V20h13v-7.5"/><path d="M10 20v-4.5h4V20"/>',
+  editar: '<g class="sv-write"><path d="M4 20l1-4L16.5 4.5a2 2 0 0 1 3 3L8 19z"/><path d="M14.5 6.5l3 3"/></g>',
+  onde: '<g class="sv-ride"><circle cx="6" cy="17" r="2.6"/><circle cx="18.5" cy="17" r="2.6"/><path d="M8.6 17H13l2-7h3"/><path d="M6 17l-1.5-5h4"/></g><path class="sv-speed" d="M1.5 9h3M1 12.5h2.5"/>',
+  endereco: '<g class="sv-bounce"><path d="M4 11l8-7 8 7"/><path d="M6 10v10h12V10"/></g><path d="M10 20v-5h4v5"/>',
+  pagamento: '<rect x="3" y="6.5" width="18" height="11" rx="2.5"/><circle class="sv-pop" cx="12" cy="12" r="2.4"/><path d="M6.5 9.5h.01M17.5 14.5h.01"/>'
+};
+const ATALHOS = {
+  local: [['bebidas', 'Bebidas'], ['conta', 'Pedir conta'], ['limpar', 'Limpar mesa'], ['garcom', 'Chamar garçom'], ['loja', 'Falar c/ loja']],
+  retirar: [['bebidas', 'Bebidas'], ['chegando', 'Estou indo'], ['cheguei', 'Já cheguei'], ['editar', 'Alterar pedido'], ['loja', 'Falar c/ loja']],
+  entregar: [['bebidas', 'Bebidas'], ['onde', 'Cadê pedido?'], ['endereco', 'Mudar endereço'], ['pagamento', 'Pagamento'], ['loja', 'Falar c/ loja']]
+};
+
+function renderAtalhos(o) {
+  const box = $('#trackShortcuts');
+  const modo = modoPedido(o);
+  const lista = ATALHOS[modo] || ATALHOS.local;
+  box.dataset.modo = modo;
+  box.innerHTML = lista.map(([k, l]) => `<button type="button" class="btn-shortcut" data-sc="${k}"><i>${SVG_AT(ICONES_AT[k])}</i><span>${l}</span></button>`).join('');
+}
+
 $('#trackShortcuts').addEventListener('click', e => {
   const b = e.target.closest('[data-sc]');
   if (!b) return;
@@ -2138,9 +2308,138 @@ $('#trackShortcuts').addEventListener('click', e => {
       zap(`Olá! Por favor, poderiam recolher/limpar os pratos${mesa ? ' da Mesa ' + mesa : ''}${quem}? Obrigado!`); break;
     case 'garcom':
       zap(`Olá! Preciso de um garçom${mesa ? ' na Mesa ' + mesa : ''}${quem}, por favor.`); break;
+    case 'chegando':
+      zap(`Olá! Estou a caminho para retirar meu pedido${quem}.`); break;
+    case 'cheguei':
+      zap(`Olá! Já cheguei para retirar meu pedido${quem}.`); break;
+    case 'editar':
+      zap(`Olá! Quero alterar meu pedido${quem}: `); break;
+    case 'onde':
+      zap(`Olá! Gostaria de saber onde está meu pedido${quem}.`); break;
+    case 'endereco':
+      zap(`Olá! Preciso corrigir o endereço de entrega${quem}. O correto é: `); break;
+    case 'pagamento':
+      zap(`Olá! Quero mudar a forma de pagamento${quem}. `); break;
     case 'loja':
       zap(`Olá! Tenho uma dúvida sobre meu pedido${quem}.`); break;
   }
+});
+
+/* ===== MODO ADM: 5 toques em "Menu" ===== */
+let admTaps = 0, admUltimo = 0, admRelatorio = '';
+$('#mTitle').addEventListener('click', () => {
+  const agora = Date.now();
+  admTaps = (agora - admUltimo < 1500) ? admTaps + 1 : 1;
+  admUltimo = agora;
+  if (admTaps >= 5) { admTaps = 0; abrirAdmin(); }
+});
+
+function abrirAdmin() {
+  closeSheet($('#menu'), false);
+  setTimeout(() => {
+    $('#admOut').innerHTML = '';
+    admRelatorio = '';
+    $('#admRelatorio').disabled = true;
+    openSheet($('#adminSheet'));
+  }, 200);
+}
+
+function admLinha(txt, cls) {
+  const d = document.createElement('div');
+  d.className = 'adm-line ' + (cls || '');
+  d.textContent = txt;
+  $('#admOut').appendChild(d);
+  d.scrollIntoView({ block: 'nearest' });
+}
+
+function montaPedidoTeste() {
+  const linhas = []; let total = 0;
+  (CONFIG.planos || []).forEach(p => { linhas.push(`1x ${p.titulo2} (${p.titulo1}) — ${brl(p.preco)}`); total += Number(p.preco) || 0; });
+  (CONFIG.bebidas || []).filter(d => d.tipo !== 'prato' && d.tipo !== 'csc').forEach(d => {
+    const t = (d.tamanhos || [])[0];
+    const it = t && (t.itens || [])[0];
+    if (!t || !it) return;
+    let nome = d.nome || 'Bebida';
+    try { nome = drinkName(d, t, it); } catch (e) {}
+    linhas.push(`1x ${nome} — ${brl(t.preco)}`);
+    total += Number(t.preco) || 0;
+  });
+  return { linhas, total };
+}
+
+$('#admEnviar').addEventListener('click', async () => {
+  const btn = $('#admEnviar');
+  btn.disabled = true;
+  const { linhas, total } = montaPedidoTeste();
+  const r = await salvarPedidoSupabase('ADM', 0, `[ADM] Adm: mensagem teste\n${linhas.join('\n')}\nTotal: ${brl(total)}`);
+  admLinha(r ? `✓ Pedido de teste enviado ao painel (${linhas.length} itens, ${brl(total)})` : '✗ Falha ao enviar o pedido de teste', r ? 'ok' : 'bad');
+  btn.disabled = false;
+});
+
+async function admTestes() {
+  const res = [];
+  const add = (nome, ok, info) => res.push({ nome, ok, info });
+  const H = { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json' };
+  const http = async (nome, url, opt) => {
+    try { const r = await fetch(url, { cache: 'no-store', ...opt }); add(nome, r.ok, 'HTTP ' + r.status); return r; }
+    catch (e) { add(nome, false, 'sem conexão'); return null; }
+  };
+
+  add('Internet', navigator.onLine, navigator.onLine ? 'online' : 'offline');
+  await http('Supabase · ler cardápio', `${SUPABASE_URL}/rest/v1/categorias?select=id&limit=1`, { headers: H });
+  await http('Supabase · status do pedido (SQL)', `${SUPABASE_URL}/rest/v1/rpc/status_pedidos`, { method: 'POST', headers: H, body: JSON.stringify({ refs: [] }) });
+  await http('Supabase · config do site (SQL 3)', `${SUPABASE_URL}/rest/v1/site_config?select=key&limit=1`, { headers: H });
+
+  try {
+    const r = await fetch('/manifest.webmanifest', { cache: 'no-store' });
+    const j = await r.json();
+    add('Manifest do app', r.ok && (j.icons || []).length >= 2, `${(j.icons || []).length} ícones`);
+  } catch (e) { add('Manifest do app', false, 'não encontrado'); }
+  for (const t of ['192', '512']) {
+    try {
+      const r = await fetch(`/icon-${t}.png`, { cache: 'no-store' });
+      const tipo = r.headers.get('content-type') || '';
+      add(`Ícone ${t}`, r.ok && tipo.includes('image/png'), `HTTP ${r.status} ${tipo}`);
+    } catch (e) { add(`Ícone ${t}`, false, 'não encontrado'); }
+  }
+  try {
+    const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
+    add('Service worker', !!reg, reg ? 'registrado' : 'não registrado');
+  } catch (e) { add('Service worker', false, 'erro'); }
+  try { localStorage.setItem('_adm', '1'); const ok = localStorage.getItem('_adm') === '1'; localStorage.removeItem('_adm'); add('Armazenamento local', ok, ok ? 'ok' : 'falhou'); }
+  catch (e) { add('Armazenamento local', false, 'bloqueado'); }
+
+  const nBeb = (CONFIG.bebidas || []).length;
+  add('Cardápio carregado', (CONFIG.planos || []).length > 0, `${(CONFIG.planos || []).length} pratos, ${nBeb} grupos de bebida, ${(CONFIG.subcategorias || []).length} subcategorias`);
+  const taxas = BAIRROS.map(b => b[1]);
+  add('Taxas de entrega', BAIRROS.length > 0 && taxas.every(x => x > 0), `${BAIRROS.length} bairros, de ${brl(Math.min(...taxas))} a ${brl(Math.max(...taxas))}`);
+  const st = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+  add('Tela', true, `${innerWidth}x${innerHeight} @${devicePixelRatio}x${st ? ' (app instalado)' : ''}`);
+  add('Pedidos neste aparelho', true, `${orders.length} guardados${syncInfo.erro ? ', sync: ' + syncInfo.erro : ''}`);
+  return res;
+}
+
+$('#admTestes').addEventListener('click', async () => {
+  const btn = $('#admTestes');
+  btn.disabled = true; btn.textContent = 'Testando…';
+  $('#admOut').innerHTML = '';
+  const res = await admTestes();
+  res.forEach(r => admLinha(`${r.ok ? '✓' : '✗'} ${r.nome} — ${r.info}`, r.ok ? 'ok' : 'bad'));
+  const falhas = res.filter(r => !r.ok).length;
+  admRelatorio = `[ADM] Adm: relatório de testes (${falhas ? falhas + ' falha(s)' : 'tudo ok'})\n` +
+    res.map(r => `${r.ok ? '✓' : '✗'} ${r.nome} — ${r.info}`).join('\n') +
+    `\nAparelho: ${navigator.userAgent.slice(0, 90)}`;
+  $('#admRelatorio').disabled = false;
+  btn.disabled = false; btn.textContent = 'Rodar testes do site';
+});
+
+$('#admRelatorio').addEventListener('click', async () => {
+  const btn = $('#admRelatorio');
+  if (!admRelatorio) return;
+  btn.disabled = true;
+  const r = await salvarPedidoSupabase('ADM', 0, admRelatorio);
+  admLinha(r ? '✓ Relatório enviado ao painel' : '✗ Falha ao enviar o relatório', r ? 'ok' : 'bad');
+  btn.disabled = !r ? false : true;
 });
 
 /* PWA INSTALL SETUP */
@@ -2190,7 +2489,7 @@ async function sendOrder() {
   let bad = null;
   if (!form.nome.trim()) bad = $('#fNome');
   else if (form.modo === 'local' && !form.mesa.trim()) bad = $('#fMesa');
-  else if (form.modo === 'entregar' && !form.bairro.trim()) bad = $('#fBairro');
+  else if (form.modo === 'entregar' && !bairroOk()) bad = $('#fBairro');
   else if (form.modo === 'entregar' && !form.rua.trim()) bad = $('#fRua');
   if (bad) { bad.classList.add('err'); bad.focus(); shake(bad); toast('Preencha os campos em destaque'); return; }
 
@@ -2250,7 +2549,8 @@ async function sendOrder() {
   });
 
   msg += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-  msg += `Total: ${brl(total())}${ent ? ' (+ taxa a combinar)' : ''}\n`;
+  if (ent) msg += `Entrega (${form.bairro}): ${brl(taxaEntrega())}\n`;
+  msg += `Total: ${brl(totalGeral())}\n`;
 
   if (ent) {
     msg += `Pagamento: ${pag}`;
@@ -2265,7 +2565,7 @@ async function sendOrder() {
   msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
   msg += `    CNPJ: 12.345.678/0001-90\n`;
 
-  const pedidoCriado = await salvarPedidoSupabase(form.nome.trim(), Math.round(total() * 100) / 100, msg);
+  const pedidoCriado = await salvarPedidoSupabase(form.nome.trim(), Math.round(totalGeral() * 100) / 100, msg);
 
   if (btnSend) {
     btnSend.disabled = false;
@@ -2281,7 +2581,7 @@ async function sendOrder() {
     ref: pedidoCriado.ref,
     sync: pedidoCriado.sincroniza,
     cliente: form.nome.trim(),
-    total: total(),
+    total: totalGeral(),
     detalhes: msg,
     modo: form.modo,
     status: 'novo',
@@ -2321,7 +2621,19 @@ $('#menuBtn').addEventListener('click', () => openSheet($('#menu')));
 const mkUrl = `https://wa.me/${CONFIG.criador.whatsapp}?text=${encodeURIComponent(CONFIG.criador.msg)}`;
 ['#mkBtn', '#mkFoot'].forEach(q => { const el = $(q); if (el) el.href = mkUrl; });
 $('#sobre').textContent = CONFIG.sobre;
-$('#horas').innerHTML = CONFIG.horarios.map(([d, h]) => `<div class="hr-row"><span>${esc(d)}</span><b>${esc(h)}</b></div>`).join('');
+const desenhaHoras = () => { $('#horas').innerHTML = CONFIG.horarios.map(([d, h]) => `<div class="hr-row"><span>${esc(d)}</span><b>${esc(h)}</b></div>`).join(''); };
+desenhaHoras();
+(async () => {
+  try {
+    const res = await fetch(`${SUPABASE_URL}/rest/v1/site_config?key=eq.site&select=value`, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }, cache: 'no-store' });
+    if (!res.ok) return;
+    const j = await res.json();
+    const v = j && j[0] && j[0].value;
+    if (!v) return;
+    if (v.sobre) { CONFIG.sobre = v.sobre; $('#sobre').textContent = v.sobre; }
+    if (Array.isArray(v.horarios) && v.horarios.length) { CONFIG.horarios = v.horarios; desenhaHoras(); }
+  } catch (e) {}
+})();
 $('#faq').innerHTML = CONFIG.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
 
 /* MODO PRINT: 5 CLIQUES NA LOGO */
