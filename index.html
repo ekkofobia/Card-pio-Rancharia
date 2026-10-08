@@ -1145,7 +1145,7 @@ const form = { nome: '', modo: 'local', mesa: '', bairro: '', rua: '', numero: '
 
 function save() { try { localStorage.setItem(KEY, JSON.stringify(cart)); } catch (e) {} }
 const itemTotal = it => it.preco * it.qty;
-const BAIRROS = [
+let BAIRROS = [
   ['Água Bela', 8], ['Alto da Aliança', 8], ['Alto da Maravilha', 7], ['Alto do Alencar', 7], ['Alto do Cruzeiro', 7],
   ['Angari', 7], ['Antônio Conselheiro', 8], ['Antônio Guilhermino', 8], ['Argemiro', 8], ['Cajueiro', 7],
   ['Castelo Branco', 7], ['Centenário', 6], ['Centro', 6], ['Country Club', 8], ['Dom José Rodrigues', 8],
@@ -2155,23 +2155,65 @@ async function sincronizarPedidos() {
 async function loopSync() {
   clearTimeout(trackPollInterval);
   const ativos = orders.filter(o => o.sync && !STATUS_FINAL.includes(o.status));
-  if (!ativos.length) return;
+  if (!ativos.length) { pararRealtimeSite(); return; }   // nada em andamento: desconecta
+  iniciarRealtimeSite();
   if (!document.hidden) await sincronizarPedidos();   // aba escondida: não consulta
   // economiza dados: rápido no começo (ou logo após uma mudança), depois espaça
   const ref = Math.max(syncInfo.mudou || 0, ...ativos.map(o => new Date(o.created_at).getTime()));
   const idade = Date.now() - ref;
-  const espera = syncInfo.erro ? 10000 : document.hidden ? 20000 : idade < 120000 ? 3500 : idade < 1800000 ? 10000 : 20000;
+  const espera = syncInfo.erro ? 10000 : document.hidden ? 20000 : rtSiteEstado === 'SUBSCRIBED' ? 30000 : idade < 120000 ? 3500 : idade < 1800000 ? 10000 : 20000;
   trackPollInterval = setTimeout(loopSync, espera);
+}
+
+/* ===== REALTIME: o painel avisa e o site confirma o status na hora ===== */
+const RT_CDN = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.js';
+let rtSite = null, rtChSite = null, rtSiteEstado = 'off', rtSiteTent = 0;
+
+function carregaLibRT() {
+  return new Promise(res => {
+    if (window.supabase) return res(true);
+    const s = document.createElement('script');
+    s.src = RT_CDN;
+    s.onload = () => res(!!window.supabase);
+    s.onerror = () => res(false);
+    document.head.appendChild(s);
+  });
+}
+
+function pararRealtimeSite() {
+  try { if (rtSite) rtSite.removeAllChannels(); } catch (e) {}
+  rtSite = null; rtChSite = null; rtSiteEstado = 'off';
+}
+
+async function iniciarRealtimeSite() {
+  const ativos = orders.some(o => o.sync && !STATUS_FINAL.includes(o.status));
+  if (!ativos) { pararRealtimeSite(); return; }              // só conecta enquanto houver pedido em andamento
+  if (rtChSite && rtChSite.state === 'joined') return;
+  if (Date.now() - rtSiteTent < 8000) return;
+  rtSiteTent = Date.now();
+  if (!(await carregaLibRT())) { rtSiteEstado = 'sem-lib'; return; }
+  pararRealtimeSite();
+  try {
+    rtSite = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
+    rtChSite = rtSite.channel('status-pedidos')
+      .on('broadcast', { event: 'status' }, msg => {
+        const ref = msg && msg.payload && msg.payload.ref;
+        if (ref && orders.some(o => o.ref === ref)) sincronizarPedidos();   // o aviso só dispara a conferência; quem decide é o banco
+      })
+      .subscribe(st => { rtSiteEstado = st; if (st === 'SUBSCRIBED') sincronizarPedidos(); });   // ao (re)conectar, confere o que perdeu
+  } catch (e) { rtSiteEstado = 'erro'; }
 }
 
 function startOrderStatusPolling() {
   clearTimeout(trackPollInterval);
   loopSync();
 }
-document.addEventListener('visibilitychange', () => { if (!document.hidden) startOrderStatusPolling(); });
-window.addEventListener('pageshow', startOrderStatusPolling);
+// ao voltar do segundo plano / reabrir o site / voltar a internet: reconecta e confere na hora
+const retomaSite = () => { rtSiteTent = 0; pararRealtimeSite(); startOrderStatusPolling(); };
+document.addEventListener('visibilitychange', () => { if (!document.hidden) retomaSite(); });
+window.addEventListener('pageshow', retomaSite);
 window.addEventListener('focus', startOrderStatusPolling);
-window.addEventListener('online', startOrderStatusPolling);
+window.addEventListener('online', retomaSite);
 
 /* ---------- Tela "Acompanhar pedido" ---------- */
 function renderPostCheckoutContent() {
@@ -2388,7 +2430,7 @@ $('#trackShortcuts').addEventListener('click', e => {
 });
 
 /* ===== MODO ADM: 5 toques em "Menu" ===== */
-const SITE_VERSION = 'v21';
+const SITE_VERSION = 'v22';
 let admTaps = 0, admUltimo = 0, admRelatorio = '', admModo = 'entregar';
 $('#mTitle').addEventListener('click', () => {
   const agora = Date.now();
@@ -2495,10 +2537,11 @@ async function admTestes() {
   const nBeb = (CONFIG.bebidas || []).length;
   add('Cardápio carregado', (CONFIG.planos || []).length > 0, `${(CONFIG.planos || []).length} pratos, ${nBeb} grupos de bebida, ${(CONFIG.subcategorias || []).length} subcategorias`);
   const taxas = BAIRROS.map(b => b[1]);
-  add('Taxas de entrega', BAIRROS.length > 0 && taxas.every(x => x > 0), `${BAIRROS.length} bairros, de ${brl(Math.min(...taxas))} a ${brl(Math.max(...taxas))}`);
+  add('Taxas de entrega', BAIRROS.length > 0 && taxas.every(x => x >= 0), `${BAIRROS.length} bairros, de ${brl(Math.min(...taxas))} a ${brl(Math.max(...taxas))}`);
   const st = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   add('Tela', true, `${innerWidth}x${innerHeight} @${devicePixelRatio}x${st ? ' (app instalado)' : ''}`);
   add('Pedidos neste aparelho', true, `${orders.length} guardados${syncInfo.erro ? ', sync: ' + syncInfo.erro : ''}`);
+  add('Realtime (aviso instantâneo)', rtSiteEstado === 'SUBSCRIBED' || !orders.some(o => o.sync && !STATUS_FINAL.includes(o.status)), rtSiteEstado === 'SUBSCRIBED' ? 'conectado' : (orders.some(o => o.sync && !STATUS_FINAL.includes(o.status)) ? 'estado: ' + rtSiteEstado : 'conecta quando houver pedido em andamento'));
   const er = window.__erros || [];
   add('Erros do site nesta sessão', er.length === 0, er.length ? er.slice(-3).join(' | ') : 'nenhum');
   add('Último erro ao gravar pedido', !ultimoErroSave, ultimoErroSave ? explicaErro(ultimoErroSave) : 'nenhum');
@@ -2603,7 +2646,7 @@ $('#admFerr').addEventListener('click', async e => {
     b.disabled = false;
   } else if (t === 'atualizar') {
     if (!confirm('Limpar o cache do site neste aparelho e recarregar?')) return;
-    try { localStorage.removeItem('rancharia_menu_v1'); } catch (e) {}
+    try { localStorage.removeItem('rancharia_menu_v1'); localStorage.removeItem('rancharia_cfg_v1'); } catch (e) {}
     try { const rs = await navigator.serviceWorker.getRegistrations(); await Promise.all(rs.map(r => r.unregister())); } catch (e) {}
     try { const ks = await caches.keys(); await Promise.all(ks.map(k => caches.delete(k))); } catch (e) {}
     location.reload();
@@ -2803,13 +2846,27 @@ const desenhaHoras = () => { $('#horas').innerHTML = CONFIG.horarios.map(([d, h]
 desenhaHoras();
 (async () => {
   try {
-    const res = await fetch(`${SUPABASE_URL}/rest/v1/site_config?key=eq.site&select=value`, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }, cache: 'no-store' });
-    if (!res.ok) return;
-    const j = await res.json();
-    const v = j && j[0] && j[0].value;
-    if (!v) return;
-    if (v.sobre) { CONFIG.sobre = v.sobre; $('#sobre').textContent = v.sobre; }
-    if (Array.isArray(v.horarios) && v.horarios.length) { CONFIG.horarios = v.horarios; desenhaHoras(); }
+    // textos e bairros vindos do painel (guardados 3 min no aparelho para economizar dados)
+    const KEY = 'rancharia_cfg_v1';
+    let rows = null;
+    try { const c = JSON.parse(localStorage.getItem(KEY) || 'null'); if (c && Date.now() - c.t < 180000) rows = c.rows; } catch (e) {}
+    if (!rows) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_config?key=in.(site,bairros)&select=key,value`, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }, cache: 'no-store' });
+      if (!res.ok) return;
+      rows = await res.json();
+      try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), rows })); } catch (e) {}
+    }
+    const get = k => ((rows || []).find(r => r.key === k) || {}).value;
+    const v = get('site');
+    if (v) {
+      if (v.sobre) { CONFIG.sobre = v.sobre; $('#sobre').textContent = v.sobre; }
+      if (Array.isArray(v.horarios) && v.horarios.length) { CONFIG.horarios = v.horarios; desenhaHoras(); }
+    }
+    const b = get('bairros');
+    if (Array.isArray(b) && b.length) {
+      const lista = b.filter(x => Array.isArray(x) && x[0] && Number(x[1]) >= 0).map(x => [String(x[0]), Number(x[1])]);
+      if (lista.length) BAIRROS = lista;
+    }
   } catch (e) {}
 })();
 $('#faq').innerHTML = CONFIG.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
