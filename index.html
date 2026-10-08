@@ -2138,6 +2138,7 @@ async function sincronizarPedidos() {
         if (o.status !== st || !!o.impresso !== imp || (o.motivo || '') !== mot) { o.status = st; o.impresso = imp; o.motivo = mot; mudou = true; }
       });
       if (mudou) {
+        syncInfo.mudou = Date.now();
         saveOrders();
         updateHeaderStatusButton();
         if (current && current.id === 'postCheckout') renderPostCheckoutContent();
@@ -2153,9 +2154,14 @@ async function sincronizarPedidos() {
 /* Ciclo com setTimeout: o iPhone pausa timers em segundo plano, então retomamos ao voltar pro app */
 async function loopSync() {
   clearTimeout(trackPollInterval);
-  if (!orders.some(o => o.sync && !STATUS_FINAL.includes(o.status))) return;
-  await sincronizarPedidos();
-  trackPollInterval = setTimeout(loopSync, syncInfo.erro ? 10000 : 3500);
+  const ativos = orders.filter(o => o.sync && !STATUS_FINAL.includes(o.status));
+  if (!ativos.length) return;
+  if (!document.hidden) await sincronizarPedidos();   // aba escondida: não consulta
+  // economiza dados: rápido no começo (ou logo após uma mudança), depois espaça
+  const ref = Math.max(syncInfo.mudou || 0, ...ativos.map(o => new Date(o.created_at).getTime()));
+  const idade = Date.now() - ref;
+  const espera = syncInfo.erro ? 10000 : document.hidden ? 20000 : idade < 120000 ? 3500 : idade < 1800000 ? 10000 : 20000;
+  trackPollInterval = setTimeout(loopSync, espera);
 }
 
 function startOrderStatusPolling() {
@@ -2382,7 +2388,7 @@ $('#trackShortcuts').addEventListener('click', e => {
 });
 
 /* ===== MODO ADM: 5 toques em "Menu" ===== */
-const SITE_VERSION = 'v17';
+const SITE_VERSION = 'v21';
 let admTaps = 0, admUltimo = 0, admRelatorio = '', admModo = 'entregar';
 $('#mTitle').addEventListener('click', () => {
   const agora = Date.now();
@@ -2597,6 +2603,7 @@ $('#admFerr').addEventListener('click', async e => {
     b.disabled = false;
   } else if (t === 'atualizar') {
     if (!confirm('Limpar o cache do site neste aparelho e recarregar?')) return;
+    try { localStorage.removeItem('rancharia_menu_v1'); } catch (e) {}
     try { const rs = await navigator.serviceWorker.getRegistrations(); await Promise.all(rs.map(r => r.unregister())); } catch (e) {}
     try { const ks = await caches.keys(); await Promise.all(ks.map(k => caches.delete(k))); } catch (e) {}
     location.reload();
@@ -2994,11 +3001,23 @@ function aplicarCardapio(cats, prods) {
 
 (async function carregarCardapio() {
   try {
+    const MENU_KEY = 'rancharia_menu_v1', MENU_TTL = 180000;   // cardápio fica 3 min no aparelho
+    const lerCache = () => { try { return JSON.parse(localStorage.getItem(MENU_KEY) || 'null'); } catch (e) { return null; } };
     const get = u => fetch(`${SUPABASE_URL}/rest/v1/${u}`, { headers: { apikey: SUPABASE_KEY }, cache: 'no-store' }).then(r => r.json());
-    const [c, p] = await Promise.all([
-      get('categorias?select=*&order=ordem.asc,id.asc'),
-      get('produtos?select=*&order=id.asc')
-    ]);
+    let c, p;
+    const cache = lerCache();
+    if (cache && Date.now() - cache.t < MENU_TTL) { c = cache.c; p = cache.p; }
+    else {
+      try {
+        [c, p] = await Promise.all([
+          get('categorias?select=*&order=ordem.asc,id.asc'),
+          get('produtos?select=*&order=id.asc')
+        ]);
+        if (c && c.length && p && p.length) { try { localStorage.setItem(MENU_KEY, JSON.stringify({ t: Date.now(), c, p })); } catch (e) {} }
+      } catch (e) {
+        if (cache) { c = cache.c; p = cache.p; } else throw e;   // sem internet: usa a cópia antiga
+      }
+    }
     if (c && c.length && p && p.length) {
       aplicarCardapio(c, p.filter(x => !x.pausado));
       renderPlates();
@@ -3093,7 +3112,7 @@ async function checarLoja() {
     if (Array.isArray(json)) setLoja(json.length > 0);
   } catch (e) {}
 }
-checarLoja(); setInterval(checarLoja, 60000);
+checarLoja(); setInterval(() => { if (!document.hidden) checarLoja(); }, 60000);
 </script>
 </body>
 </html>
