@@ -1218,7 +1218,7 @@ const customHTML = orig => (TIT.custom || []).filter(c => c.cat === orig && (c.t
 function aplicaTitulos() {
   const h = TIT.hero, x = TIT.extras;
   const AL = { l: 'left', c: 'center', r: 'right' };
-  if (h.a && AL[h.a]) { $('#heroBrand').parentElement.style.textAlign = AL[h.a]; $('#heroLead').style.textAlign = AL[h.a]; $('#heroLead').style.marginLeft = h.a === 'l' ? '' : 'auto'; $('#heroLead').style.marginRight = h.a === 'r' ? '0' : (h.a === 'c' ? 'auto' : ''); }
+  if (h.a && AL[h.a]) { const H = document.querySelector('.hero'); H.style.textAlign = AL[h.a]; $('#heroBrand').parentElement.style.textAlign = AL[h.a]; const sc = $('#heroScript'); sc.style.textAlign = AL[h.a]; const L = $('#heroLead'); L.style.textAlign = AL[h.a]; L.style.marginLeft = h.a === 'l' ? '0' : 'auto'; L.style.marginRight = h.a === 'r' ? '0' : 'auto'; const C = document.querySelector('.hero .cta'); if (C) C.style.alignItems = ({ l: 'flex-start', c: 'center', r: 'flex-end' })[h.a]; }
   if (x.a && AL[x.a]) { $('#extrasT').style.textAlign = AL[x.a]; $('#extrasS').style.textAlign = AL[x.a]; $('#extrasS').style.maxWidth = 'none'; }
   if (h.t) $('#heroBrand').textContent = h.t;
   if (h.s) $('#heroScript').textContent = h.s;
