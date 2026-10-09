@@ -293,6 +293,9 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
   transition: transform .15s, background .2s, border-color .2s;
 }
 .opt:active { transform: scale(.96); }
+.opt .ob-t { display: grid; gap: 1px; min-width: 0; flex: 1; }
+.opt .ob-t small { color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.25; }
+.opt .ob-p { color: var(--gold); font-weight: 700; font-size: 13px; }
 .opt .tick { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; transition: .2s; }
 .opt .tick::after { content: ""; width: 10px; height: 6px; border-left: 2.5px solid var(--ink); border-bottom: 2.5px solid var(--ink); transform: rotate(-45deg) scale(0); margin-top: -2px; transition: transform .2s; }
 .opt.on { background: var(--gold); color: var(--ink); border-color: var(--gold); font-weight: 700; }
@@ -584,9 +587,11 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .drink.open { border-color: var(--gold); }
 .drink-h { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px; text-align: left; }
 .sv-i { vertical-align: -3px; flex: none; }
-.sub-div { display: flex; align-items: center; gap: 12px; margin: 10px 0 4px; color: var(--muted); font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; grid-column: 1 / -1; }
-.sub-div::before, .sub-div::after { content: ''; flex: 1; height: 1px; background: rgba(242, 196, 109, .35); }
+.sub-div { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 8px 0 6px; color: #fff; font-size: 14.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; grid-column: 1 / -1; text-align: center; }
+.sub-div::before, .sub-div::after { content: ''; flex: 1; height: 1px; background: rgba(242, 196, 109, .45); }
+.sub-div-s { text-align: center; color: var(--muted); font-size: 13px; margin: -2px 0 6px; grid-column: 1 / -1; }
 .sub-div:first-child { margin-top: 2px; }
+.d-sub { display: block; margin-top: 2px; color: var(--muted); font-size: 12.5px; font-weight: 400; }
 .d-emoji .sv { width: 26px; height: 26px; color: var(--gold); }
 .xcard h3 .sv { width: 20px; height: 20px; vertical-align: -4px; color: var(--gold); margin-right: 4px; }
 .modal .emoji svg { color: var(--gold); }
@@ -604,7 +609,7 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .drink-opts[hidden] { display: none; }
 .d-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0 12px 6px; border-top: 1px solid var(--line); }
 .d-row:first-child { border-top: 0; padding-top: 2px; }
-.sub-div + .d-row { border-top: 0; padding-top: 2px; }
+.sub-div + .d-row, .sub-div-s + .d-row { border-top: 0; padding-top: 12px; }
 .d-row b { font-weight: 500; font-size: 15px; flex: 1; min-width: 0; }
 .d-pr { color: var(--gold); font-weight: 700; font-size: 14px; white-space: nowrap; }
 .d-row .qty { flex: none; margin-left: auto; gap: 2px; }
@@ -1317,7 +1322,7 @@ $$('[data-close]').forEach(b => b.addEventListener('click', () => {
   }
 }));
 
-const optBtn = (k, v, sid) => `<button type="button" class="opt" data-k="${k}" ${sid ? `data-sid="${sid}"` : ''} data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${esc(v)}</button>`;
+const optBtn = (k, v, sid, it) => `<button type="button" class="opt" data-k="${k}" ${sid ? `data-sid="${sid}"` : ''} data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${it ? `<span class="ob-t"><span>${esc(v)}</span>${it.descricao ? `<small>${esc(it.descricao)}</small>` : ''}${Number(it.preco) > 0 ? `<span class="ob-p">+ ${brl(it.preco)}</span>` : ''}</span>` : esc(v)}</button>`;
 
 function openBuilder(id, fromBump = false) {
   openedFromOrderBump = !!fromBump;
@@ -1385,7 +1390,7 @@ function openBuilder(id, fromBump = false) {
       </div>`;
 
     if (isChecklist) {
-      bodyHTML += `<div class="opts" id="optSub_${sub.id}">${sub.itens.map(it => optBtn('sub_check', it.nome, sub.id)).join('')}</div>`;
+      bodyHTML += `<div class="opts" id="optSub_${sub.id}">${sub.itens.map(it => optBtn('sub_check', it.nome, sub.id, it)).join('')}</div>`;
     } else if (isMin) {
       const precos = sub.itens.map(it => Number(it.preco) || 0);
       const aPartir = sub.apartir_de || (precos.length ? Math.min(...precos) : 0);
@@ -1748,7 +1753,8 @@ const seg = (name, list, val) => list.map(([v, l]) => `<button type="button" cla
 const drinkName = (d, t, item) => [d.nome, t.nome, item].filter(Boolean).join(' ');
 const drinkQty = nome => { const it = cart.find(x => x.kind === 'extra' && x.nome === nome); return it ? it.qty : 0; };
 
-const divSub = t => t.div ? `<div class="sub-div"><span>${esc(t.div)}</span></div>` : '';
+const divSub = t => t.div ? `<div class="sub-div"><span>${esc(t.div)}</span></div>${t.sub ? `<div class="sub-div-s">${esc(t.sub)}</div>` : ''}` : '';
+const descItem = (t, ii) => { const d = t.subId ? (t.descs && t.descs[ii]) : t.nome; return d ? `<small class="d-sub">${esc(d)}</small>` : ''; };
 
 function drinkHTML(d) {
   const min = d.apartir_de || Math.min(...d.tamanhos.map(t => t.preco));
@@ -1758,7 +1764,7 @@ function drinkHTML(d) {
     return divSub(t) + t.itens.map((item, ii) => {
       const q = drinkQty(drinkName(d, t, item));
       return `<div class="d-row">
-        <b>${esc(item)}</b>
+        <b>${esc(item)}${descItem(t, ii)}</b>
         <span class="d-pr">${brl(t.preco)}</span>
         <div class="qty">
           <button type="button" class="${q ? '' : 'off'}" data-a="ddec" data-d="${d.id}" data-t="${ti}" data-i="${ii}">−</button>
@@ -3108,8 +3114,8 @@ function aplicarCardapio(cats, prods) {
     por(c).filter(x => norm(x.nome) !== PL).forEach(x => {
       const k = (x.descricao || '') + '|' + Number(x.preco);
       let t = tam.find(z => z.k === k);
-      if (!t) tam.push(t = { k, nome: x.descricao || '', preco: Number(x.preco), itens: [] });
-      t.itens.push(x.nome);
+      if (!t) tam.push(t = { k, nome: x.descricao || '', preco: Number(x.preco), itens: [], descs: [] });
+      t.itens.push(x.nome); t.descs.push(x.descricao || '');
     });
 
     // subcategorias ligadas a esta categoria (ex.: "Refrigerante 1 Litro" dentro de "Refrigerante") viram os tamanhos dela
@@ -3119,8 +3125,8 @@ function aplicarCardapio(cats, prods) {
       (sc.itens || []).forEach(x => {
         const k = 'sub' + sc.id + '|' + Number(x.preco);
         let t = tam.find(z => z.k === k);
-        if (!t) tam.push(t = { k, nome: nm, preco: Number(x.preco), itens: [], div: tam.some(z => z.subId === sc.id) ? '' : nm, subId: sc.id });
-        t.itens.push(x.nome);
+        if (!t) tam.push(t = { k, nome: nm, preco: Number(x.preco), itens: [], descs: [], div: tam.some(z => z.subId === sc.id) ? '' : nm, sub: sc.substituto || '', subId: sc.id });
+        t.itens.push(x.nome); t.descs.push(x.descricao || '');
       });
     });
 
@@ -3171,12 +3177,12 @@ carregarCardapio();
 
 function cscHTML(d) {
   return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3>` + d.tamanhos.map((t, ti) => divSub(t) + t.itens.map((item, ii) =>
-    `<div class="d-row"><span class="xn"><b>${esc(item)}</b>${t.nome ? `<small>${esc(t.nome)}</small>` : ''}<i>${brl(t.preco)}</i></span>${qtyBtns(d, ti, ii, drinkName(d, t, item))}</div>`).join('')).join('') + `</div>`;
+    `<div class="d-row"><span class="xn"><b>${esc(item)}</b>${(() => { const d = t.subId ? (t.descs && t.descs[ii]) : t.nome; return d ? `<small>${esc(d)}</small>` : ''; })()}<i>${brl(t.preco)}</i></span>${qtyBtns(d, ti, ii, drinkName(d, t, item))}</div>`).join('')).join('') + `</div>`;
 }
 
 function ckHTML(d) {
   return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3><div class="opts one">` + d.tamanhos.map((t, ti) => divSub(t) + t.itens.map((item, ii) =>
-    `<button type="button" class="opt ${drinkQty(drinkName(d, t, item)) ? 'on' : ''}" data-a="dtog" data-d="${d.id}" data-t="${ti}" data-i="${ii}"><span class="tick"></span>${esc(item)}<span style="margin-left:auto">${brl(t.preco)}</span></button>`).join('')).join('') + `</div></div>`;
+    `<button type="button" class="opt ${drinkQty(drinkName(d, t, item)) ? 'on' : ''}" data-a="dtog" data-d="${d.id}" data-t="${ti}" data-i="${ii}"><span class="tick"></span><span class="ob-t"><span>${esc(item)}</span>${descItem(t, ii).replace('d-sub', '')}</span><span style="margin-left:auto">${brl(t.preco)}</span></button>`).join('')).join('') + `</div></div>`;
 }
 
 function bumpPratoHTML(d) {
