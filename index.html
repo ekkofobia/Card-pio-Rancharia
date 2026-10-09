@@ -363,7 +363,7 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
   width: 100%; display: flex; align-items: center; gap: 10px; padding: 14px 16px;
   color: var(--cream); font-size: 15px; font-weight: 700; text-align: left;
 }
-.sanfona-h span { flex: 1; }
+.sanfona-h span { flex: 1; display: flex; align-items: center; gap: 8px; }
 .sanfona-h b { color: var(--gold); font-size: 15px; }
 .sanfona-b { display: grid; grid-template-rows: 0fr; transition: grid-template-rows .32s ease; }
 .sanfona.open .sanfona-b { grid-template-rows: 1fr; }
@@ -586,6 +586,7 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .drink-opts[hidden] { display: none; }
 .d-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 0 12px 6px; border-top: 1px solid var(--line); }
 .d-row:first-child { border-top: 0; padding-top: 2px; }
+.sub-div + .d-row { border-top: 0; padding-top: 2px; }
 .d-row b { font-weight: 500; font-size: 15px; flex: 1; min-width: 0; }
 .d-pr { color: var(--gold); font-weight: 700; font-size: 14px; white-space: nowrap; }
 .d-row .qty { flex: none; margin-left: auto; gap: 2px; }
