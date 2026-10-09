@@ -30,21 +30,21 @@ window.EDITAVEL = {
 <meta property="og:title" content="Rancharia | Restaurante e Petiscaria em Juazeiro, BA">
 <meta property="og:description" content="Monte seu prato e peça por delivery ou retirada. Rancharia, São Geraldo, Juazeiro - BA.">
 <meta property="og:url" content="https://rancharia.juaba.workers.dev/">
-<meta property="og:image" content="https://rancharia.juaba.workers.dev/icon-512.png">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Rancharia | Restaurante e Petiscaria em Juazeiro, BA">
 <meta name="twitter:description" content="Monte seu prato e peça por delivery ou retirada.">
 <meta name="geo.region" content="BR-BA">
 <meta name="geo.placename" content="Juazeiro">
 <script type="application/ld+json">
-{"@context":"https://schema.org","@type":"Restaurant","name":"Rancharia","alternateName":["Rancharia Restaurante e Petiscaria","Rancharia Juazeiro","Rancharia Jua","Rancharia Juaba"],"url":"https://rancharia.juaba.workers.dev/","image":"https://rancharia.juaba.workers.dev/icon-512.png","description":"Restaurante e petiscaria em Juazeiro, BA. Cardápio, delivery e retirada.","servesCuisine":["Brasileira","Petiscos"],"priceRange":"R$","telephone":"+5574988188139","hasMenu":"https://rancharia.juaba.workers.dev/","hasMap":"https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac","acceptsReservations":false,"address":{"@type":"PostalAddress","streetAddress":"R. dos Pinheiros","addressLocality":"Juazeiro","addressRegion":"BA","postalCode":"48994-181","addressCountry":"BR","addressNeighborhood":"São Geraldo"},"sameAs":["https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac"]}
+{"@context":"https://schema.org","@type":"Restaurant","name":"Rancharia","alternateName":["Rancharia Restaurante e Petiscaria","Rancharia Juazeiro","Rancharia Jua","Rancharia Juaba"],"url":"https://rancharia.juaba.workers.dev/","image":"https://rancharia.juaba.workers.dev/icon.svg","description":"Restaurante e petiscaria em Juazeiro, BA. Cardápio, delivery e retirada.","servesCuisine":["Brasileira","Petiscos"],"priceRange":"R$","telephone":"+5574988188139","hasMenu":"https://rancharia.juaba.workers.dev/","hasMap":"https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac","acceptsReservations":false,"address":{"@type":"PostalAddress","streetAddress":"R. dos Pinheiros","addressLocality":"Juazeiro","addressRegion":"BA","postalCode":"48994-181","addressCountry":"BR","addressNeighborhood":"São Geraldo"},"sameAs":["https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac"]}
 </script>
 <meta name="theme-color" content="#2a1509">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Rancharia">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="/icon.svg">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0BAMAAADP4xsBAAAAGFBMVEXyxG3mume7lFKHZjdmSSc+JhMxGw0qFQnoGEBHAAAB9UlEQVR42u3aT07CQBQG8JkCe/5cYATdF4J7A3oBj8LGM7jwIsZ4A+EABOlei71AKXuFcecrxOjr5D0T4tdVKeQX8vHmvZkEe2O0rsiABg0aNGjQoEGDBg0aNGjQoEGD/td0/cd3P+72X9tmy7Z6ToI+vHxRGLPoDp1SID69n6pl7eePej/jy0yvQuaZGu2f9Oo6z9RoP9Nbjbkevc30ekiiRxd69FqoPTUmxph1kS7p0U6y87XbvRZ1Ji8cyHlM9EY46xHdStM1PTpy7E9WrrnmUdJ/sg9pHuO3tk6a/qpma46HpuESSdPUSrvSNG3JnDBNu6YolhwFe1OmI7W/fr89fDJQWzL1WIu2Y7WFfhpr0Z2RVnvqXDIGQj0ojTFn1IQdk/T6dfqwURsF+VSNNq+JGu0XerPx9wNY+LlxKVbXjYnxq9VzqUokv7XtXV2XZmQiG8jZBd1Ln3aHpfoTpmvUS3cb4QqhZuqlj6Q16nlvwnRpi5BLL5kBO+zqxyR22NUPd44bdvUe4rhhV6fZYVen2WFXp9mVHdCvuZUdQPeZYQfQ3LAD6FLYmTBtmZUdMnYp7K003eaFHUIzww6hS2Gn0luc/jdnXyGawt4lwnTECjuMZoUdtp084YRt8f9r0KBBgwYNGjRo0KBBgwYNGjRo0ErXJ1btcGOn9bfSAAAAAElFTkSuQmCC">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Outfit:wght@400;500;600;700;800&family=Yellowtail&display=swap" rel="stylesheet">
@@ -294,6 +294,8 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
 }
 .opt:active { transform: scale(.96); }
 .opt .ob-t { display: grid; gap: 1px; min-width: 0; flex: 1; }
+.opt.on .ob-t small { color: rgba(42, 21, 9, .78); }
+.opt.on .ob-p { color: var(--ink); }
 .opt .ob-t small { color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.25; }
 .opt .ob-p { color: var(--gold); font-weight: 700; font-size: 13px; }
 .opt .tick { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; transition: .2s; }
@@ -633,9 +635,14 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .drawer .head { padding: calc(10px + env(safe-area-inset-top)) 20px 8px; }
 .drawer .body { padding: 4px 20px calc(12px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 18px; overflow-y: auto; }
 .msec h3 { margin-bottom: 6px; font-size: 22px; }
-.loc-btn { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 16px; color: var(--cream); text-decoration: none; }
+.loc-btn { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 12px 14px; border: 1px solid rgba(242, 196, 109, .45); border-radius: 16px; background: rgba(242, 196, 109, .06); color: var(--cream); text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.loc-btn:active { background: rgba(242, 196, 109, .14); }
+.loc-btn > span:nth-of-type(1) { flex: 1; min-width: 0; }
+.loc-row { flex: 0 0 100%; display: flex; justify-content: flex-end; }
+.loc-btn .loc-go svg { color: #2a1509; }
+.loc-go { display: inline-flex; align-items: center; gap: 6px; min-height: 34px; padding: 0 16px; border-radius: 999px; background: var(--gold); color: #2a1509; font-weight: 800; font-size: 16px; }
 .loc-btn svg { flex: none; color: var(--gold); }
-.loc-btn span { display: grid; gap: 1px; }
+.loc-btn > span:nth-of-type(1) { display: grid; gap: 1px; }
 .loc-btn b { font-size: 17px; }
 .loc-btn small { color: var(--muted); font-size: 14px; }
 .msec > p { color: var(--muted); font-size: 16px; line-height: 1.4; }
@@ -1121,7 +1128,7 @@ body.print-mode .print-salad small {
     <div class="body">
       <div class="msec"><h3>Sobre</h3><p id="sobre"></p></div>
       <div class="msec"><h3>Horário de funcionamento</h3><div class="hrs" id="horas"></div></div>
-      <div class="msec"><a class="loc-btn" href="https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac" target="_blank" rel="noopener"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span><b>Como chegar</b><small>R. dos Pinheiros, São Geraldo · Juazeiro-BA</small></span></a></div>
+      <div class="msec"><a class="loc-btn" href="https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac" target="_blank" rel="noopener"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span><b>Como chegar</b><small>R. dos Pinheiros, São Geraldo · Juazeiro-BA</small></span><span class="loc-row"><span class="loc-go">Ir<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a></div>
       <div class="msec"><h3>Perguntas frequentes</h3><div class="faq" id="faq"></div></div>
       <div class="msec"><div class="pills" id="sites"></div></div>
     </div>
@@ -2631,13 +2638,11 @@ async function admTestes() {
     const j = await r.json();
     add('Manifest do app', r.ok && (j.icons || []).length >= 2, `${(j.icons || []).length} ícones`);
   } catch (e) { add('Manifest do app', false, 'não encontrado'); }
-  for (const t of ['192', '512']) {
-    try {
-      const r = await fetch(`/icon-${t}.png`, { cache: 'no-store' });
-      const tipo = r.headers.get('content-type') || '';
-      add(`Ícone ${t}`, r.ok && tipo.includes('image/png'), `HTTP ${r.status} ${tipo}`);
-    } catch (e) { add(`Ícone ${t}`, false, 'não encontrado'); }
-  }
+  try {
+    const r = await fetch('/icon.svg', { cache: 'no-store' });
+    const tipo = r.headers.get('content-type') || '';
+    add('Ícone do app (icon.svg)', r.ok && tipo.includes('svg'), `HTTP ${r.status} ${tipo}`);
+  } catch (e) { add('Ícone do app (icon.svg)', false, 'não encontrado'); }
   try {
     const reg = 'serviceWorker' in navigator ? await navigator.serviceWorker.getRegistration() : null;
     add('Service worker', !!reg, reg ? 'registrado' : 'não registrado');
