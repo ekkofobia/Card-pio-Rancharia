@@ -194,9 +194,8 @@ section { padding: 46px 0; scroll-margin-top: 62px; }
 .sec-title { font-size: 26px; font-weight: 700; line-height: 1.15; }
 .sec-title em { font-style: normal; color: var(--gold); }
 .ty { color: var(--gold); }
-.tt-c { grid-column: 1 / -1; text-align: center; margin: 14px 0 6px; }
-.tt-ct { font-size: 24px; font-weight: 800; line-height: 1.15; }
-.tt-cs { margin-top: 4px; color: var(--muted); font-size: 14px; }
+.tt-c { grid-column: 1 / -1; margin: 18px 0 8px; }
+.tt-c .sec-sub { max-width: none; margin-top: 4px; }
 .sec-sub { margin-top: 8px; color: var(--muted); max-width: 46ch; }
 #extras .sec-sub { margin-top: 4px; margin-bottom: 20px; }
 
@@ -1215,9 +1214,12 @@ let TIT = { hero: {}, extras: {}, nomes: {}, custom: [] };
 const tit = (orig, shown) => { const o = TIT.nomes[orig]; return fmtT(o && o.t ? o.t : shown); };
 const titS = (orig, fb) => { const o = TIT.nomes[orig]; return o && o.s ? o.s : fb; };
 const customHTML = orig => (TIT.custom || []).filter(c => c.cat === orig && (c.t || c.s)).map(c =>
-  `<div class="tt-c">${c.t ? `<h3 class="tt-ct">${fmtT(c.t)}</h3>` : ''}${c.s ? `<p class="tt-cs">${fmtT(c.s)}</p>` : ''}</div>`).join('');
+  `<div class="tt-c" style="text-align:${({ l: 'left', c: 'center', r: 'right' })[c.a] || 'left'}">${c.t ? `<h2 class="sec-title">${fmtT(c.t)}</h2>` : ''}${c.s ? `<p class="sec-sub">${fmtT(c.s)}</p>` : ''}</div>`).join('');
 function aplicaTitulos() {
   const h = TIT.hero, x = TIT.extras;
+  const AL = { l: 'left', c: 'center', r: 'right' };
+  if (h.a && AL[h.a]) { $('#heroBrand').parentElement.style.textAlign = AL[h.a]; $('#heroLead').style.textAlign = AL[h.a]; $('#heroLead').style.marginLeft = h.a === 'l' ? '' : 'auto'; $('#heroLead').style.marginRight = h.a === 'r' ? '0' : (h.a === 'c' ? 'auto' : ''); }
+  if (x.a && AL[x.a]) { $('#extrasT').style.textAlign = AL[x.a]; $('#extrasS').style.textAlign = AL[x.a]; $('#extrasS').style.maxWidth = 'none'; }
   if (h.t) $('#heroBrand').textContent = h.t;
   if (h.s) $('#heroScript').textContent = h.s;
   if (h.sub) $('#heroLead').innerHTML = fmtT(h.sub);
