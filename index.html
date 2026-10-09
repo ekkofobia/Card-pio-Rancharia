@@ -1240,7 +1240,8 @@ let BAIRROS = [
 
 const total = () => cart.reduce((s, it) => s + itemTotal(it), 0);
 const count = () => cart.reduce((s, it) => s + it.qty, 0);
-const bairroOk = () => BAIRROS.find(b => b[0] === form.bairro);
+let ENTREGA_COMBINAR = false;
+const bairroOk = () => ENTREGA_COMBINAR ? (form.bairro.trim() ? [form.bairro.trim(), 0] : null) : BAIRROS.find(b => b[0] === form.bairro);
 const taxaEntrega = () => (form.modo === 'entregar' && bairroOk()) ? bairroOk()[1] : 0;
 const totalGeral = () => total() + taxaEntrega();
 
@@ -1908,7 +1909,7 @@ function renderCart() {
       <div class="field" id="fMesaW" ${form.modo === 'local' ? '' : 'hidden'}>
         <input id="fMesa" type="text" placeholder="Número da mesa — ex.: 12" value="${esc(form.mesa)}"></div>
       <div class="field" id="fEndW" ${ent ? '' : 'hidden'}>
-        <button type="button" id="fBairro" class="sel-btn ${bairroOk() ? '' : 'vazio'}" data-a="bairro" style="margin-bottom:8px"><span class="sel-v">${bairroOk() ? esc(form.bairro) : 'Selecione o bairro'}</span>${bairroOk() ? `<small>${brl(bairroOk()[1])}</small>` : ''}</button>
+        ${ENTREGA_COMBINAR ? `<input id="fBairro" type="text" placeholder="Seu bairro" value="${esc(form.bairro)}" style="margin-bottom:8px">` : ''}${ENTREGA_COMBINAR ? '' : `<button type="button" id="fBairro" class="sel-btn ${bairroOk() ? '' : 'vazio'}" data-a="bairro" style="margin-bottom:8px"><span class="sel-v">${bairroOk() ? esc(form.bairro) : 'Selecione o bairro'}</span>${bairroOk() ? `<small>${brl(bairroOk()[1])}</small>` : ''}</button>`}
         <div style="display:flex;gap:8px">
           <input id="fRua" type="text" placeholder="Rua" value="${esc(form.rua)}" style="flex:2">
           <input id="fNumero" type="text" placeholder="Nº" value="${esc(form.numero)}" style="flex:1;min-width:0">
@@ -1922,7 +1923,7 @@ function renderCart() {
     foot.innerHTML = `<div class="fsum">
       <button type="button" class="vp-ico" data-a="toggleItems" aria-label="Ver pedido" title="Ver pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span>Pedido</span></button>
       <div class="fs-right">
-        <span class="fs-ent" id="cEntregaRow" ${taxaEntrega() ? '' : 'hidden'}>Entrega <b id="cEntrega">${brl(taxaEntrega())}</b></span>
+        <span class="fs-ent" id="cEntregaRow" ${(taxaEntrega() || (ENTREGA_COMBINAR && form.modo === 'entregar')) ? '' : 'hidden'}>Entrega <b id="cEntrega">${ENTREGA_COMBINAR ? 'Taxa da entrega a combinar' : brl(taxaEntrega())}</b></span>
         <small class="fs-tl">Total</small><b id="cTotal">${brl(totalGeral())}</b>
       </div>
     </div>
@@ -2025,8 +2026,8 @@ function atualizaTotaisCheckout() {
   const row = $('#cEntregaRow');
   if (!row) return;
   const taxa = taxaEntrega();
-  row.hidden = !taxa;
-  $('#cEntrega').textContent = brl(taxa);
+  row.hidden = !(taxa || (ENTREGA_COMBINAR && form.modo === 'entregar'));
+  $('#cEntrega').textContent = ENTREGA_COMBINAR ? 'Taxa da entrega a combinar' : brl(taxa);
   $('#cTotal').textContent = brl(totalGeral());
 }
 
@@ -2653,6 +2654,7 @@ async function admTestes() {
   const nBeb = (CONFIG.bebidas || []).length;
   add('Cardápio carregado', (CONFIG.planos || []).length > 0, `${(CONFIG.planos || []).length} pratos, ${nBeb} grupos de bebida, ${(CONFIG.subcategorias || []).length} subcategorias`);
   const taxas = BAIRROS.map(b => b[1]);
+  if (!ENTREGA_COMBINAR)
   add('Taxas de entrega', BAIRROS.length > 0 && taxas.every(x => x >= 0), `${BAIRROS.length} bairros, de ${brl(Math.min(...taxas))} a ${brl(Math.max(...taxas))}`);
   const st = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   add('Tela', true, `${innerWidth}x${innerHeight} @${devicePixelRatio}x${st ? ' (app instalado)' : ''}`);
@@ -2886,7 +2888,7 @@ async function sendOrder() {
   });
 
   msg += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-  if (ent) msg += `Entrega (${form.bairro}): ${brl(taxaEntrega())}\n`;
+  if (ent) msg += ENTREGA_COMBINAR ? `Entrega (${form.bairro}): taxa a combinar\n` : `Entrega (${form.bairro}): ${brl(taxaEntrega())}\n`;
   msg += `Total: ${brl(totalGeral())}\n`;
 
   if (ent) {
@@ -2967,7 +2969,7 @@ async function carregarConfig(force) {
     let rows = null;
     try { const c = JSON.parse(localStorage.getItem(KEY) || 'null'); if (!force && c && Date.now() - c.t < 180000) rows = c.rows; } catch (e) {}
     if (!rows) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_config?key=in.(site,bairros)&select=key,value`, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }, cache: 'no-store' });
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_config?key=in.(site,bairros,entrega)&select=key,value`, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }, cache: 'no-store' });
       if (!res.ok) return;
       rows = await res.json();
       try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), rows })); } catch (e) {}
@@ -2978,6 +2980,7 @@ async function carregarConfig(force) {
       if (v.sobre) { CONFIG.sobre = v.sobre; $('#sobre').textContent = v.sobre; }
       if (Array.isArray(v.horarios) && v.horarios.length) { CONFIG.horarios = v.horarios; desenhaHoras(); }
     }
+    const ent = get('entrega'); ENTREGA_COMBINAR = !!(ent && ent.combinar);
     const b = get('bairros');
     if (Array.isArray(b) && b.length) {
       const lista = b.filter(x => Array.isArray(x) && x[0] && Number(x[1]) >= 0).map(x => [String(x[0]), Number(x[1])]);
