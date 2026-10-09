@@ -1213,7 +1213,7 @@ const fmtT = s => esc(s).replace(/\/([^\/]+)\//g, '<span class="ty">$1</span>');
 let TIT = { hero: {}, extras: {}, nomes: {}, custom: [] };
 const tit = (orig, shown) => { const o = TIT.nomes[orig]; return fmtT(o && o.t ? o.t : shown); };
 const titS = (orig, fb) => { const o = TIT.nomes[orig]; return o && o.s ? o.s : fb; };
-const customHTML = orig => (TIT.custom || []).filter(c => c.cat === orig && (c.t || c.s)).map(c =>
+const customHTML = (orig, after) => (TIT.custom || []).filter(c => c.cat === orig && (c.pos === 'after') === !!after && (c.t || c.s)).map(c =>
   `<div class="tt-c" style="text-align:${({ l: 'left', c: 'center', r: 'right' })[c.a] || 'left'}">${c.t ? `<h2 class="sec-title">${fmtT(c.t)}</h2>` : ''}${c.s ? `<p class="sec-sub">${fmtT(c.s)}</p>` : ''}</div>`).join('');
 function aplicaTitulos() {
   const h = TIT.hero, x = TIT.extras;
@@ -1296,7 +1296,7 @@ function renderPlates() {
         ${p.img ? `<div class="photo"><img src="${p.img}" alt="Prato ${esc(p.titulo2)}" loading="lazy" width="298" height="220"></div>` : ''}
       </div>
       <button class="btn" data-plano="${p.id}">Montar esse prato</button>
-    </article>`).join('');
+    </article>` + customHTML(p.titulo2, true)).join('');
 
   (CONFIG.cardsAvulsos || []).forEach(cat => {
     html += customHTML(cat.nome) + `
@@ -3276,9 +3276,9 @@ function qtyBtns(d, ti, ii, nome) {
 }
 
 function cardDe(d) { 
-  const cu = customHTML(d.orig || d.nome);
-  if (d.tipo === 'prato') return cu + bumpPratoHTML(d);
-  return cu + (d.tipo === 'ck' ? ckHTML(d) : (d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d))); 
+  const cu = customHTML(d.orig || d.nome), cd = customHTML(d.orig || d.nome, true);
+  if (d.tipo === 'prato') return cu + bumpPratoHTML(d) + cd;
+  return cu + (d.tipo === 'ck' ? ckHTML(d) : (d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d))) + cd; 
 }
 
 function toggleDrink(id, ti, ii) {
