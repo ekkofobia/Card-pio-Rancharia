@@ -566,6 +566,9 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .drink.open { border-color: var(--gold); }
 .drink-h { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px; text-align: left; }
 .sv-i { vertical-align: -3px; flex: none; }
+.sub-div { display: flex; align-items: center; gap: 12px; margin: 10px 0 4px; color: var(--muted); font-size: 12.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; grid-column: 1 / -1; }
+.sub-div::before, .sub-div::after { content: ''; flex: 1; height: 1px; background: rgba(242, 196, 109, .35); }
+.sub-div:first-child { margin-top: 2px; }
 .d-emoji .sv { width: 26px; height: 26px; color: var(--gold); }
 .xcard h3 .sv { width: 20px; height: 20px; vertical-align: -4px; color: var(--gold); margin-right: 4px; }
 .modal .emoji svg { color: var(--gold); }
@@ -1720,12 +1723,14 @@ const seg = (name, list, val) => list.map(([v, l]) => `<button type="button" cla
 const drinkName = (d, t, item) => [d.nome, t.nome, item].filter(Boolean).join(' ');
 const drinkQty = nome => { const it = cart.find(x => x.kind === 'extra' && x.nome === nome); return it ? it.qty : 0; };
 
+const divSub = t => t.div ? `<div class="sub-div"><span>${esc(t.div)}</span></div>` : '';
+
 function drinkHTML(d) {
   const min = d.apartir_de || Math.min(...d.tamanhos.map(t => t.preco));
   const n = d.tamanhos.reduce((s, t) => s + t.itens.reduce((s2, it) => s2 + drinkQty(drinkName(d, t, it)), 0), 0);
   const open = openDrink === d.id;
   const groups = d.tamanhos.map((t, ti) => {
-    return t.itens.map((item, ii) => {
+    return divSub(t) + t.itens.map((item, ii) => {
       const q = drinkQty(drinkName(d, t, item));
       return `<div class="d-row">
         <b>${esc(item)}</b>
@@ -3089,7 +3094,7 @@ function aplicarCardapio(cats, prods) {
       (sc.itens || []).forEach(x => {
         const k = 'sub' + sc.id + '|' + Number(x.preco);
         let t = tam.find(z => z.k === k);
-        if (!t) tam.push(t = { k, nome: nm, preco: Number(x.preco), itens: [] });
+        if (!t) tam.push(t = { k, nome: nm, preco: Number(x.preco), itens: [], div: tam.some(z => z.subId === sc.id) ? '' : nm, subId: sc.id });
         t.itens.push(x.nome);
       });
     });
@@ -3100,7 +3105,7 @@ function aplicarCardapio(cats, prods) {
       lugar: c.tipo,
       nome,
       tamanhos: tam,
-      desc: c.substituto || [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', '),
+      desc: c.substituto || (tam.some(t => t.subId) ? '' : [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', ')),
       emoji: SVG_AT(/cerv/.test(n) ? ICO.cerveja : /suco/.test(n) ? ICO.suco : /refri|bebida/.test(n) ? ICO.refri : /sobremes|doce/.test(n) ? ICO.sobremesa : /porc|frit|batata/.test(n) ? ICO.porcao : ICO.extra),
       apartir_de: c.apartir_de
     };
@@ -3140,12 +3145,12 @@ async function carregarCardapio(force) {
 carregarCardapio();
 
 function cscHTML(d) {
-  return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3>` + d.tamanhos.map((t, ti) => t.itens.map((item, ii) =>
+  return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3>` + d.tamanhos.map((t, ti) => divSub(t) + t.itens.map((item, ii) =>
     `<div class="d-row"><span class="xn"><b>${esc(item)}</b>${t.nome ? `<small>${esc(t.nome)}</small>` : ''}<i>${brl(t.preco)}</i></span>${qtyBtns(d, ti, ii, drinkName(d, t, item))}</div>`).join('')).join('') + `</div>`;
 }
 
 function ckHTML(d) {
-  return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3><div class="opts one">` + d.tamanhos.map((t, ti) => t.itens.map((item, ii) =>
+  return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3><div class="opts one">` + d.tamanhos.map((t, ti) => divSub(t) + t.itens.map((item, ii) =>
     `<button type="button" class="opt ${drinkQty(drinkName(d, t, item)) ? 'on' : ''}" data-a="dtog" data-d="${d.id}" data-t="${ti}" data-i="${ii}"><span class="tick"></span>${esc(item)}<span style="margin-left:auto">${brl(t.preco)}</span></button>`).join('')).join('') + `</div></div>`;
 }
 
