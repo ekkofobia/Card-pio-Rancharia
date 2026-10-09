@@ -3082,6 +3082,18 @@ function aplicarCardapio(cats, prods) {
       t.itens.push(x.nome);
     });
 
+    // subcategorias ligadas a esta categoria (ex.: "Refrigerante 1 Litro" dentro de "Refrigerante") viram os tamanhos dela
+    (CONFIG.subcategorias || []).filter(sc => (sc.parents || []).map(String).includes(String(c.id))).forEach(sc => {
+      let nm = String(sc.nome || '');
+      if (norm(nm).startsWith(n)) nm = nm.slice(c.nome.length).replace(/^[\s·\-–:]+/, '') || nm;
+      (sc.itens || []).forEach(x => {
+        const k = 'sub' + sc.id + '|' + Number(x.preco);
+        let t = tam.find(z => z.k === k);
+        if (!t) tam.push(t = { k, nome: nm, preco: Number(x.preco), itens: [] });
+        t.itens.push(x.nome);
+      });
+    });
+
     return {
       id: 'b' + c.id,
       tipo: c.exibicao === 'checklist' ? 'ck' : (c.exibicao === 'cards' ? 'csc' : 'min'),
