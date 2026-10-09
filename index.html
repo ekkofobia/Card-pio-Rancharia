@@ -901,6 +901,40 @@ body.print-mode .print-salad small {
   .sheet { align-items: center; }
   .sheet .panel { border-radius: 26px; border-bottom: 1px solid var(--line); max-height: 88vh; }
 }
+/* ===== Animações de rolagem (só transform + opacity) ===== */
+@keyframes fxIn { from { opacity: 0; transform: translate3d(0, 16px, 0); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: no-preference) {
+  .fx:not(.fx-in) { opacity: 0; will-change: opacity, transform; transition: opacity .45s ease, transform .45s ease; }
+  .fx.fx-in { opacity: 1; transform: none; transition: opacity .75s cubic-bezier(.22, .8, .24, 1), transform .85s cubic-bezier(.22, .8, .24, 1), border-color .25s ease; }
+  .fx-title:not(.fx-in) { transform: translate3d(0, 16px, 0); }
+  .fx-text:not(.fx-in) { transform: translate3d(0, 10px, 0); }
+  .fx-card:not(.fx-in) { transform: translate3d(0, 20px, 0) scale(.988); }
+  .fx.fx-now { transition: none !important; }
+  .plate .photo img { transition: transform 1.2s cubic-bezier(.22, .8, .24, 1); }
+  .plate.fx:not(.fx-in) .photo img { transform: scale(1.06); }
+  .plate .photo { will-change: transform; }
+  .sheet.fx-open .body > * { animation: fxIn .55s cubic-bezier(.22, .8, .24, 1) both; }
+  .sheet.fx-open .body > *:nth-child(1) { animation-delay: .12s; }
+  .sheet.fx-open .body > *:nth-child(2) { animation-delay: .19s; }
+  .sheet.fx-open .body > *:nth-child(3) { animation-delay: .26s; }
+  .sheet.fx-open .body > *:nth-child(4) { animation-delay: .33s; }
+  .sheet.fx-open .body > *:nth-child(5) { animation-delay: .40s; }
+  .sheet.fx-open .body > *:nth-child(6) { animation-delay: .47s; }
+  .sheet.fx-open .body > *:nth-child(n+7) { animation-delay: .52s; }
+  .drink-opts.fx-anim > * { animation: fxIn .45s cubic-bezier(.22, .8, .24, 1) both; }
+  .drink-opts.fx-anim > *:nth-child(1) { animation-delay: .04s; }
+  .drink-opts.fx-anim > *:nth-child(2) { animation-delay: .09s; }
+  .drink-opts.fx-anim > *:nth-child(3) { animation-delay: .14s; }
+  .drink-opts.fx-anim > *:nth-child(4) { animation-delay: .19s; }
+  .drink-opts.fx-anim > *:nth-child(5) { animation-delay: .24s; }
+  .drink-opts.fx-anim > *:nth-child(6) { animation-delay: .29s; }
+  .drink-opts.fx-anim > *:nth-child(n+7) { animation-delay: .32s; }
+}
+@media (prefers-reduced-motion: no-preference) and (min-width: 701px) {
+  .fx-title:not(.fx-in) { transform: translate3d(0, 22px, 0); }
+  .fx-text:not(.fx-in) { transform: translate3d(0, 14px, 0); }
+  .fx-card:not(.fx-in) { transform: translate3d(0, 28px, 0) scale(.985); }
+}
 </style>
 <script>window.__erros=[];window.addEventListener('error',function(e){window.__erros.push((e.message||'erro')+' @linha '+(e.lineno||'?'))});window.addEventListener('unhandledrejection',function(e){window.__erros.push('promise: '+String((e.reason&&e.reason.message)||e.reason))});</script>
 </head>
@@ -957,8 +991,8 @@ body.print-mode .print-salad small {
 
   <section class="final">
     <div class="wrap">
-      <h2 class="sec-title reveal">Bateu a fome?<br><em>Monte seu prato agora.</em></h2>
-      <a class="btn reveal" href="#pratos">Escolher meu prato</a>
+      <h2 class="sec-title">Bateu a fome?<br><em>Monte seu prato agora.</em></h2>
+      <a class="btn" href="#pratos">Escolher meu prato</a>
     </div>
   </section>
 </main>
@@ -1172,6 +1206,7 @@ let uid = Date.now();
 let draft = null;
 let step = 'list';
 let openDrink = null;
+let fxOpenId = null;   // gaveta recém-aberta: só ela anima as linhas
 let current = null;
 let lastFocus = null;
 let openedFromOrderBump = false;
@@ -1220,7 +1255,7 @@ function renderPlates() {
   let html = '';
 
   html += (CONFIG.planos || []).map((p, i) => `
-    <article class="plate plate-prato ${!p.img ? 'nofoto' : ''} ${i < 2 ? 'first-card' + (splashDone ? ' in' : '') : 'reveal' + (splashDone ? ' in' : '')}">
+    <article class="plate plate-prato ${!p.img ? 'nofoto' : ''} ">
       <span class="price"><small>R$</small>${String(p.preco.toFixed(2)).replace('.', ',')}</span>
       <div class="row">
         <div>
@@ -1241,7 +1276,7 @@ function renderPlates() {
     cat.itens.forEach(it => {
       const q = drinkQty(it.nome);
       html += `
-      <article class="plate nofoto ${splashDone ? 'in' : 'reveal'}" style="padding:14px 16px">
+      <article class="plate nofoto" style="padding:14px 16px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
           <div>
             <div class="t2" style="font-size:18px">${esc(it.nome)}</div>
@@ -1277,6 +1312,7 @@ function renderPlates() {
 function openSheet(el) {
   lastFocus = document.activeElement;
   el.hidden = false;
+  el.classList.add('fx-open'); setTimeout(() => el.classList.remove('fx-open'), 1400);
   document.body.classList.add('lock');
   current = el;
   requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('open')));
@@ -1760,6 +1796,7 @@ function drinkHTML(d) {
   const min = d.apartir_de || Math.min(...d.tamanhos.map(t => t.preco));
   const n = d.tamanhos.reduce((s, t) => s + t.itens.reduce((s2, it) => s2 + drinkQty(drinkName(d, t, it)), 0), 0);
   const open = openDrink === d.id;
+  const fxA = open && fxOpenId === d.id;
   const groups = d.tamanhos.map((t, ti) => {
     return divSub(t) + t.itens.map((item, ii) => {
       const q = drinkQty(drinkName(d, t, item));
@@ -1781,7 +1818,7 @@ function drinkHTML(d) {
       <span class="d-price"><i>a partir de</i><b>${brl(min)}</b>${n ? `<i class="d-n">${icoI('ok', 12)} ${n}</i>` : ''}</span>
       <span class="chev"></span>
     </button>
-    <div class="drink-opts" ${open ? '' : 'hidden'}>${groups}</div>
+    <div class="drink-opts ${fxA ? 'fx-anim' : ''}" ${open ? '' : 'hidden'}>${groups}</div>
   </div>`;
 }
 
@@ -1910,7 +1947,7 @@ $('#cart').addEventListener('click', e => {
   if (a === 'bairro') { abrirBairros(); return; }
   if (a === 'dtoggle') {
     openDrink = openDrink === t.dataset.d ? null : t.dataset.d;
-    renderCart(); return;
+    fxOpenId = openDrink; renderCart(); fxOpenId = null; return;
   }
   if (a === 'dtog') { toggleDrink(t.dataset.d, +t.dataset.t, +t.dataset.i); renderCart(); return; }
   if (a === 'dinc' || a === 'ddec') {
@@ -2504,7 +2541,7 @@ $('#trackShortcuts').addEventListener('click', e => {
 });
 
 /* ===== MODO ADM: 5 toques em "Menu" ===== */
-const SITE_VERSION = 'v23';
+const SITE_VERSION = 'v30';
 let admTaps = 0, admUltimo = 0, admRelatorio = '', admModo = 'entregar';
 $('#mTitle').addEventListener('click', () => {
   const agora = Date.now();
@@ -2972,7 +3009,7 @@ $('#heroBrand').addEventListener('click', () => {
 let splashDone = false;
 function hideSplash() {
   if (splashDone) return; splashDone = true;
-  $('#splash').classList.add('done'); document.body.classList.add('ready'); document.body.classList.remove('lock'); $$('.plate.first-card').forEach((c, i) => setTimeout(() => c.classList.add('in'), reduce ? 0 : 900 + i * 150));
+  $('#splash').classList.add('done'); document.body.classList.add('ready'); document.body.classList.remove('lock'); if (window.fxGate) setTimeout(window.fxGate, 350); $$('.plate.first-card').forEach((c, i) => setTimeout(() => c.classList.add('in'), reduce ? 0 : 900 + i * 150));
   $$('.plate.reveal').forEach(c => c.classList.add('in')); } window.addEventListener('load', () => setTimeout(hideSplash, 600)); function initReveal() { const els =$$
 ('.reveal');
   if (!('IntersectionObserver' in window) || reduce) { els.forEach(el => el.classList.add('in')); return; }
@@ -3224,13 +3261,13 @@ document.addEventListener('click', e => {
   const t = e.target.closest('[data-a="subtoggle"]'); if (!t) return;
   const box = t.closest('.drink'); if (!box) return;
   const aberto = box.classList.toggle('open');
-  const op = box.querySelector('.drink-opts'); if (op) op.hidden = !aberto;
+  const op = box.querySelector('.drink-opts'); if (op) { op.hidden = !aberto; op.classList.toggle('fx-anim', aberto); }
 });
 
 $('#extrasList').addEventListener('click', e => {
   const t = e.target.closest('[data-a]'); if (!t) return;
   const a = t.dataset.a;
-  if (a === 'dtoggle') { openDrink = openDrink === t.dataset.d ? null : t.dataset.d; renderExtras(); return; }
+  if (a === 'dtoggle') { openDrink = openDrink === t.dataset.d ? null : t.dataset.d; fxOpenId = openDrink; renderExtras(); fxOpenId = null; return; }
   if (a === 'dtog') { toggleDrink(t.dataset.d, +t.dataset.t, +t.dataset.i); return; }
   if (a === 'dinc' || a === 'ddec') {
     changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
@@ -3296,6 +3333,94 @@ window.addEventListener('pageshow', () => { rtCatTent = 0; iniciarCatRT(); });
 window.addEventListener('online', () => { rtCatTent = 0; iniciarCatRT(); });
 setInterval(() => { if (!document.hidden && !(rtCatCh && rtCatCh.state === 'joined')) iniciarCatRT(); }, 15000);
 iniciarCatRT();
+</script>
+<script>
+/* ===== Motor das animações de rolagem: IntersectionObserver, sem biblioteca, sem ficar ouvindo scroll (só o parallax das fotos) ===== */
+(function () {
+  try {
+    if (matchMedia('(prefers-reduced-motion: reduce)').matches || !('IntersectionObserver' in window)) return;
+    const ALVOS = [
+      ['.sec-title', 'fx-title', 0],
+      ['.sec-sub', 'fx-text', 90],
+      ['#avisos > *', 'fx-text', 0],
+      ['.plate', 'fx-card', 0],
+      ['#extrasList .drink, #extrasList .xcard', 'fx-card', 0],
+      ['.final .btn', 'fx-text', 140],
+      ['footer .wrap', 'fx-text', 0]
+    ];
+    let gate = false, pronto = false, primeiro = true;
+    const reg = new Set();
+    const noVis = el => { const r = el.getBoundingClientRect(); return r.height > 0 && r.bottom > 0 && r.top < innerHeight * .94; };
+
+    const io = new IntersectionObserver(list => {
+      if (!gate) return;
+      const entram = list.filter(e => e.isIntersecting && !e.target.classList.contains('fx-in'))
+        .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top || a.boundingClientRect.left - b.boundingClientRect.left);
+      entram.forEach((e, i) => {
+        const el = e.target;
+        el.classList.remove('fx-now');
+        el.style.transitionDelay = ((+el.dataset.fxd || 0) + Math.min(i, 5) * 85 + (primeiro ? 380 : 0)) + 'ms';   // em sequência (stagger)
+        el.classList.add('fx-in');
+      });
+      if (entram.length) primeiro = false;
+      list.filter(e => !e.isIntersecting && e.target.isConnected).forEach(e => {
+        const el = e.target;
+        if (e.boundingClientRect.top > 0) {            // saiu por baixo (voltou o scroll): anima ao contrário
+          el.style.transitionDelay = '0ms';
+          el.classList.remove('fx-now', 'fx-in');
+        } else if (e.boundingClientRect.height > 0 && !el.classList.contains('fx-in')) {   // ficou lá em cima: já aparece pronto
+          el.classList.add('fx-now', 'fx-in');
+        }
+      });
+    }, { rootMargin: '0px 0px -6% 0px', threshold: .06 });
+
+    function recheck() { reg.forEach(el => { io.unobserve(el); io.observe(el); }); }
+
+    function scan() {
+      reg.forEach(el => { if (!el.isConnected) { io.unobserve(el); reg.delete(el); } });
+      ALVOS.forEach(([sel, cls, d]) => document.querySelectorAll(sel).forEach(el => {
+        if (el.__fx) return;
+        el.__fx = 1; el.classList.add('fx', cls); el.dataset.fxd = d; reg.add(el);
+        if (pronto && noVis(el)) el.classList.add('fx-in', 'fx-now');   // redesenho (ex.: mudou quantidade): não repete a animação
+        io.observe(el);
+      }));
+    }
+
+    function replay() {                                  // ex.: saiu do modo print
+      pronto = false; primeiro = true;
+      reg.forEach(el => { el.classList.remove('fx-in', 'fx-now'); el.style.transitionDelay = '0ms'; });
+      requestAnimationFrame(() => { recheck(); setTimeout(() => { pronto = true; }, 1500); });
+    }
+
+    let agendado = false;
+    const agenda = () => { if (agendado) return; agendado = true; requestAnimationFrame(() => { agendado = false; scan(); }); };
+    let eraPrint = document.body.classList.contains('print-mode');
+    new MutationObserver(() => {
+      const p = document.body.classList.contains('print-mode');
+      if (eraPrint && !p) replay();
+      eraPrint = p; agenda();
+    }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    ['#plates', '#extrasList', '#avisos', 'main'].forEach(s => { const n = document.querySelector(s); if (n) new MutationObserver(agenda).observe(n, { childList: true, subtree: s === 'main' }); });
+
+    window.fxGate = function () { if (gate) return; gate = true; scan(); recheck(); setTimeout(() => { pronto = true; }, 1500); };
+    setTimeout(window.fxGate, 4000);                     // segurança: nunca deixa conteúdo escondido
+    scan();
+
+    /* parallax sutil só nas fotos dos pratos */
+    let tick = false;
+    const par = () => {
+      tick = false;
+      const vh = innerHeight, amp = innerWidth < 700 ? 7 : 12;
+      document.querySelectorAll('.plate .photo').forEach(p => {
+        const r = p.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > vh) return;
+        const k = ((r.top + r.height / 2) - vh / 2) / vh;
+        p.style.transform = 'translate3d(0,' + (-k * amp).toFixed(1) + 'px,0)';
+      });
+    };
+    addEventListener('scroll', () => { if (!tick) { tick = true; requestAnimationFrame(par); } }, { passive: true });
+  } catch (e) { /* se algo falhar, o site aparece normal, sem animação */ }
+})();
 </script>
 </body>
 </html>
