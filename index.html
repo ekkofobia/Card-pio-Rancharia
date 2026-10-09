@@ -19,8 +19,26 @@ window.EDITAVEL = {
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Rancharia — Monte seu prato</title>
-<meta name="description" content="Escolha sua proteína, monte suas guarnições e envie o pedido pelo WhatsApp. Pratos a partir de R$15,00.">
+<title>Rancharia | Restaurante e Petiscaria em Juazeiro, BA — Cardápio e Delivery</title>
+<meta name="description" content="Rancharia, restaurante e petiscaria em Juazeiro (BA), São Geraldo. Monte seu prato, veja o cardápio e peça por delivery ou retirada pelo WhatsApp. Pratos a partir de R$15,00.">
+<meta name="keywords" content="Rancharia, Rancharia Juazeiro, Rancharia Juazeiro BA, Rancharia Jua, Rancharia Juaba, restaurante em Juazeiro, petiscaria Juazeiro, delivery Juazeiro, almoço Juazeiro BA">
+<meta name="robots" content="index, follow, max-image-preview:large">
+<link rel="canonical" href="https://rancharia.juaba.workers.dev/">
+<meta property="og:type" content="restaurant.restaurant">
+<meta property="og:site_name" content="Rancharia">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:title" content="Rancharia | Restaurante e Petiscaria em Juazeiro, BA">
+<meta property="og:description" content="Monte seu prato e peça por delivery ou retirada. Rancharia, São Geraldo, Juazeiro - BA.">
+<meta property="og:url" content="https://rancharia.juaba.workers.dev/">
+<meta property="og:image" content="https://rancharia.juaba.workers.dev/icon-512.png">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Rancharia | Restaurante e Petiscaria em Juazeiro, BA">
+<meta name="twitter:description" content="Monte seu prato e peça por delivery ou retirada.">
+<meta name="geo.region" content="BR-BA">
+<meta name="geo.placename" content="Juazeiro">
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"Restaurant","name":"Rancharia","alternateName":["Rancharia Restaurante e Petiscaria","Rancharia Juazeiro","Rancharia Jua","Rancharia Juaba"],"url":"https://rancharia.juaba.workers.dev/","image":"https://rancharia.juaba.workers.dev/icon-512.png","description":"Restaurante e petiscaria em Juazeiro, BA. Cardápio, delivery e retirada.","servesCuisine":["Brasileira","Petiscos"],"priceRange":"R$","telephone":"+5574988188139","hasMenu":"https://rancharia.juaba.workers.dev/","hasMap":"https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac","acceptsReservations":false,"address":{"@type":"PostalAddress","streetAddress":"R. dos Pinheiros","addressLocality":"Juazeiro","addressRegion":"BA","postalCode":"48994-181","addressCountry":"BR","addressNeighborhood":"São Geraldo"},"sameAs":["https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac"]}
+</script>
 <meta name="theme-color" content="#2a1509">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -609,21 +627,26 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .drawer .panel { width: 88%; max-width: 400px; height: 100%; max-height: none; border-radius: 26px 0 0 26px; border: 1px solid var(--line); border-right: 0; transform: translateX(100%); }
 .drawer .head { padding: calc(10px + env(safe-area-inset-top)) 20px 8px; }
 .drawer .body { padding: 4px 20px calc(12px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 18px; overflow-y: auto; }
-.msec h3 { margin-bottom: 6px; font-size: 20px; }
-.msec > p { color: var(--muted); font-size: 14px; line-height: 1.4; }
+.msec h3 { margin-bottom: 6px; font-size: 22px; }
+.loc-btn { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 16px; color: var(--cream); text-decoration: none; }
+.loc-btn svg { flex: none; color: var(--gold); }
+.loc-btn span { display: grid; gap: 1px; }
+.loc-btn b { font-size: 17px; }
+.loc-btn small { color: var(--muted); font-size: 14px; }
+.msec > p { color: var(--muted); font-size: 16px; line-height: 1.4; }
 .faq details { border-top: 1px solid var(--line); }
 .faq details:last-child { border-bottom: 1px solid var(--line); }
-.faq summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; cursor: pointer; font-weight: 600; font-size: 14px; }
+.faq summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 0; cursor: pointer; font-weight: 600; font-size: 16px; }
 .faq summary::after { content: ""; flex: none; width: 9px; height: 9px; margin: 0 4px 4px 0; border-right: 2px solid var(--gold); border-bottom: 2px solid var(--gold); transform: rotate(45deg); transition: transform .2s; }
 .faq details[open] summary::after { transform: rotate(-135deg); margin: 4px 4px 0 0; }
-.faq details p { padding: 0 0 10px; color: var(--muted); font-size: 13px; line-height: 1.4; }
+.faq details p { padding: 0 0 10px; color: var(--muted); font-size: 15px; line-height: 1.4; }
 .pills { display: flex; flex-wrap: nowrap; gap: 6px; }
 .pill { flex: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 0 6px; border-radius: 999px; border: 1.5px solid var(--gold); color: var(--gold); font-weight: 600; font-size: 12px; text-decoration: none; }
 .mk-foot { display: flex; justify-content: center; padding: 10px 20px calc(14px + env(safe-area-inset-bottom)); }
-.mk-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0 22px; border-radius: 999px; background: var(--gold); color: #2a1509; font-weight: 800; font-size: 14px; text-decoration: none; }
+.mk-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0 22px; border-radius: 999px; background: var(--gold); color: #2a1509; font-weight: 800; font-size: 16px; text-decoration: none; }
 .mk p { margin-bottom: 10px; font-size: 17px; font-weight: 700; }
 .hrs { display: grid; gap: 3px; }
-.hr-row { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; color: var(--muted); }
+.hr-row { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; color: var(--muted); }
 .hr-row b { color: var(--cream); font-weight: 600; }
 
 #lojaBar{position:fixed;left:0;right:0;bottom:0;z-index:9998;background:#7a1f1f;color:#fff;text-align:center;padding:14px 16px calc(14px + env(safe-area-inset-bottom));font-weight:600;font-size:15px;box-shadow:0 -6px 20px #0006}
@@ -1059,6 +1082,7 @@ body.print-mode .print-salad small {
     <div class="body">
       <div class="msec"><h3>Sobre</h3><p id="sobre"></p></div>
       <div class="msec"><h3>Horário de funcionamento</h3><div class="hrs" id="horas"></div></div>
+      <div class="msec"><a class="loc-btn" href="https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac" target="_blank" rel="noopener"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span><b>Como chegar</b><small>R. dos Pinheiros, São Geraldo · Juazeiro-BA</small></span></a></div>
       <div class="msec"><h3>Perguntas frequentes</h3><div class="faq" id="faq"></div></div>
       <div class="msec"><div class="pills" id="sites"></div></div>
     </div>
