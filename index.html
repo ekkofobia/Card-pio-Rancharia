@@ -193,6 +193,10 @@ body.ready .hero .cta { animation: rise .6s .95s ease both; }
 section { padding: 46px 0; scroll-margin-top: 62px; }
 .sec-title { font-size: 26px; font-weight: 700; line-height: 1.15; }
 .sec-title em { font-style: normal; color: var(--gold); }
+.ty { color: var(--gold); }
+.tt-c { grid-column: 1 / -1; text-align: center; margin: 14px 0 6px; }
+.tt-ct { font-size: 24px; font-weight: 800; line-height: 1.15; }
+.tt-cs { margin-top: 4px; color: var(--muted); font-size: 14px; }
 .sec-sub { margin-top: 8px; color: var(--muted); max-width: 46ch; }
 #extras .sec-sub { margin-top: 4px; margin-bottom: 20px; }
 
@@ -973,8 +977,8 @@ body.print-mode .print-salad small {
 <main style="padding-top:62px">
   <div class="hero">
     <div class="wrap">
-      <h1><span id="heroBrand">Rancharia</span><span class="script">Cardápio</span></h1>
-      <p class="lead">Escolha a proteína, monte as guarnições e <b>peça pelo WhatsApp</b>.</p>
+      <h1><span id="heroBrand">Rancharia</span><span class="script" id="heroScript">Cardápio</span></h1>
+      <p class="lead" id="heroLead">Escolha a proteína, monte as guarnições e <b>peça pelo WhatsApp</b>.</p>
       <div class="cta">
         <a class="btn" href="#pratos" id="heroCta">Montar meu prato</a>
       </div>
@@ -990,8 +994,8 @@ body.print-mode .print-salad small {
 
   <section id="extras" hidden>
     <div class="wrap">
-      <h2 class="sec-title">Acompanhamentos e <em>Bebidas</em></h2>
-      <p class="sec-sub">Escolha as quantidades para adicionar ao seu pedido.</p>
+      <h2 class="sec-title" id="extrasT">Acompanhamentos e <em>Bebidas</em></h2>
+      <p class="sec-sub" id="extrasS">Escolha as quantidades para adicionar ao seu pedido.</p>
       <div id="extrasList"></div>
     </div>
   </section>
@@ -1205,6 +1209,22 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const brl = n => 'R$' + Number(n || 0).toFixed(2).replace('.', ',');
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+/* TÍTULOS editáveis pelo painel (site_config: titulos). /texto/ fica amarelo */
+const fmtT = s => esc(s).replace(/\/([^\/]+)\//g, '<span class="ty">$1</span>');
+let TIT = { hero: {}, extras: {}, nomes: {}, custom: [] };
+const tit = (orig, shown) => { const o = TIT.nomes[orig]; return fmtT(o && o.t ? o.t : shown); };
+const titS = (orig, fb) => { const o = TIT.nomes[orig]; return o && o.s ? o.s : fb; };
+const customHTML = orig => (TIT.custom || []).filter(c => c.cat === orig && (c.t || c.s)).map(c =>
+  `<div class="tt-c">${c.t ? `<h3 class="tt-ct">${fmtT(c.t)}</h3>` : ''}${c.s ? `<p class="tt-cs">${fmtT(c.s)}</p>` : ''}</div>`).join('');
+function aplicaTitulos() {
+  const h = TIT.hero, x = TIT.extras;
+  if (h.t) $('#heroBrand').textContent = h.t;
+  if (h.s) $('#heroScript').textContent = h.s;
+  if (h.sub) $('#heroLead').innerHTML = fmtT(h.sub);
+  if (x.t) $('#extrasT').innerHTML = fmtT(x.t);
+  if (x.sub) $('#extrasS').innerHTML = fmtT(x.sub);
+  setTimeout(() => { try { if ((CONFIG.planos || []).length || (CONFIG.bebidas || []).length) { renderPlates(); renderExtras(); } } catch (e) {} }, 0);
+}
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const KEY = 'rancharia_cart_v1';
 
@@ -1262,13 +1282,13 @@ function renderPlates() {
   const container = $('#plates');
   let html = '';
 
-  html += (CONFIG.planos || []).map((p, i) => `
+  html += (CONFIG.planos || []).map((p, i) => customHTML(p.titulo2) + `
     <article class="plate plate-prato ${!p.img ? 'nofoto' : ''} ">
       <span class="price"><small>R$</small>${String(p.preco.toFixed(2)).replace('.', ',')}</span>
       <div class="row">
         <div>
-          <div class="t1">${esc(p.titulo1)}</div>
-          <div class="t2">${esc(p.titulo2)}</div>
+          <div class="t1">${fmtT(titS(p.titulo2, p.titulo1))}</div>
+          <div class="t2">${tit(p.titulo2, p.titulo2)}</div>
           <ul>${p.proteinas.map(n => `<li>${esc(n)}</li>`).join('')}</ul>
         </div>
         ${p.img ? `<div class="photo"><img src="${p.img}" alt="Prato ${esc(p.titulo2)}" loading="lazy" width="298" height="220"></div>` : ''}
@@ -1277,9 +1297,9 @@ function renderPlates() {
     </article>`).join('');
 
   (CONFIG.cardsAvulsos || []).forEach(cat => {
-    html += `
+    html += customHTML(cat.nome) + `
     <div style="grid-column: 1 / -1; margin-top: 14px;">
-      <h3 style="font-size:22px;color:var(--gold);font-weight:800;text-transform:uppercase">${esc(cat.nome)}</h3>
+      <h3 style="font-size:22px;color:var(--gold);font-weight:800;text-transform:uppercase">${tit(cat.nome, cat.nome)}</h3>
     </div>`;
     cat.itens.forEach(it => {
       const q = drinkQty(it.nome);
@@ -1409,7 +1429,7 @@ function openBuilder(id, fromBump = false) {
     <div class="grp" data-sub-grp="${sub.id}" id="sub-grp-${sub.id}">
       <div class="grp-h" ${isMin ? 'style="display:none"' : ''}>
         <h3 style="display:flex;align-items:center;gap:6px">
-          ${esc(sub.nome)}
+          ${tit(sub.nome, sub.nome)}
           ${isChecklist && sub.max_escolha ? `<small style="font-size:12px;color:var(--muted);font-weight:400">(até ${sub.max_escolha})</small>` : ''}
         </h3>
         <span id="cntSub_${sub.id}">0/${sub.max_escolha || 4}</span>
@@ -1441,7 +1461,7 @@ function openBuilder(id, fromBump = false) {
       bodyHTML += `
       <div class="drink" style="margin-bottom:0">
         <button type="button" class="drink-h" data-a="subtoggle" data-sid="${sub.id}">
-          <span class="d-txt"><b>${esc(sub.nome)}</b>${sub.substituto ? `<small>${esc(sub.substituto)}</small>` : ''}</span>
+          <span class="d-txt"><b>${tit(sub.nome, sub.nome)}</b>${titS(sub.nome, sub.substituto) ? `<small>${fmtT(titS(sub.nome, sub.substituto))}</small>` : ''}</span>
           <span class="d-price">${aPartir > 0 ? `<i>a partir de</i><b>${brl(aPartir)}</b>` : ''}<i class="d-n" data-cnt-sub="${sub.id}"></i></span>
           <span class="chev"></span>
         </button>
@@ -1797,7 +1817,7 @@ const seg = (name, list, val) => list.map(([v, l]) => `<button type="button" cla
 const drinkName = (d, t, item) => [d.nome, t.nome, item].filter(Boolean).join(' ');
 const drinkQty = nome => { const it = cart.find(x => x.kind === 'extra' && x.nome === nome); return it ? it.qty : 0; };
 
-const divSub = t => t.div ? `<div class="sub-div"><span>${esc(t.div)}</span></div>${t.sub ? `<div class="sub-div-s">${esc(t.sub)}</div>` : ''}` : '';
+const divSub = t => t.div ? `<div class="sub-div"><span>${tit(t.orig || t.div, t.div)}</span></div>${titS(t.orig || t.div, t.sub) ? `<div class="sub-div-s">${fmtT(titS(t.orig || t.div, t.sub))}</div>` : ''}` : '';
 const descItem = (t, ii) => { const d = t.subId ? (t.descs && t.descs[ii]) : t.nome; return d ? `<small class="d-sub">${esc(d)}</small>` : ''; };
 
 function drinkHTML(d) {
@@ -1822,7 +1842,7 @@ function drinkHTML(d) {
   return `<div class="drink ${open ? 'open' : ''}">
     <button type="button" class="drink-h" data-a="dtoggle" data-d="${d.id}">
       <span class="d-emoji">${d.emoji}</span>
-      <span class="d-txt"><b>${esc(d.nome)}</b><small>${esc(d.desc)}</small></span>
+      <span class="d-txt"><b>${tit(d.orig || d.nome, d.nome)}</b><small>${fmtT(titS(d.orig || d.nome, d.desc))}</small></span>
       <span class="d-price"><i>a partir de</i><b>${brl(min)}</b>${n ? `<i class="d-n">${icoI('ok', 12)} ${n}</i>` : ''}</span>
       <span class="chev"></span>
     </button>
@@ -2969,7 +2989,7 @@ async function carregarConfig(force) {
     let rows = null;
     try { const c = JSON.parse(localStorage.getItem(KEY) || 'null'); if (!force && c && Date.now() - c.t < 180000) rows = c.rows; } catch (e) {}
     if (!rows) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_config?key=in.(site,bairros,entrega)&select=key,value`, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }, cache: 'no-store' });
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_config?key=in.(site,bairros,entrega,titulos)&select=key,value`, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }, cache: 'no-store' });
       if (!res.ok) return;
       rows = await res.json();
       try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), rows })); } catch (e) {}
@@ -2980,6 +3000,9 @@ async function carregarConfig(force) {
       if (v.sobre) { CONFIG.sobre = v.sobre; $('#sobre').textContent = v.sobre; }
       if (Array.isArray(v.horarios) && v.horarios.length) { CONFIG.horarios = v.horarios; desenhaHoras(); }
     }
+    const tv = get('titulos') || {};
+    TIT = { hero: tv.hero || {}, extras: tv.extras || {}, nomes: tv.nomes || {}, custom: Array.isArray(tv.custom) ? tv.custom : [] };
+    aplicaTitulos();
     const ent = get('entrega'); ENTREGA_COMBINAR = !!(ent && ent.combinar);
     const b = get('bairros');
     if (Array.isArray(b) && b.length) {
@@ -3170,7 +3193,7 @@ function aplicarCardapio(cats, prods) {
       (sc.itens || []).forEach(x => {
         const k = 'sub' + sc.id + '|' + Number(x.preco);
         let t = tam.find(z => z.k === k);
-        if (!t) tam.push(t = { k, nome: nm, preco: Number(x.preco), itens: [], descs: [], div: tam.some(z => z.subId === sc.id) ? '' : nm, sub: sc.substituto || '', subId: sc.id });
+        if (!t) tam.push(t = { k, nome: nm, preco: Number(x.preco), itens: [], descs: [], div: tam.some(z => z.subId === sc.id) ? '' : nm, sub: sc.substituto || '', subId: sc.id, orig: sc.nome });
         t.itens.push(x.nome); t.descs.push(x.descricao || '');
       });
     });
@@ -3180,6 +3203,7 @@ function aplicarCardapio(cats, prods) {
       tipo: c.exibicao === 'checklist' ? 'ck' : (c.exibicao === 'cards' ? 'csc' : 'min'),
       lugar: c.tipo,
       nome,
+      orig: c.nome,
       tamanhos: tam,
       desc: c.substituto || (tam.some(t => t.subId) ? '' : [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', ')),
       emoji: SVG_AT(/cerv/.test(n) ? ICO.cerveja : /suco/.test(n) ? ICO.suco : /refri|bebida/.test(n) ? ICO.refri : /sobremes|doce/.test(n) ? ICO.sobremesa : /porc|frit|batata/.test(n) ? ICO.porcao : ICO.extra),
@@ -3221,12 +3245,12 @@ async function carregarCardapio(force) {
 carregarCardapio();
 
 function cscHTML(d) {
-  return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3>` + d.tamanhos.map((t, ti) => divSub(t) + t.itens.map((item, ii) =>
+  return `<div class="xcard"><h3>${d.emoji} ${tit(d.orig || d.nome, d.nome)}</h3>` + d.tamanhos.map((t, ti) => divSub(t) + t.itens.map((item, ii) =>
     `<div class="d-row"><span class="xn"><b>${esc(item)}</b>${(() => { const d = t.subId ? (t.descs && t.descs[ii]) : t.nome; return d ? `<small>${esc(d)}</small>` : ''; })()}<i>${brl(t.preco)}</i></span>${qtyBtns(d, ti, ii, drinkName(d, t, item))}</div>`).join('')).join('') + `</div>`;
 }
 
 function ckHTML(d) {
-  return `<div class="xcard"><h3>${d.emoji} ${esc(d.nome)}</h3><div class="opts one">` + d.tamanhos.map((t, ti) => divSub(t) + t.itens.map((item, ii) =>
+  return `<div class="xcard"><h3>${d.emoji} ${tit(d.orig || d.nome, d.nome)}</h3><div class="opts one">` + d.tamanhos.map((t, ti) => divSub(t) + t.itens.map((item, ii) =>
     `<button type="button" class="opt ${drinkQty(drinkName(d, t, item)) ? 'on' : ''}" data-a="dtog" data-d="${d.id}" data-t="${ti}" data-i="${ii}"><span class="tick"></span><span class="ob-t"><span>${esc(item)}</span>${descItem(t, ii).replace('d-sub', '')}</span><span style="margin-left:auto">${brl(t.preco)}</span></button>`).join('')).join('') + `</div></div>`;
 }
 
@@ -3235,7 +3259,7 @@ function bumpPratoHTML(d) {
   <div class="xcard" style="margin-top:12px">
     <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
       <div>
-        <h3 style="margin-bottom:2px">${d.emoji} ${esc(d.nome)}</h3>
+        <h3 style="margin-bottom:2px">${d.emoji} ${tit(d.orig || d.nome, d.nome)}</h3>
         ${d.desc ? `<small style="color:var(--muted);display:block">${esc(d.desc)}</small>` : ''}
       </div>
       <b style="color:var(--gold);font-size:18px">${brl(d.preco)}</b>
@@ -3250,8 +3274,9 @@ function qtyBtns(d, ti, ii, nome) {
 }
 
 function cardDe(d) { 
-  if (d.tipo === 'prato') return bumpPratoHTML(d);
-  return d.tipo === 'ck' ? ckHTML(d) : (d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d)); 
+  const cu = customHTML(d.orig || d.nome);
+  if (d.tipo === 'prato') return cu + bumpPratoHTML(d);
+  return cu + (d.tipo === 'ck' ? ckHTML(d) : (d.tipo === 'csc' ? cscHTML(d) : drinkHTML(d))); 
 }
 
 function toggleDrink(id, ti, ii) {
