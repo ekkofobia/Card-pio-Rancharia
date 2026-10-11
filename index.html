@@ -429,6 +429,12 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
 .fs-ent { grid-column: 2; display: inline-flex; align-items: baseline; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: -10px; }
 .fs-ent[hidden] { display: none; }
 .fs-ent b { color: var(--cream); font-size: 14px; }
+.pixbox { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1.5px dashed rgba(242, 196, 109, .55); border-radius: 14px; background: rgba(242, 196, 109, .06); }
+.pixbox span { font-size: 12px; color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; flex: none; }
+.pixbox b { flex: 1; min-width: 0; font-size: 15px; word-break: break-all; color: var(--cream); }
+.pixbox button { flex: none; min-height: 36px; padding: 0 14px; border-radius: 999px; background: var(--gold); color: #2a1509; font-weight: 800; font-size: 14px; }
+.fs-ent.comb { grid-column: 1 / -1; justify-self: end; text-align: right; }
+.fs-ent.comb b { white-space: nowrap; line-height: 1.2; font-size: 13.5px; }
 .fs-tl { font-size: 39px; font-weight: 800; line-height: 1; color: var(--gold); }
 .fs-right #cTotal { font-size: 24px; color: #fff; }
 
@@ -1246,6 +1252,61 @@ let deferredPwaPrompt = null;
 let trackPollInterval = null;
 
 const form = { nome: '', modo: 'local', mesa: '', bairro: '', rua: '', numero: '', pag: 'pix', troco: '', obs: '' };
+/* lembra os dados do cliente neste aparelho */
+try { const c = JSON.parse(localStorage.getItem('rancharia_cli_v1') || 'null'); if (c) ['nome', 'bairro', 'rua', 'numero'].forEach(k => { if (typeof c[k] === 'string') form[k] = c[k]; }); } catch (e) {}
+const salvaCli = () => { try { localStorage.setItem('rancharia_cli_v1', JSON.stringify({ nome: form.nome, bairro: form.bairro, rua: form.rua, numero: form.numero })); } catch (e) {} };
+let LOJA_MARK = false, LOJA_CFG = {}, lojaAtual = null, PIX_KEY = '';
+
+/* ===== LOJA: horário automático + abrir/fechar manual ===== */
+const _sn = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+const _DIAS = { dom: 0, seg: 1, ter: 2, qua: 3, qui: 4, sex: 5, sab: 6 };
+function parseDias(txt) {
+  const t = _sn(txt), set = new Set();
+  if (/todos os dias|todo dia|diariamente/.test(t)) return [0, 1, 2, 3, 4, 5, 6];
+  const re = /\b(dom|seg|ter|qua|qui|sex|sab)[a-z]*(?:-feira)?(?:\s*(?:a|ate|-)\s*(dom|seg|ter|qua|qui|sex|sab)[a-z]*(?:-feira)?)?/g;
+  let m;
+  while ((m = re.exec(t))) {
+    const a = _DIAS[m[1]];
+    if (m[2]) { const b = _DIAS[m[2]]; for (let d = a, n = 0; n < 8; d = (d + 1) % 7, n++) { set.add(d); if (d === b) break; } }
+    else set.add(a);
+  }
+  return [...set];
+}
+function parseHoras(txt) {
+  const t = _sn(txt).replace(/hrs?\b/g, 'h'), out = [];
+  const re = /(\d{1,2})\s*(?:h|:)?\s*(\d{2})?\s*(?:h)?\s*(?:as|a|-|ate)\s*(\d{1,2})\s*(?:h|:)?\s*(\d{2})?/g;
+  let m;
+  while ((m = re.exec(t))) { if (+m[1] <= 24 && +m[3] <= 24) out.push([+m[1] * 60 + (+m[2] || 0), +m[3] * 60 + (+m[4] || 0)]); }
+  return out;
+}
+function janelasLoja(rows) {
+  const w = [];
+  (rows || []).forEach(r => { const d = parseDias(r[0]), h = parseHoras(r[1]); if (d.length && h.length) h.forEach(([i, f]) => w.push({ d: new Set(d), i, f })); });
+  return w;
+}
+function agoraBA(ms) {
+  const p = {};
+  new Intl.DateTimeFormat('en-US', { timeZone: 'America/Bahia', hour12: false, weekday: 'short', hour: '2-digit', minute: '2-digit' }).formatToParts(new Date(ms)).forEach(x => { p[x.type] = x.value; });
+  return { dow: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].indexOf(p.weekday), min: (+p.hour % 24) * 60 + +p.minute };
+}
+function estadoHorario(rows, ms) {   // true = aberta, false = fechada, null = horário não entendido
+  const W = janelasLoja(rows); if (!W.length) return null;
+  const { dow, min } = agoraBA(ms || Date.now()), prev = (dow + 6) % 7;
+  return W.some(w => w.i < w.f ? (w.d.has(dow) && min >= w.i && min < w.f) : ((w.d.has(dow) && min >= w.i) || (w.d.has(prev) && min < w.f)));
+}
+function proxEstado(rows, ms, alvo) {
+  for (let t = ms + 60000; t < ms + 8 * 864e5; t += 300000) if (estadoHorario(rows, t) === alvo) return t;
+  return null;
+}
+
+function lojaFechadaAgora() {
+  const sch = estadoHorario(CONFIG.horarios, Date.now()), m = LOJA_CFG && LOJA_CFG.manual;
+  if (m && m.estado) { if (!m.ate || Date.now() < Date.parse(m.ate)) return m.estado === 'fechada'; return sch === false; }
+  if (LOJA_MARK) return true;
+  return sch === false;
+}
+function avaliaLoja() { const f = lojaFechadaAgora(); if (f === lojaAtual) return; lojaAtual = f; setLoja(f); }
+
 
 function save() { try { localStorage.setItem(KEY, JSON.stringify(cart)); } catch (e) {} }
 const itemTotal = it => it.preco * it.qty;
@@ -1942,13 +2003,14 @@ function renderCart() {
         </div>
       <div class="field" id="fPagW" ${ent ? '' : 'hidden'}><span class="lbl">Pagamento</span>
         <div class="seg">${seg('pag', [['pix', 'Pix'], ['cartao', 'Cartão'], ['dinheiro', 'Dinheiro']], form.pag)}</div></div>
+      <div class="field" id="fPixW" ${ent && form.pag === 'pix' && PIX_KEY ? '' : 'hidden'}><div class="pixbox"><span>Chave Pix</span><b>${esc(PIX_KEY)}</b><button type="button" data-a="copypix">Copiar</button></div></div>
       <div class="field" id="fTrocoW" ${ent && form.pag === 'dinheiro' ? '' : 'hidden'}>
         <input id="fTroco" type="text" placeholder="Troco para? — ex.: 50" value="${esc(form.troco)}"></div>
       <div class="field"><textarea id="fObs" maxlength="200" placeholder="Observação (opcional)">${esc(form.obs)}</textarea></div>`;
     foot.innerHTML = `<div class="fsum">
       <button type="button" class="vp-ico" data-a="toggleItems" aria-label="Ver pedido" title="Ver pedido"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg><span>Pedido</span></button>
       <div class="fs-right">
-        <span class="fs-ent" id="cEntregaRow" ${(taxaEntrega() || (ENTREGA_COMBINAR && form.modo === 'entregar')) ? '' : 'hidden'}>Entrega <b id="cEntrega">${ENTREGA_COMBINAR ? 'Taxa da entrega a combinar' : brl(taxaEntrega())}</b></span>
+        <span class="fs-ent ${ENTREGA_COMBINAR ? 'comb' : ''}" id="cEntregaRow" ${(taxaEntrega() || (ENTREGA_COMBINAR && form.modo === 'entregar')) ? '' : 'hidden'}><span id="cEntLbl" ${ENTREGA_COMBINAR ? 'hidden' : ''}>Entrega</span> <b id="cEntrega">${ENTREGA_COMBINAR ? 'Taxa da entrega<br>a combinar' : brl(taxaEntrega())}</b></span>
         <small class="fs-tl">Total</small><b id="cTotal">${brl(totalGeral())}</b>
       </div>
     </div>
@@ -1973,11 +2035,13 @@ $('#cart').addEventListener('click', e => {
     $('#fEndW').hidden = form.modo !== 'entregar';
     $('#fPagW').hidden = form.modo !== 'entregar';
     $('#fTrocoW').hidden = !(form.modo === 'entregar' && form.pag === 'dinheiro');
+    $('#fPixW').hidden = !(form.modo === 'entregar' && form.pag === 'pix' && PIX_KEY);
     atualizaTotaisCheckout();
     return;
   }
   const a = t.dataset.a, it = cart.find(x => x.uid === +t.dataset.u);
   if (a === 'bairro') { abrirBairros(); return; }
+  if (a === 'copypix') { copiaTxt(PIX_KEY).then(ok => toast(ok ? 'Chave Pix copiada' : 'Não consegui copiar')); return; }
   if (a === 'dtoggle') {
     openDrink = openDrink === t.dataset.d ? null : t.dataset.d;
     fxOpenId = openDrink; renderCart(); fxOpenId = null; return;
@@ -2006,7 +2070,7 @@ $('#cart').addEventListener('click', e => {
 
 $('#cart').addEventListener('input', e => {
   const m = { fNome: 'nome', fMesa: 'mesa', fBairro: 'bairro', fRua: 'rua', fNumero: 'numero', fTroco: 'troco', fObs: 'obs' }[e.target.id];
-  if (m) { form[m] = e.target.value; e.target.classList.remove('err'); }
+  if (m) { form[m] = e.target.value; e.target.classList.remove('err'); salvaCli(); }
   if (e.target.id === 'fBairro') atualizaTotaisCheckout();
 });
 
@@ -2037,7 +2101,7 @@ $('#bairroBusca').addEventListener('input', e => desenhaBairros(e.target.value))
 $('#bairroLista').addEventListener('click', e => {
   const it = e.target.closest('[data-bairro]');
   if (!it) return;
-  form.bairro = it.dataset.bairro;
+  form.bairro = it.dataset.bairro; salvaCli();
   const btn = $('#fBairro');
   if (btn) {
     btn.classList.remove('vazio', 'err');
@@ -2052,7 +2116,7 @@ function atualizaTotaisCheckout() {
   if (!row) return;
   const taxa = taxaEntrega();
   row.hidden = !(taxa || (ENTREGA_COMBINAR && form.modo === 'entregar'));
-  $('#cEntrega').textContent = ENTREGA_COMBINAR ? 'Taxa da entrega a combinar' : brl(taxa);
+  if (ENTREGA_COMBINAR) $('#cEntrega').innerHTML = 'Taxa da entrega<br>a combinar'; else $('#cEntrega').textContent = brl(taxa);
   $('#cTotal').textContent = brl(totalGeral());
 }
 
@@ -2139,6 +2203,20 @@ const ordersAtivos = () => orders.filter(o => !STATUS_FINAL.includes(o.status));
 const selOrder = () => orders.find(o => o.ref === selectedRef) || orders[0] || null;
 const codigoPedido = o => '#' + String(o.ref || '').slice(0, 4);
 const horaPedido = o => new Date(o.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+function pedeNotificacao() { try { if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission(); } catch (e) {} }
+function avisaStatus(o) {
+  const inf = infoEtapa(chaveStatus(o), o), titulo = 'Rancharia · ' + inf.label, corpo = (o.cliente ? o.cliente.split(' ')[0] + ', ' : '') + inf.desc.charAt(0).toLowerCase() + inf.desc.slice(1);
+  try { if (navigator.vibrate) navigator.vibrate([220, 100, 220, 100, 420]); } catch (e) {}
+  if (!document.hidden) { try { toast(inf.label); } catch (e) {} }
+  try {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      const opts = { body: corpo, icon: 'icon.svg', tag: 'ped-' + o.ref, renotify: true, vibrate: [220, 100, 220, 100, 420] };
+      const mostra = () => { try { new Notification(titulo, opts); } catch (e) {} };
+      if ('serviceWorker' in navigator) navigator.serviceWorker.getRegistration().then(r => r ? r.showNotification(titulo, opts) : mostra()).catch(mostra); else mostra();
+    }
+  } catch (e) {}
+}
 
 function modoPedido(o) {
   if (o.modo) return o.modo;
@@ -2253,7 +2331,7 @@ async function sincronizarPedidos() {
         const st = r.status || 'novo';
         const imp = !!r.impresso;
         const mot = r.motivo || '';
-        if (o.status !== st || !!o.impresso !== imp || (o.motivo || '') !== mot) { o.status = st; o.impresso = imp; o.motivo = mot; mudou = true; }
+        if (o.status !== st || !!o.impresso !== imp || (o.motivo || '') !== mot) { const antes = chaveStatus(o); o.status = st; o.impresso = imp; o.motivo = mot; mudou = true; if (antes !== chaveStatus(o)) { try { avisaStatus(o); } catch (e) {} } }
       });
       if (mudou) {
         syncInfo.mudou = Date.now();
@@ -2853,6 +2931,7 @@ function abrirAjudaPwa() {
 }
 
 async function sendOrder() {
+  pedeNotificacao(); salvaCli();
   let bad = null;
   if (!form.nome.trim()) bad = $('#fNome');
   else if (form.modo === 'local' && !form.mesa.trim()) bad = $('#fMesa');
@@ -3008,10 +3087,12 @@ async function carregarConfig(force) {
       if (v.sobre) { CONFIG.sobre = v.sobre; $('#sobre').textContent = v.sobre; }
       if (Array.isArray(v.horarios) && v.horarios.length) { CONFIG.horarios = v.horarios; desenhaHoras(); }
     }
-    const lj = get('loja'); const lm = lj && lj.msg ? String(lj.msg) : '';
+    const lj = get('loja'); LOJA_CFG = lj || {}; const lm = lj && lj.msg ? String(lj.msg) : '';
     const bt = document.getElementById('lojaBarTxt'), mt = document.getElementById('lojaModalTxt');
     if (bt) bt.textContent = lm || 'Loja fechada no momento — você pode ver o cardápio, mas os pedidos estão pausados.';
     if (mt) mt.textContent = lm || 'No momento não estamos aceitando pedidos. Volte em breve!';
+    PIX_KEY = (v && v.pix) ? String(v.pix).trim() : '';
+    try { avaliaLoja(); } catch (e) {}
     const tv = get('titulos') || {};
     TIT = { hero: tv.hero || {}, extras: tv.extras || {}, nomes: tv.nomes || {}, custom: Array.isArray(tv.custom) ? tv.custom : [] };
     aplicaTitulos();
@@ -3354,10 +3435,10 @@ async function checarLoja() {
     });
     if (!r.ok) return;
     const json = await r.json();
-    if (Array.isArray(json)) setLoja(json.length > 0);
+    if (Array.isArray(json)) { LOJA_MARK = json.length > 0; avaliaLoja(); }
   } catch (e) {}
 }
-checarLoja(); setInterval(() => { if (!document.hidden) checarLoja(); }, 60000);
+checarLoja(); setInterval(() => { if (!document.hidden) checarLoja(); }, 60000); setInterval(() => { try { avaliaLoja(); } catch (e) {} }, 30000);
 
 /* ===== REALTIME do cardápio, textos e loja aberta/fechada ===== */
 let rtCat = null, rtCatCh = null, rtCatTimer = null, rtCatSai = null, rtCatTent = 0;
