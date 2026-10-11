@@ -645,6 +645,18 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .drawer .body { padding: 4px 20px calc(12px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 18px; overflow-y: auto; }
 .msec h3 { margin-bottom: 6px; font-size: 22px; }
 .loc-btn { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; padding: 12px 14px; border: 1px solid rgba(242, 196, 109, .45); border-radius: 16px; background: rgba(242, 196, 109, .06); color: var(--cream); text-decoration: none; -webkit-tap-highlight-color: transparent; }
+.fb { margin-top: 12px; padding: 18px 14px 16px; border-radius: 22px; background: var(--card-2); border: 1px solid var(--line); text-align: center; }
+.fb h4 { margin: 0 0 14px; font-size: 21px; line-height: 1.2; color: var(--cream); font-weight: 800; }
+.fb-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
+.fb-face { aspect-ratio: 1 / 1; border: 2px solid transparent; border-radius: 18px; background: #000; display: grid; place-items: center; padding: 0; -webkit-tap-highlight-color: transparent; }
+.fb-face svg { width: 74%; height: 74%; display: block; }
+.fb-face:active { transform: scale(.95); }
+.fb-face.on { border-color: var(--gold); }
+.fb-txt { width: 100%; margin-top: 14px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: #000; color: var(--cream); font: inherit; font-size: 15px; resize: none; box-sizing: border-box; }
+.fb-txt::placeholder { color: var(--muted); }
+.fb-txt:focus { outline: none; border-color: var(--gold); }
+.fb-send { margin-top: 10px; }
+.fb-ok { margin: 14px 0 0; color: var(--gold); font-weight: 700; }
 .rev-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; padding: 13px 14px; border: 1px solid rgba(242, 196, 109, .45); border-radius: 16px; background: rgba(242, 196, 109, .06); color: var(--cream); font-weight: 700; font-size: 15px; text-decoration: none; -webkit-tap-highlight-color: transparent; }
 .rev-btn svg { color: var(--gold); flex: none; }
 .rev-btn:active { background: rgba(242, 196, 109, .14); }
@@ -1423,8 +1435,10 @@ function openSheet(el) {
   updateBar();
 }
 
+let admVoltar = false;   // veio do modo ADM: ao sair do pós-checkout volta pro ADM
 function closeSheet(el, restoreFocus = true) {
   if (!el || el.hidden) return;
+  if (el.id === 'postCheckout' && admVoltar) { admVoltar = false; setTimeout(() => { try { openSheet($('#adminSheet')); } catch (e) {} }, 420); }
   el.classList.remove('open');
   if (current === el) current = null;
   if (!current) document.body.classList.remove('lock');
@@ -2433,6 +2447,29 @@ window.addEventListener('focus', startOrderStatusPolling);
 window.addEventListener('online', retomaSite);
 
 /* ---------- Tela "Acompanhar pedido" ---------- */
+const FB = {};   // avaliação por pedido: { nota, texto, enviado }
+const FB_LAB = ['', 'Muito ruim', 'Ruim', 'Neutro', 'Bom', 'Ótimo'];
+function faceSVG(n) {
+  const eye = (x, y) => `<circle cx="${x}" cy="${y}" r="2.6" fill="#3b2400"/>`;
+  const base = c1 => `<defs><radialGradient id="fg${n}" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="${c1[0]}"/><stop offset="1" stop-color="${c1[1]}"/></radialGradient></defs><circle cx="24" cy="24" r="22" fill="url(#fg${n})"/>`;
+  const st = 'fill="none" stroke="#3b2400" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"';
+  let b = '';
+  if (n === 1) b = base(['#ff8a5c', '#e5432d']) + `<path d="M13 15l9 4M35 15l-9 4" ${st}/>` + eye(17.5, 23) + eye(30.5, 23) + `<path d="M16 35q8-6 16 0" ${st}/>`;
+  if (n === 2) b = base(['#ffe07a', '#ffb52e']) + `<path d="M14 17l8-1.5M34 19l-8-3" ${st} stroke-width="2"/>` + eye(17.5, 23) + eye(30.5, 23) + `<path d="M16 34q8-5 16-1" ${st}/>`;
+  if (n === 3) b = base(['#ffe07a', '#ffb52e']) + eye(17.5, 21) + eye(30.5, 21) + `<path d="M16 33h16" ${st}/>`;
+  if (n === 4) b = base(['#ffe07a', '#ffb52e']) + `<path d="M13 22q4.5-6 9 0M26 22q4.5-6 9 0" ${st}/>` + `<path d="M15 29q9 9 18 0" ${st}/>`;
+  if (n === 5) { const star = (x, y) => `<path transform="translate(${x} ${y})" d="M0-6.5l1.9 4 4.4.6-3.2 3 .8 4.4L0 3.4l-3.9 2.1.8-4.4-3.2-3 4.4-.6z" fill="#e5334a"/>`; b = base(['#ffe07a', '#ffb52e']) + star(16.5, 20) + star(31.5, 20) + `<path d="M14 28h20q-1 10-10 10t-10-10z" fill="#7a2a12"/><path d="M17 28h14q-.5 4-7 4t-7-4z" fill="#fff"/>`; }
+  return `<svg viewBox="0 0 48 48" aria-hidden="true">${b}</svg>`;
+}
+function fbHTML(o) {
+  const f = FB[o.ref] || {};
+  return `<div class="fb">
+        <h4>Como foi sua experiência?</h4>
+        <div class="fb-row">${[1, 2, 3, 4, 5].map(n => `<button type="button" class="fb-face ${f.nota === n ? 'on' : ''}" data-a="fb-nota" data-n="${n}" aria-label="${FB_LAB[n]}">${faceSVG(n)}</button>`).join('')}</div>
+        ${f.nota === 3 ? (f.enviado ? '<p class="fb-ok">Obrigado! Sua opinião foi enviada.</p>' : `<textarea id="fbTxt" class="fb-txt" rows="3" maxlength="500" placeholder="Como podemos melhorar?">${esc(f.texto || '')}</textarea><button type="button" class="btn btn--block fb-send" data-a="fb-enviar">Enviar</button>`) : ''}
+      </div>`;
+}
+
 function renderPostCheckoutContent() {
   const body = $('#trackBody');
   const atalhos = $('#trackShortcuts');
@@ -2521,7 +2558,7 @@ function renderPostCheckoutContent() {
         </div></div>
       </div>
 
-      <a class="rev-btn" href="${AVALIACAO_URL}" target="_blank" rel="noopener"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>Avalie a Rancharia no Google</a>
+      ${fbHTML(o)}
 
       ${temConcluidos ? '<button type="button" class="track-clear" data-a="limpar-concluidos">Limpar pedidos concluídos</button>' : ''}
     </div>
@@ -2550,6 +2587,38 @@ $('#btnHeaderTrack').addEventListener('click', () => {
   openPostCheckout();
 });
 $('#btnBackToMenu').addEventListener('click', () => { closeSheet($('#postCheckout')); renderExtras(); });
+
+$('#trackBody').addEventListener('input', e => {
+  if (e.target.id !== 'fbTxt') return;
+  const o = selOrder(); if (o) (FB[o.ref] = FB[o.ref] || {}).texto = e.target.value;
+});
+$('#trackBody').addEventListener('click', e => {
+  const fbn = e.target.closest('[data-a="fb-nota"]');
+  if (fbn) {
+    const o = selOrder(); if (!o) return;
+    const f = FB[o.ref] = FB[o.ref] || {};
+    f.nota = Number(fbn.dataset.n);
+    if (f.nota !== 3) window.open(AVALIACAO_URL, '_blank');   // as outras notas vão direto pro Google Maps
+    renderSig = ''; renderPostCheckoutContent();
+    return;
+  }
+  const fbe = e.target.closest('[data-a="fb-enviar"]');
+  if (fbe) {
+    const o = selOrder(); if (!o) return;
+    const f = FB[o.ref] = FB[o.ref] || {};
+    const ta = $('#fbTxt'); f.texto = ta ? ta.value.trim() : (f.texto || '');
+    if (!f.texto) { toast('Escreva como podemos melhorar.'); return; }
+    fbe.disabled = true;
+    const w = window.open('', '_blank');   // abre já no toque (o navegador não bloqueia) e manda pro Google Maps depois de enviar
+    (async () => {
+      const r = await salvarPedidoSupabase('ADM', 0.01, `[ADM] Adm: feedback do cliente (Neutro)\nCliente: ${o.cliente || '-'} · pedido ${o.ref}\nComo podemos melhorar?\n${f.texto}`);
+      if (!r) { try { w && w.close(); } catch (_) {} fbe.disabled = false; toast('Não foi possível enviar. Tente de novo.'); return; }
+      f.enviado = true;
+      if (w) { try { w.location.href = AVALIACAO_URL; } catch (_) { window.open(AVALIACAO_URL, '_blank'); } } else window.open(AVALIACAO_URL, '_blank');
+      renderSig = ''; renderPostCheckoutContent();
+    })();
+  }
+});
 
 $('#trackBody').addEventListener('click', e => {
   const delT = e.target.closest('[data-del-teste]');
@@ -2852,6 +2921,7 @@ $('#admVerTela').addEventListener('click', () => {
   const o = pedidoFicticio();
   selectedRef = o.ref; refrescaPedidos();
   closeSheet($('#adminSheet'), false);
+  admVoltar = true;
   setTimeout(() => openPostCheckout(), 250);
 });
 
