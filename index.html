@@ -3247,7 +3247,7 @@ async function carregarCardapio(force) {
       const _n = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
       const _real = x => !/^__/.test(String(x.nome || '')) && _n(x.nome) !== 'valor do prato';
       const _off = new Set(c.filter(cat => { const its = p.filter(x => x.categoria_id === cat.id && _real(x)); return its.length && its.every(x => x.pausado); }).map(cat => cat.id));
-      aplicarCardapio(c.filter(cat => !_off.has(cat.id)), p.filter(x => !x.pausado));
+      aplicarCardapio(c.filter(cat => !_off.has(cat.id) && !/^__/.test(String(cat.nome || ''))), p.filter(x => !x.pausado));
       renderPlates();
       renderExtras();
       initReveal();
