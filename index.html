@@ -3315,7 +3315,15 @@ document.addEventListener('click', e => {
 $('#extrasList').addEventListener('click', e => {
   const t = e.target.closest('[data-a]'); if (!t) return;
   const a = t.dataset.a;
-  if (a === 'dtoggle') { openDrink = openDrink === t.dataset.d ? null : t.dataset.d; fxOpenId = openDrink; renderExtras(); fxOpenId = null; return; }
+  if (a === 'dtoggle') {
+    const id = t.dataset.d, topoAntes = t.getBoundingClientRect().top;
+    openDrink = openDrink === id ? null : id; fxOpenId = openDrink; renderExtras(); fxOpenId = null;
+    if (openDrink === id) {   // mantém o cabeçalho clicado no mesmo lugar da tela (não salta quando outro card, acima, fecha)
+      const nt = document.querySelector(`#extrasList [data-a="dtoggle"][data-d="${id}"]`);
+      if (nt) { const dy = nt.getBoundingClientRect().top - topoAntes; if (Math.abs(dy) > 1) window.scrollBy({ top: dy, behavior: 'instant' }); }
+    }
+    return;
+  }
   if (a === 'dtog') { toggleDrink(t.dataset.d, +t.dataset.t, +t.dataset.i); return; }
   if (a === 'dinc' || a === 'ddec') {
     changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
