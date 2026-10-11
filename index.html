@@ -3166,6 +3166,7 @@ function aplicarCardapio(cats, prods) {
     c.exibicao = j.exibicao || c.exibicao || (norm(c.nome).includes('guarni') ? 'checklist' : /bebida|refri|suco|cerveja/.test(norm(c.nome)) ? 'min' : 'prato');
     c.max_escolha = j.max_escolha !== undefined ? Number(j.max_escolha) : 4;
     c.min_escolha = j.min_escolha !== undefined ? Number(j.min_escolha) : 1;
+    c._minSet = j.min_escolha !== undefined;
     c.parents = j.parents || c.parents || [];
     c.item_order = j.item_order || [];
     c.substituto = j.substituto || '';
@@ -3217,10 +3218,10 @@ function aplicarCardapio(cats, prods) {
       return {
         id: 'c' + c.id,
         catId: c.id,
-        titulo1: planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
+        titulo1: c.substituto || planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
         titulo2: c.nome,
         preco: preco,
-        escolhe: /duas|gourmet/i.test(c.nome) ? 2 : 1,
+        escolhe: (c._minSet && c.min_escolha > 0) ? c.min_escolha : (/duas|gourmet/i.test(c.nome) ? 2 : 1),
         proteinas: proteinas.map(x => x.nome),
         img: FOTO(idKey)
       };
@@ -3251,10 +3252,10 @@ function aplicarCardapio(cats, prods) {
         CONFIG.planos.push({
           id: 'c' + c.id,
           catId: c.id,
-          titulo1: planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
+          titulo1: c.substituto || planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
           titulo2: c.nome,
           preco: precoBase,
-          escolhe: /duas|gourmet/i.test(c.nome) ? 2 : 1,
+          escolhe: (c._minSet && c.min_escolha > 0) ? c.min_escolha : (/duas|gourmet/i.test(c.nome) ? 2 : 1),
           proteinas: proteinas.map(x => x.nome),
           img: FOTO(idKey)
         });
