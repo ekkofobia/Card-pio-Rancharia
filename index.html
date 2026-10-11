@@ -3209,6 +3209,7 @@ function aplicarCardapio(cats, prods) {
   })).filter(c => c.itens.length > 0);
 
   const catsPrato = cats.filter(c => c.exibicao === 'prato' && c.tipo !== 'item' && c.tipo !== 'bump');
+  if (!catsPrato.length && CDIA_IDS) CONFIG.planos = [];   // cardápio do dia sem pratos: não deixa os pratos padrão
   if (catsPrato.length) {
     CONFIG.planos = catsPrato.map(c => {
       const planItem = todos.find(x => x.categoria_id === c.id && norm(x.nome) === PL);
