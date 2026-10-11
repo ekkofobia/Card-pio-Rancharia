@@ -3069,6 +3069,7 @@ const mkUrl = `https://wa.me/${CONFIG.criador.whatsapp}?text=${encodeURIComponen
 $('#sobre').textContent = CONFIG.sobre;
 const desenhaHoras = () => { $('#horas').innerHTML = CONFIG.horarios.map(([d, h]) => `<div class="hr-row"><span>${esc(d)}</span><b>${esc(h)}</b></div>`).join(''); };
 desenhaHoras();
+let CDIA_IDS = null;
 async function carregarConfig(force) {
   try {
     // textos e bairros vindos do painel (guardados 3 min no aparelho para economizar dados)
@@ -3076,7 +3077,7 @@ async function carregarConfig(force) {
     let rows = null;
     try { const c = JSON.parse(localStorage.getItem(KEY) || 'null'); if (!force && c && Date.now() - c.t < 180000) rows = c.rows; } catch (e) {}
     if (!rows) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_config?key=in.(site,bairros,entrega,titulos,loja)&select=key,value`, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }, cache: 'no-store' });
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/site_config?key=in.(site,bairros,entrega,titulos,loja,cdia)&select=key,value`, { headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY }, cache: 'no-store' });
       if (!res.ok) return;
       rows = await res.json();
       try { localStorage.setItem(KEY, JSON.stringify({ t: Date.now(), rows })); } catch (e) {}
@@ -3096,6 +3097,7 @@ async function carregarConfig(force) {
     const tv = get('titulos') || {};
     TIT = { hero: tv.hero || {}, extras: tv.extras || {}, nomes: tv.nomes || {}, custom: Array.isArray(tv.custom) ? tv.custom : [] };
     aplicaTitulos();
+    try { const cd = get('cdia'); const a = cd && Array.isArray(cd.cards) ? (cd.cards.find(k => k.id === cd.ativo) || cd.cards[0]) : null; CDIA_IDS = a && Array.isArray(a.cats) ? a.cats.map(Number) : null; } catch (e) { CDIA_IDS = null; }
     const ent = get('entrega'); ENTREGA_COMBINAR = !!(ent && ent.combinar);
     const b = get('bairros');
     if (Array.isArray(b) && b.length) {
@@ -3104,7 +3106,7 @@ async function carregarConfig(force) {
     }
   } catch (e) {}
 }
-carregarConfig();
+const CFG_P = carregarConfig();
 $('#faq').innerHTML = CONFIG.faq.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('');
 
 /* MODO PRINT: 5 CLIQUES NA LOGO */
@@ -3169,6 +3171,7 @@ function aplicarCardapio(cats, prods) {
     c.substituto = j.substituto || '';
     c.apartir_de = j.apartir_de !== undefined ? Number(j.apartir_de) : 0;
   });
+  if (CDIA_IDS) cats = cats.filter(c => c.tipo === 'item' || CDIA_IDS.includes(c.id));   // cardápio do dia escolhido no painel
 
   const por = c => {
     const items = prods.filter(x => x.categoria_id === c.id && !/^__/.test(String(x.nome || '')));
@@ -3307,6 +3310,7 @@ function aplicarCardapio(cats, prods) {
 
 async function carregarCardapio(force) {
   try {
+    try { await Promise.race([CFG_P, new Promise(r => setTimeout(r, 2500))]); } catch (e) {}
     const MENU_KEY = 'rancharia_menu_v1', MENU_TTL = 180000;   // cardápio fica 3 min no aparelho
     const lerCache = () => { try { return JSON.parse(localStorage.getItem(MENU_KEY) || 'null'); } catch (e) { return null; } };
     const get = u => fetch(`${SUPABASE_URL}/rest/v1/${u}`, { headers: { apikey: SUPABASE_KEY }, cache: 'no-store' }).then(r => r.json());
@@ -3442,7 +3446,7 @@ checarLoja(); setInterval(() => { if (!document.hidden) checarLoja(); }, 60000);
 
 /* ===== REALTIME do cardápio, textos e loja aberta/fechada ===== */
 let rtCat = null, rtCatCh = null, rtCatTimer = null, rtCatSai = null, rtCatTent = 0;
-function atualizaTudo() { checarLoja(); carregarCardapio(true); carregarConfig(true); }
+async function atualizaTudo() { checarLoja(); try { await carregarConfig(true); } catch (e) {} carregarCardapio(true); }
 function catMudou() { clearTimeout(rtCatTimer); rtCatTimer = setTimeout(atualizaTudo, 800); }
 function pararCatRT() { try { if (rtCat) rtCat.removeAllChannels(); } catch (e) {} rtCat = null; rtCatCh = null; }
 async function iniciarCatRT() {
