@@ -1008,6 +1008,12 @@ body.print-mode .print-salad small {
     </div>
   </section>
 
+  <section id="avulsosDepois" hidden>
+    <div class="wrap">
+      <div class="plates" id="plates2"></div>
+    </div>
+  </section>
+
   <section class="final">
     <div class="wrap">
       <h2 class="sec-title">Bateu a fome?<br><em>Monte seu prato agora.</em></h2>
@@ -1362,14 +1368,15 @@ function renderPlates() {
       <button class="btn" data-plano="${p.id}">Montar esse prato</button>
     </article>` + customHTML(p.titulo2, true)).join('');
 
+  let html2 = '';
   (CONFIG.cardsAvulsos || []).forEach(cat => {
-    html += customHTML(cat.nome) + `
+    let h = customHTML(cat.nome) + `
     <div style="grid-column: 1 / -1; margin-top: 14px;">
       <h3 style="font-size:22px;color:var(--gold);font-weight:800;text-transform:uppercase">${tit(cat.nome, cat.nome)}</h3>
     </div>`;
     cat.itens.forEach(it => {
       const q = drinkQty(it.nome);
-      html += `
+      h += `
       <article class="plate nofoto" style="padding:14px 16px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
           <div>
@@ -1387,6 +1394,7 @@ function renderPlates() {
         </div>
       </article>`;
     });
+    if (cat.depois) html2 += h; else html += h;
   });
 
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
@@ -1401,6 +1409,7 @@ function renderPlates() {
     </article>`;
 
   container.innerHTML = html;
+  const p2 = document.getElementById('plates2'); if (p2) { p2.innerHTML = html2; document.getElementById('avulsosDepois').hidden = !html2; }
 }
 
 function openSheet(el) {
@@ -3230,7 +3239,10 @@ function aplicarCardapio(cats, prods) {
   }
 
   const catsCards = cats.filter(c => c.exibicao === 'cards' && (c.tipo === 'principal' || c.tipo === 'ambos'));
+  const _ordEx = cats.filter(c => c.tipo !== 'item' && (c.tipo === 'bump' || c.tipo === 'ambos' || c.exibicao === 'min' || c.exibicao === 'checklist') && c.exibicao !== 'cards' && c.exibicao !== 'prato' && (c.tipo === 'ambos' || c.tipo === 'principal')).map(c => c.ordem || 0);
+  const _minEx = _ordEx.length ? Math.min(..._ordEx) : Infinity;   // cards avulsos que vêm depois das bebidas na ordem do painel
   CONFIG.cardsAvulsos = catsCards.map(c => ({
+    depois: (c.ordem || 0) > _minEx,
     id: c.id,
     nome: c.nome,
     itens: por(c).filter(x => norm(x.nome) !== PL)
