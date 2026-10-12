@@ -211,6 +211,8 @@ section { padding: 46px 0; scroll-margin-top: 62px; }
 .plate .t2 { font-weight: 800; font-size: 22px; line-height: 1.1; color: var(--gold); text-transform: uppercase; }
 .plate ul { margin: 8px 0 0; display: grid; gap: 2px; font-size: 14px; }
 .plate li { position: relative; padding-left: 16px; }
+.plate li.li-p { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.plate li.li-p b { color: var(--gold); font-weight: 800; white-space: nowrap; }
 .plate li::before { content: ""; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
 .plate .photo { margin: 28px -16px 0 0; pointer-events: none; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 26%); mask-image: linear-gradient(90deg, transparent 0, #000 26%); }
 .plate .photo img { width: calc(100% + 10px); max-width: none; height: auto; }
@@ -1368,12 +1370,12 @@ function renderPlates() {
 
   html += (CONFIG.planos || []).map((p, i) => customHTML(p.titulo2) + `
     <article class="plate plate-prato ${!p.img ? 'nofoto' : ''} ">
-      <span class="price"><small>R$</small>${String(p.preco.toFixed(2)).replace('.', ',')}</span>
+      ${p.preco > 0 ? `<span class="price"><small>R$</small>${String(p.preco.toFixed(2)).replace('.', ',')}</span>` : ''}
       <div class="row">
         <div>
           <div class="t1">${fmtT(titS(p.titulo2, p.titulo1))}</div>
           <div class="t2">${tit(p.titulo2, p.titulo2)}</div>
-          <ul>${p.proteinas.map(n => `<li>${esc(n)}</li>`).join('')}</ul>
+          <ul>${p.proteinas.map(n => p.carta && p.precos[n] > 0 ? `<li class="li-p"><span>${esc(n)}</span><b>${brl(p.precos[n])}</b></li>` : `<li>${esc(n)}</li>`).join('')}</ul>
         </div>
         ${p.img ? `<div class="photo"><img src="${p.img}" alt="Prato ${esc(p.titulo2)}" loading="lazy" width="298" height="220"></div>` : ''}
       </div>
@@ -1502,12 +1504,12 @@ function openBuilder(id, fromBump = false) {
     draft.subSelections[sub.id] = {};
   });
 
-  $('#bTitle').innerHTML = `${esc(p.titulo2)}<small>${esc(p.titulo1)} · ${brl(p.preco)}</small>`;
+  $('#bTitle').innerHTML = `${esc(p.titulo2)}<small>${esc(p.titulo1)}${p.preco > 0 ? ' · ' + brl(p.preco) : ''}</small>`;
   
   let bodyHTML = `
     <div class="grp">
       <div class="grp-h"><h3>${p.escolhe === 1 ? 'Escolha 1 proteína' : 'Escolha 2 proteínas'}</h3><span id="cntP"></span></div>
-      <div class="opts one" id="optP">${p.proteinas.map(n => optBtn('p', n)).join('')}</div>
+      <div class="opts one" id="optP">${p.proteinas.map(n => optBtn('p', n, '', p.carta && p.precos[n] > 0 ? { preco: p.precos[n] } : null)).join('')}</div>
     </div>`;
 
   subcatsDoPrato.forEach(sub => {
@@ -1655,7 +1657,8 @@ function syncBuilder() {
   });
 
   add.disabled = faltaP > 0 || faltaChecklist;
-  const precoFinalUnit = p.preco + extraPrecoTotal;
+  const protPreco = p.carta ? d.proteinas.reduce((t, n) => t + (p.precos[n] || 0), 0) : 0;
+  const precoFinalUnit = p.preco + protPreco + extraPrecoTotal;
   add.textContent = faltaP > 0 ? `Escolha ${faltaP} proteína${faltaP > 1 ? 's' : ''}`
     : faltaChecklist ? 'Escolha suas opções'
     : `Adicionar · ${brl(precoFinalUnit * d.qty)}`;
@@ -1834,7 +1837,8 @@ function addToCart() {
     }
   });
 
-  const precoFinalPrato = p.preco + precoExtraTotal;
+  const protPreco = p.carta ? d.proteinas.reduce((t, n) => t + (p.precos[n] || 0), 0) : 0;
+  const precoFinalPrato = p.preco + protPreco + precoExtraTotal;
 
   cart.push({
     uid: ++uid,
@@ -3303,6 +3307,7 @@ function aplicarCardapio(cats, prods) {
         preco: preco,
         escolhe: (c._minSet && c.min_escolha > 0) ? c.min_escolha : (/duas|gourmet/i.test(c.nome) ? 2 : 1),
         proteinas: proteinas.map(x => x.nome),
+        carta: preco === 0, precos: preco === 0 ? Object.fromEntries(proteinas.map(x => [x.nome, Number(x.preco) || 0])) : null,   // título com preço 0: cada item tem o seu preço
         img: FOTO(idKey)
       };
     });
@@ -3340,6 +3345,7 @@ function aplicarCardapio(cats, prods) {
           preco: precoBase,
           escolhe: (c._minSet && c.min_escolha > 0) ? c.min_escolha : (/duas|gourmet/i.test(c.nome) ? 2 : 1),
           proteinas: proteinas.map(x => x.nome),
+          carta: precoBase === 0, precos: precoBase === 0 ? Object.fromEntries(proteinas.map(x => [x.nome, Number(x.preco) || 0])) : null,
           img: FOTO(idKey)
         });
       }
@@ -3446,7 +3452,7 @@ function bumpPratoHTML(d) {
         <h3 style="margin-bottom:2px">${d.emoji} ${tit(d.orig || d.nome, d.nome)}</h3>
         ${d.desc ? `<small style="color:var(--muted);display:block">${esc(d.desc)}</small>` : ''}
       </div>
-      <b style="color:var(--gold);font-size:18px">${brl(d.preco)}</b>
+      ${d.preco > 0 ? `<b style="color:var(--gold);font-size:18px">${brl(d.preco)}</b>` : ''}
     </div>
     <button type="button" class="btn btn--block" data-bump-plano="${d.planoId}" style="margin-top:10px;min-height:44px;font-size:15px">Montar este prato</button>
   </div>`;
