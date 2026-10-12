@@ -1324,6 +1324,7 @@ setTimeout(function () {
 <script>
 'use strict';
 const FOTO_2 = 'https://res.cloudinary.com/dwrq06fta/image/upload/v1791773447/file_00000000c774820e80a770fb01c46ec6_hftmgc.webp';
+const FOTO_3 = 'https://res.cloudinary.com/dwrq06fta/image/upload/v1791808828/file_00000000aedc820eb3c02eabffd0109e_uskzdl.webp';
 const FOTO = k => (typeof IMG !== 'undefined' && IMG[k]) || '';
 const EDIT = window.EDITAVEL || {};
 const listar = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);
@@ -3441,7 +3442,7 @@ function aplicarCardapio(cats, prods) {
     c.item_order = j.item_order || [];
     c.substituto = j.substituto || '';
     c.apartir_de = j.apartir_de !== undefined ? Number(j.apartir_de) : 0;
-    c.foto = Number(j.foto) === 2 ? 2 : 1;
+    c.foto = [2, 3].includes(Number(j.foto)) ? Number(j.foto) : 1;
   });
   if (CDIA_IDS) cats = cats.filter(c => c.tipo === 'item' || CDIA_IDS.includes(c.id));   // cardápio do dia escolhido no painel
 
@@ -3496,7 +3497,7 @@ function aplicarCardapio(cats, prods) {
         escolhe: (c._minSet && c.min_escolha > 0) ? c.min_escolha : (/duas|gourmet/i.test(c.nome) ? 2 : 1),
         proteinas: proteinas.map(x => x.nome),
         descs: Object.fromEntries(proteinas.map(x => [x.nome, x.descricao || ''])), carta: preco === 0, precos: preco === 0 ? Object.fromEntries(proteinas.map(x => [x.nome, Number(x.preco) || 0])) : null,   // título com preço 0: cada item tem o seu preço
-        img: c.foto === 2 ? FOTO_2 : FOTO(idKey)
+        img: c.foto === 3 ? FOTO_3 : c.foto === 2 ? FOTO_2 : FOTO(idKey)
       };
     });
   }
@@ -3534,7 +3535,7 @@ function aplicarCardapio(cats, prods) {
           escolhe: (c._minSet && c.min_escolha > 0) ? c.min_escolha : (/duas|gourmet/i.test(c.nome) ? 2 : 1),
           proteinas: proteinas.map(x => x.nome),
           descs: Object.fromEntries(proteinas.map(x => [x.nome, x.descricao || ''])), carta: precoBase === 0, precos: precoBase === 0 ? Object.fromEntries(proteinas.map(x => [x.nome, Number(x.preco) || 0])) : null,
-          img: c.foto === 2 ? FOTO_2 : FOTO(idKey)
+          img: c.foto === 3 ? FOTO_3 : c.foto === 2 ? FOTO_2 : FOTO(idKey)
         });
       }
 
