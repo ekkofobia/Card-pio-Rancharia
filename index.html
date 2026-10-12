@@ -610,6 +610,19 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .sub-div:first-child { margin-top: 2px; }
 .d-sub { display: block; margin-top: 2px; color: var(--muted); font-size: 12.5px; font-weight: 400; }
 .d-emoji .sv { width: 26px; height: 26px; color: var(--gold); }
+/* ícone animado do Alacarte (ciclo de 6s) */
+.ac-base { animation: acBase 6s ease-out infinite; transform-origin: 12px 20px; }
+.ac-lid { animation: acLid 6s cubic-bezier(.4, 0, .2, 1) infinite; transform-origin: 20.5px 17px; }
+.ac-food { animation: acFood 6s ease-in-out infinite; transform-origin: 12px 17px; }
+.ac-st { stroke-width: 1.5; stroke-dasharray: 10; stroke-dashoffset: 10; opacity: 0; animation: acSt 6s ease-in-out infinite; }
+.ac-s2 { animation-delay: .25s; } .ac-s3 { animation-delay: .5s; }
+.ac-sp { transform-box: fill-box; transform-origin: center; opacity: 0; animation: acSp 6s ease-in-out infinite; }
+@keyframes acBase { 0% { opacity: 0; transform: scaleX(.3); } 12%, 100% { opacity: 1; transform: scaleX(1); } }
+@keyframes acLid { 0% { transform: translateY(-8px); opacity: 0; } 12% { transform: translateY(.8px); opacity: 1; } 17%, 32% { transform: none; } 42%, 66% { transform: translate(2px, -2.4px) rotate(32deg); } 78% { transform: translateY(.8px); } 83%, 100% { transform: none; } }
+@keyframes acFood { 0%, 34% { opacity: 0; transform: scale(.6) translateY(1.5px); } 46%, 64% { opacity: 1; transform: none; } 74%, 100% { opacity: 0; transform: scale(.6) translateY(1.5px); } }
+@keyframes acSt { 0%, 36% { stroke-dashoffset: 10; opacity: 0; transform: translateY(1.5px); } 46% { opacity: .95; } 58% { stroke-dashoffset: 0; opacity: .8; } 72%, 100% { stroke-dashoffset: -10; opacity: 0; transform: translateY(-2px); } }
+@keyframes acSp { 0%, 40% { opacity: 0; transform: scale(0) rotate(0); } 48% { opacity: 1; transform: scale(1.2) rotate(45deg); } 56% { opacity: 1; transform: scale(.9) rotate(90deg); } 66%, 100% { opacity: 0; transform: scale(0) rotate(135deg); } }
+@media (prefers-reduced-motion: reduce) { .ac-base, .ac-lid, .ac-food, .ac-st, .ac-sp { animation: none; } .ac-st, .ac-sp, .ac-food { opacity: 0; } }
 .xcard h3 .sv { width: 20px; height: 20px; vertical-align: -4px; color: var(--gold); margin-right: 4px; }
 .modal .emoji svg { color: var(--gold); }
 .d-emoji { flex: none; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 13px; background: rgba(242, 196, 109, .12); font-size: 24px; line-height: 1; }
@@ -2700,6 +2713,7 @@ const ICO = {
   sobremesa: '<path d="M8 11a4 4 0 1 1 8 0z"/><path d="M8 11l4 10 4-10"/><path d="M10.2 15h3.6M11.2 18h1.6"/>',
   porcao: '<path d="M6 10h12l-1.4 10H7.4z"/><path d="M8.5 10L8 4.5M11 10V3.5M13.5 10l.5-6M16 10l1-4.5"/>',
   prato: '<path d="M3 17h18"/><path d="M5 17a7 7 0 0 1 14 0"/><path d="M12 10V8.5M10.5 8.5h3"/><path d="M4 20.5h16"/>',
+  alacarte: '<g class="ac-base"><path d="M3 20h18"/></g><g class="ac-food"><path d="M7.5 17a4.5 4.5 0 0 1 9 0" stroke-width="1.5" opacity=".75"/></g><path class="ac-st" pathLength="10" d="M9.5 13c-1.2-1.2 1.2-2 0-3.6"/><path class="ac-st ac-s2" pathLength="10" d="M12 12.5c-1.2-1.2 1.2-2 0-3.6"/><path class="ac-st ac-s3" pathLength="10" d="M14.5 13c-1.2-1.2 1.2-2 0-3.6"/><path class="ac-sp" d="M19 6.5l.6 1.4 1.4.6-1.4.6-.6 1.4-.6-1.4-1.4-.6 1.4-.6z" fill="currentColor" stroke="none"/><g class="ac-lid"><path d="M3.5 17a8.5 8.5 0 0 1 17 0z"/><circle cx="12" cy="7" r="1.1"/></g>',
   extra: '<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
   tigela: '<path d="M3.5 12h17a8.5 8.5 0 0 1-17 0z"/><path d="M9 20.5h6"/><path d="M9 8c-1-1 1-2 0-3.5M13 8c-1-1 1-2 0-3.5"/>',
   aviso: '<path d="M12 4l9 16H3z"/><path d="M12 10v4M12 17h.01"/>',
@@ -3464,7 +3478,7 @@ function aplicarCardapio(cats, prods) {
       orig: c.nome,
       tamanhos: tam,
       desc: c.substituto || '',   // só o campo Substituto da categoria (nada de juntar descrições dos itens)
-      emoji: SVG_AT(/cerv/.test(n) ? ICO.cerveja : /suco/.test(n) ? ICO.suco : /refri|bebida/.test(n) ? ICO.refri : /sobremes|doce/.test(n) ? ICO.sobremesa : /porc|frit|batata/.test(n) ? ICO.porcao : ICO.extra),
+      emoji: SVG_AT(/a\s?la\s?carte|alacarte/.test(n) ? ICO.alacarte : /cerv/.test(n) ? ICO.cerveja : /suco/.test(n) ? ICO.suco : /refri|bebida/.test(n) ? ICO.refri : /sobremes|doce/.test(n) ? ICO.sobremesa : /porc|frit|batata/.test(n) ? ICO.porcao : ICO.extra),
       apartir_de: c.apartir_de
     };
   }).filter(d => d.tamanhos.length > 0 || d.tipo === 'prato');
