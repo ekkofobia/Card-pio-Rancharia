@@ -211,7 +211,9 @@ section { padding: 46px 0; scroll-margin-top: 62px; }
 .plate .t2 { font-weight: 800; font-size: 22px; line-height: 1.1; color: var(--gold); text-transform: uppercase; }
 .plate ul { margin: 8px 0 0; display: grid; gap: 2px; font-size: 14px; }
 .plate li { position: relative; padding-left: 16px; }
-.plate li.li-p { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.plate li .li-d { display: block; color: var(--muted); font-size: 12px; line-height: 1.25; }
+.plate li.li-p .li-d { flex-basis: 100%; }
+.plate li.li-p { flex-wrap: wrap; display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
 .plate li.li-p b { color: var(--gold); font-weight: 800; white-space: nowrap; }
 .plate li::before { content: ""; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
 .plate .photo { margin: 28px -16px 0 0; pointer-events: none; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 26%); mask-image: linear-gradient(90deg, transparent 0, #000 26%); }
@@ -302,6 +304,8 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
 .opt.on .ob-t small { color: rgba(42, 21, 9, .78); }
 .opt.on .ob-p { color: var(--ink); }
 .opt .ob-t small { color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.25; }
+.opt .ob-row { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
+.opt .ob-p { white-space: nowrap; }
 .opt .ob-p { color: var(--gold); font-weight: 700; font-size: 13px; }
 .opt .tick { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--line); display: grid; place-items: center; transition: .2s; }
 .opt .tick::after { content: ""; width: 10px; height: 6px; border-left: 2.5px solid var(--ink); border-bottom: 2.5px solid var(--ink); transform: rotate(-45deg) scale(0); margin-top: -2px; transition: transform .2s; }
@@ -1375,7 +1379,7 @@ function renderPlates() {
         <div>
           <div class="t1">${fmtT(titS(p.titulo2, p.titulo1))}</div>
           <div class="t2">${tit(p.titulo2, p.titulo2)}</div>
-          <ul>${p.proteinas.map(n => p.carta && p.precos[n] > 0 ? `<li class="li-p"><span>${esc(n)}</span><b>${brl(p.precos[n])}</b></li>` : `<li>${esc(n)}</li>`).join('')}</ul>
+          <ul>${p.proteinas.map(n => { const ds = p.descs && p.descs[n] ? `<small class="li-d">${esc(p.descs[n])}</small>` : ''; return p.carta && p.precos[n] > 0 ? `<li class="li-p"><span>${esc(n)}</span><b>${brl(p.precos[n])}</b>${ds}</li>` : `<li>${esc(n)}${ds}</li>`; }).join('')}</ul>
         </div>
         ${p.img ? `<div class="photo"><img src="${p.img}" alt="Prato ${esc(p.titulo2)}" loading="lazy" width="298" height="220"></div>` : ''}
       </div>
@@ -1477,7 +1481,7 @@ $$('[data-close]').forEach(b => b.addEventListener('click', () => {
   }
 }));
 
-const optBtn = (k, v, sid, it) => `<button type="button" class="opt" data-k="${k}" ${sid ? `data-sid="${sid}"` : ''} data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${it ? `<span class="ob-t"><span>${esc(v)}</span>${it.descricao ? `<small>${esc(it.descricao)}</small>` : ''}${Number(it.preco) > 0 ? `<span class="ob-p">+ ${brl(it.preco)}</span>` : ''}</span>` : esc(v)}</button>`;
+const optBtn = (k, v, sid, it) => `<button type="button" class="opt" data-k="${k}" ${sid ? `data-sid="${sid}"` : ''} data-v="${esc(v)}" aria-pressed="false"><span class="tick"></span>${it ? `<span class="ob-t"><span class="ob-row"><span>${esc(v)}</span>${Number(it.preco) > 0 ? `<span class="ob-p">${it.base ? '' : '+ '}${brl(it.preco)}</span>` : ''}</span>${it.descricao ? `<small>${esc(it.descricao)}</small>` : ''}</span>` : esc(v)}</button>`;
 
 function openBuilder(id, fromBump = false) {
   openedFromOrderBump = !!fromBump;
@@ -1509,7 +1513,7 @@ function openBuilder(id, fromBump = false) {
   let bodyHTML = `
     <div class="grp">
       <div class="grp-h"><h3>${p.escolhe === 1 ? 'Escolha 1 proteína' : 'Escolha 2 proteínas'}</h3><span id="cntP"></span></div>
-      <div class="opts one" id="optP">${p.proteinas.map(n => optBtn('p', n, '', p.carta && p.precos[n] > 0 ? { preco: p.precos[n] } : null)).join('')}</div>
+      <div class="opts one" id="optP">${p.proteinas.map(n => optBtn('p', n, '', (p.carta && p.precos[n] > 0) || (p.descs && p.descs[n]) ? { preco: p.carta ? p.precos[n] : 0, descricao: p.descs && p.descs[n], base: true } : null)).join('')}</div>
     </div>`;
 
   subcatsDoPrato.forEach(sub => {
@@ -3307,7 +3311,7 @@ function aplicarCardapio(cats, prods) {
         preco: preco,
         escolhe: (c._minSet && c.min_escolha > 0) ? c.min_escolha : (/duas|gourmet/i.test(c.nome) ? 2 : 1),
         proteinas: proteinas.map(x => x.nome),
-        carta: preco === 0, precos: preco === 0 ? Object.fromEntries(proteinas.map(x => [x.nome, Number(x.preco) || 0])) : null,   // título com preço 0: cada item tem o seu preço
+        descs: Object.fromEntries(proteinas.map(x => [x.nome, x.descricao || ''])), carta: preco === 0, precos: preco === 0 ? Object.fromEntries(proteinas.map(x => [x.nome, Number(x.preco) || 0])) : null,   // título com preço 0: cada item tem o seu preço
         img: FOTO(idKey)
       };
     });
@@ -3345,7 +3349,7 @@ function aplicarCardapio(cats, prods) {
           preco: precoBase,
           escolhe: (c._minSet && c.min_escolha > 0) ? c.min_escolha : (/duas|gourmet/i.test(c.nome) ? 2 : 1),
           proteinas: proteinas.map(x => x.nome),
-          carta: precoBase === 0, precos: precoBase === 0 ? Object.fromEntries(proteinas.map(x => [x.nome, Number(x.preco) || 0])) : null,
+          descs: Object.fromEntries(proteinas.map(x => [x.nome, x.descricao || ''])), carta: precoBase === 0, precos: precoBase === 0 ? Object.fromEntries(proteinas.map(x => [x.nome, Number(x.preco) || 0])) : null,
           img: FOTO(idKey)
         });
       }
