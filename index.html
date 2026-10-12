@@ -1378,11 +1378,16 @@ function toast(msg) {
   toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
 }
 
+function extrasLista() { return (CONFIG.bebidas || []).filter(d => d.tipo !== 'prato' && d.tipo !== 'csc' && (d.lugar === 'principal' || d.lugar === 'ambos')); }
+function maxTopoOf() { const o = (CONFIG.planos || []).map(p => p.ordem).filter(v => v !== undefined && v !== null); return o.length ? Math.max(...o) : -1; }
+function extrasInline() { const mt = maxTopoOf(); return extrasLista().filter(d => d.ordem !== undefined && d.ordem !== null && d.ordem < mt); }
 function renderPlates() {
   const container = $('#plates');
   let html = '';
 
-  html += (CONFIG.planos || []).map((p, i) => customHTML(p.titulo2) + `
+  const blocos = [];
+  const _mt = maxTopoOf();
+  (CONFIG.planos || []).forEach((p, i) => blocos.push({ o: p.ordem ?? 0, h: customHTML(p.titulo2) + `
     <article class="plate plate-prato ${!p.img ? 'nofoto' : ''} ">
       ${p.preco > 0 ? `<span class="price"><small>R$</small>${String(p.preco.toFixed(2)).replace('.', ',')}</span>` : ''}
       <div class="row">
@@ -1394,10 +1399,14 @@ function renderPlates() {
         ${p.img ? `<div class="photo"><img src="${p.img}" alt="Prato ${esc(p.titulo2)}" loading="lazy" width="298" height="220"></div>` : ''}
       </div>
       <button class="btn" data-plano="${p.id}">Montar esse prato</button>
-    </article>` + customHTML(p.titulo2, true)).join('');
+    </article>` + customHTML(p.titulo2, true) }));
 
   let html2 = '';
+  const _sec = extrasLista().filter(d => d.ordem !== undefined && d.ordem !== null && d.ordem >= _mt).map(d => d.ordem);
+  const _minSec = _sec.length ? Math.min(..._sec) : Infinity;
+  extrasInline().forEach(d => blocos.push({ o: d.ordem, h: `<div class="inl-x" data-xid="${d.id}" style="grid-column:1/-1">${cardDe(d)}</div>` }));
   (CONFIG.cardsAvulsos || []).forEach(cat => {
+    cat.depois = cat.ordem !== undefined && cat.ordem !== null && cat.ordem >= _mt && cat.ordem > _minSec;
     let h = customHTML(cat.nome) + `
     <div style="grid-column: 1 / -1; margin-top: 14px;">
       <h3 style="font-size:22px;color:var(--gold);font-weight:800;text-transform:uppercase">${tit(cat.nome, cat.nome)}</h3>
@@ -1422,8 +1431,10 @@ function renderPlates() {
         </div>
       </article>`;
     });
-    if (cat.depois) html2 += h; else html += h;
+    if (cat.depois) html2 += h; else blocos.push({ o: cat.ordem ?? 0, h });
   });
+  blocos.sort((x, y) => x.o - y.o);
+  html += blocos.map(x => x.h).join('');
 
   const norm = t => String(t || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
   const subSalad = (CONFIG.subcategorias || []).find(s => norm(s.nome).includes('salada'));
@@ -2980,8 +2991,8 @@ $('#admRt').addEventListener('click', async e => {
     admLinha(`Canal catalogo-site: ${st}`, st === 'joined' ? 'ok' : 'bad');
   }
   if (k === 'cats') {
-    if (!window.DIAG_CAT) { admLinha('Cardápio ainda não carregado do painel.', 'bad'); return; }
-    window.DIAG_CAT.forEach(l => admLinha(l, /oculta|não apareceu/.test(l) ? 'bad' : 'ok'));
+    if (!window.DIAG_FN) { admLinha('Cardápio ainda não carregado do painel.', 'bad'); return; }
+    window.DIAG_FN().forEach(l => admLinha(l, /oculta|não apareceu/.test(l) ? 'bad' : 'ok'));
   }
   if (k === 'recarregar') {
     const t0 = performance.now();
@@ -3362,7 +3373,7 @@ function aplicarCardapio(cats, prods) {
       const idKey = norm(c.nome).includes('classica') ? 'classica' : norm(c.nome).includes('gourmet') ? 'duas' : norm(c.nome).includes('executivo') ? 'pf' : 'premium';
       return {
         id: 'c' + c.id,
-        catId: c.id,
+        catId: c.id, ordem: c.ordem,
         titulo1: c.substituto || planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
         titulo2: c.nome,
         preco: preco,
@@ -3378,7 +3389,7 @@ function aplicarCardapio(cats, prods) {
   const _ordEx = cats.filter(c => c.tipo !== 'item' && (c.tipo === 'bump' || c.tipo === 'ambos' || c.exibicao === 'min' || c.exibicao === 'checklist') && c.exibicao !== 'cards' && c.exibicao !== 'prato' && (c.tipo === 'ambos' || c.tipo === 'principal')).map(c => c.ordem || 0);
   const _minEx = _ordEx.length ? Math.min(..._ordEx) : Infinity;   // cards avulsos que vêm depois das bebidas na ordem do painel
   CONFIG.cardsAvulsos = catsCards.map(c => ({
-    depois: (c.ordem || 0) > _minEx,
+    ordem: c.ordem,
     id: c.id,
     nome: c.nome,
     itens: por(c).filter(x => norm(x.nome) !== PL)
@@ -3400,7 +3411,7 @@ function aplicarCardapio(cats, prods) {
       if (!planoExistente) {
         CONFIG.planos.push({
           id: 'c' + c.id,
-          catId: c.id,
+          catId: c.id, ordem: c.ordem,
           titulo1: c.substituto || planItem?.descricao || (/duas|gourmet/i.test(c.nome) ? 'Com duas proteínas' : 'Com uma proteína'),
           titulo2: c.nome,
           preco: precoBase,
@@ -3412,7 +3423,7 @@ function aplicarCardapio(cats, prods) {
       }
 
       return {
-        id: 'b' + c.id,
+        id: 'b' + c.id, ordem: c.ordem,
         tipo: 'prato',
         lugar: c.tipo,
         nome: c.nome,
@@ -3446,7 +3457,7 @@ function aplicarCardapio(cats, prods) {
     });
 
     return {
-      id: 'b' + c.id,
+      id: 'b' + c.id, ordem: c.ordem,
       tipo: c.exibicao === 'checklist' ? 'ck' : (c.exibicao === 'cards' ? 'csc' : 'min'),
       lugar: c.tipo,
       nome,
@@ -3484,7 +3495,7 @@ async function carregarCardapio(force) {
       const _real = x => !/^__/.test(String(x.nome || '')) && _n(x.nome) !== 'valor do prato';
       const _off = new Set(c.filter(cat => { const its = p.filter(x => x.categoria_id === cat.id && _real(x)); return its.length && its.every(x => x.pausado); }).map(cat => cat.id));
       aplicarCardapio(c.filter(cat => !_off.has(cat.id) && !/^__/.test(String(cat.nome || ''))), p.filter(x => !x.pausado));
-      window.DIAG_CAT = c.filter(cat => !/^__/.test(String(cat.nome || ''))).map(cat => {
+      window.DIAG_FN = () => c.filter(cat => !/^__/.test(String(cat.nome || ''))).map(cat => {
         let onde;
         const itens = p.filter(x => x.categoria_id === cat.id && _real(x)).length;
         if (_off.has(cat.id)) onde = 'oculta — todos os itens pausados';
@@ -3548,9 +3559,11 @@ function toggleDrink(id, ti, ii) {
 }
 
 function renderExtras() {
-  const L = (CONFIG.bebidas || []).filter(d => d.tipo !== 'prato' && d.tipo !== 'csc' && (d.lugar === 'principal' || d.lugar === 'ambos'));
+  const inl = new Set(extrasInline().map(d => d.id));
+  const L = extrasLista().filter(d => !inl.has(d.id));
   $('#extras').hidden = !L.length;
   $('#extrasList').innerHTML = L.map(cardDe).join('');
+  document.querySelectorAll('#plates .inl-x').forEach(el => { const d = (CONFIG.bebidas || []).find(x => x.id === el.dataset.xid); if (d) el.innerHTML = cardDe(d); });
 }
 
 document.addEventListener('click', e => {
@@ -3560,14 +3573,15 @@ document.addEventListener('click', e => {
   const op = box.querySelector('.drink-opts'); if (op) { op.hidden = !aberto; op.classList.toggle('fx-anim', aberto); }
 });
 
-$('#extrasList').addEventListener('click', e => {
+function extrasClick(e) {
   const t = e.target.closest('[data-a]'); if (!t) return;
+  if (e.currentTarget.id === 'plates' && !t.closest('.inl-x')) return;
   const a = t.dataset.a;
   if (a === 'dtoggle') {
     const id = t.dataset.d, topoAntes = t.getBoundingClientRect().top;
     openDrink = openDrink === id ? null : id; fxOpenId = openDrink; renderExtras(); fxOpenId = null;
     if (openDrink === id) {   // mantém o cabeçalho clicado no mesmo lugar da tela (não salta quando outro card, acima, fecha)
-      const nt = document.querySelector(`#extrasList [data-a="dtoggle"][data-d="${id}"]`);
+      const nt = document.querySelector(`.inl-x [data-a="dtoggle"][data-d="${id}"], #extrasList [data-a="dtoggle"][data-d="${id}"]`);
       if (nt) { const dy = nt.getBoundingClientRect().top - topoAntes; if (Math.abs(dy) > 1) window.scrollBy({ top: dy, behavior: 'instant' }); }
     }
     return;
@@ -3577,7 +3591,9 @@ $('#extrasList').addEventListener('click', e => {
     changeDrink(t.dataset.d, +t.dataset.t, +t.dataset.i, a === 'dinc' ? 1 : -1);
     renderExtras();
   }
-});
+}
+$('#extrasList').addEventListener('click', extrasClick);
+$('#plates').addEventListener('click', extrasClick);
 
 function setLoja(f) {
   document.body.classList.toggle('fechada', f);
