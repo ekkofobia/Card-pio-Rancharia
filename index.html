@@ -212,8 +212,10 @@ section { padding: 46px 0; scroll-margin-top: 62px; }
 .plate ul { margin: 8px 0 0; display: grid; gap: 2px; font-size: 14px; }
 .plate li { position: relative; padding-left: 16px; }
 .plate li .li-d { display: block; color: var(--muted); font-size: 12px; line-height: 1.25; }
-.plate li.li-p .li-d { flex-basis: 100%; }
-.plate li.li-p { flex-wrap: wrap; display: flex; justify-content: flex-start; column-gap: 12px; row-gap: 0; align-items: baseline; line-height: 1.25; }
+.plate li.li-p .li-d { grid-column: 1 / -1; }
+.plate li.li-p { display: grid; grid-template-columns: minmax(0, 1fr) auto; column-gap: 12px; row-gap: 0; align-items: start; line-height: 1.25; }
+.plate li.li-p b { text-align: right; }
+.plate li.li-p::before { top: .5em; }
 .plate li.li-p b { color: var(--gold); font-weight: 800; white-space: nowrap; }
 .plate li::before { content: ""; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
 .plate .photo { margin: 28px -16px 0 0; pointer-events: none; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 26%); mask-image: linear-gradient(90deg, transparent 0, #000 26%); }
@@ -1224,6 +1226,7 @@ setTimeout(function () {
 
 <script>
 'use strict';
+const FOTO_2 = 'https://res.cloudinary.com/dwrq06fta/image/upload/v1791773447/file_00000000c774820e80a770fb01c46ec6_hftmgc.webp';
 const FOTO = k => (typeof IMG !== 'undefined' && IMG[k]) || '';
 const EDIT = window.EDITAVEL || {};
 const listar = s => (s || '').split(',').map(x => x.trim()).filter(Boolean);
@@ -3340,6 +3343,7 @@ function aplicarCardapio(cats, prods) {
     c.item_order = j.item_order || [];
     c.substituto = j.substituto || '';
     c.apartir_de = j.apartir_de !== undefined ? Number(j.apartir_de) : 0;
+    c.foto = Number(j.foto) === 2 ? 2 : 1;
   });
   if (CDIA_IDS) cats = cats.filter(c => c.tipo === 'item' || CDIA_IDS.includes(c.id));   // cardápio do dia escolhido no painel
 
@@ -3394,7 +3398,7 @@ function aplicarCardapio(cats, prods) {
         escolhe: (c._minSet && c.min_escolha > 0) ? c.min_escolha : (/duas|gourmet/i.test(c.nome) ? 2 : 1),
         proteinas: proteinas.map(x => x.nome),
         descs: Object.fromEntries(proteinas.map(x => [x.nome, x.descricao || ''])), carta: preco === 0, precos: preco === 0 ? Object.fromEntries(proteinas.map(x => [x.nome, Number(x.preco) || 0])) : null,   // título com preço 0: cada item tem o seu preço
-        img: FOTO(idKey)
+        img: c.foto === 2 ? FOTO_2 : FOTO(idKey)
       };
     });
   }
@@ -3432,7 +3436,7 @@ function aplicarCardapio(cats, prods) {
           escolhe: (c._minSet && c.min_escolha > 0) ? c.min_escolha : (/duas|gourmet/i.test(c.nome) ? 2 : 1),
           proteinas: proteinas.map(x => x.nome),
           descs: Object.fromEntries(proteinas.map(x => [x.nome, x.descricao || ''])), carta: precoBase === 0, precos: precoBase === 0 ? Object.fromEntries(proteinas.map(x => [x.nome, Number(x.preco) || 0])) : null,
-          img: FOTO(idKey)
+          img: c.foto === 2 ? FOTO_2 : FOTO(idKey)
         });
       }
 
