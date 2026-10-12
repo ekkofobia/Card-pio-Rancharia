@@ -1122,7 +1122,8 @@ body.print-mode .print-salad small {
         <button type="button" class="adm-mini" data-rt="log">Ver últimos eventos</button>
         <button type="button" class="adm-mini" data-rt="ping">Teste de ida e volta</button>
         <button type="button" class="adm-mini" data-rt="reconectar">Reconectar realtime</button>
-        <button type="button" class="adm-mini" data-rt="recarregar" style="grid-column:1/-1">Recarregar cardápio e textos agora</button>
+        <button type="button" class="adm-mini" data-rt="cats">Onde cada categoria aparece</button>
+        <button type="button" class="adm-mini" data-rt="recarregar">Recarregar cardápio e textos agora</button>
       </div>
 
       <h4 class="adm-h">Ferramentas</h4>
@@ -2978,6 +2979,10 @@ $('#admRt').addEventListener('click', async e => {
     const st = rtCatCh ? rtCatCh.state : 'sem canal';
     admLinha(`Canal catalogo-site: ${st}`, st === 'joined' ? 'ok' : 'bad');
   }
+  if (k === 'cats') {
+    if (!window.DIAG_CAT) { admLinha('Cardápio ainda não carregado do painel.', 'bad'); return; }
+    window.DIAG_CAT.forEach(l => admLinha(l, /oculta|não apareceu/.test(l) ? 'bad' : 'ok'));
+  }
   if (k === 'recarregar') {
     const t0 = performance.now();
     try { await carregarConfig(true); await carregarCardapio(true); admLinha(`✓ Cardápio e textos recarregados em ${Math.round(performance.now() - t0)} ms`, 'ok'); }
@@ -3447,7 +3452,7 @@ function aplicarCardapio(cats, prods) {
       nome,
       orig: c.nome,
       tamanhos: tam,
-      desc: c.substituto || (tam.some(t => t.subId) ? '' : [...new Set(tam.map(t => t.nome).filter(Boolean))].join(', ')),
+      desc: c.substituto || '',   // só o campo Substituto da categoria (nada de juntar descrições dos itens)
       emoji: SVG_AT(/cerv/.test(n) ? ICO.cerveja : /suco/.test(n) ? ICO.suco : /refri|bebida/.test(n) ? ICO.refri : /sobremes|doce/.test(n) ? ICO.sobremesa : /porc|frit|batata/.test(n) ? ICO.porcao : ICO.extra),
       apartir_de: c.apartir_de
     };
@@ -3479,6 +3484,18 @@ async function carregarCardapio(force) {
       const _real = x => !/^__/.test(String(x.nome || '')) && _n(x.nome) !== 'valor do prato';
       const _off = new Set(c.filter(cat => { const its = p.filter(x => x.categoria_id === cat.id && _real(x)); return its.length && its.every(x => x.pausado); }).map(cat => cat.id));
       aplicarCardapio(c.filter(cat => !_off.has(cat.id) && !/^__/.test(String(cat.nome || ''))), p.filter(x => !x.pausado));
+      window.DIAG_CAT = c.filter(cat => !/^__/.test(String(cat.nome || ''))).map(cat => {
+        let onde;
+        const itens = p.filter(x => x.categoria_id === cat.id && _real(x)).length;
+        if (_off.has(cat.id)) onde = 'oculta — todos os itens pausados';
+        else if (CDIA_IDS && cat.tipo !== 'item' && !CDIA_IDS.includes(cat.id)) onde = 'oculta — fora do cardápio do dia selecionado';
+        else if (!itens) onde = 'oculta — sem itens';
+        else if (cat.tipo === 'item') onde = 'subcategoria (dentro dos pratos/bebidas)';
+        else if (cat.exibicao === 'prato') onde = 'prato (topo)';
+        else if (cat.exibicao === 'cards') { const a = (CONFIG.cardsAvulsos || []).find(x => x.id === cat.id); onde = a ? (a.depois ? 'cards (abaixo de Acompanhamentos e Bebidas)' : 'cards (topo)') : 'cards — não apareceu (sem itens com nome válido)'; }
+        else onde = 'acompanhamentos e bebidas (' + cat.exibicao + ')';
+        return `${cat.nome}: ${onde}`;
+      });
       renderPlates();
       renderExtras();
       initReveal();
