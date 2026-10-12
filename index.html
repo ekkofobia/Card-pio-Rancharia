@@ -725,12 +725,14 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 /* card "Como chegar" com mapa animado (ciclo de 7s) */
 .loc-card { display: block; overflow: hidden; border-radius: 20px; border: 1px solid rgba(242, 196, 109, .45); background: var(--card-2); color: var(--cream); text-decoration: none; -webkit-tap-highlight-color: transparent; }
 .loc-card:active { transform: scale(.985); }
+.lc-top { display: grid; grid-template-columns: 52% minmax(0, 1fr); align-items: center; gap: 12px; padding-right: 14px; }
 .lc-map { display: block; width: 100%; height: auto; }
-.lc-info { display: grid; gap: 12px; padding: 14px 16px 16px; }
+.lc-map text, .lc-you g, .lc-tag { display: none; }
+
 .lc-txt { display: grid; gap: 2px; min-width: 0; }
-.lc-txt b { font-size: 19px; font-weight: 800; }
-.lc-txt small { color: var(--muted); font-size: 14px; line-height: 1.3; }
-.lc-go { display: flex; justify-content: center; align-items: center; gap: 6px; min-height: 46px; padding: 0 16px; border-radius: 999px; background: var(--gold); color: #2a1509; font-weight: 800; font-size: 15px; }
+.lc-txt b { font-size: 18px; font-weight: 800; line-height: 1.15; }
+.lc-txt small { color: var(--muted); font-size: 13px; line-height: 1.3; }
+.lc-go { display: flex; justify-content: center; align-items: center; gap: 6px; min-height: 42px; margin: 0 14px 14px; padding: 0 16px; border-radius: 999px; background: var(--gold); color: #2a1509; font-weight: 800; font-size: 15px; }
 .lc-route { stroke-dasharray: 100; stroke-dashoffset: 100; animation: lcRoute 7s ease-in-out infinite; }
 .lc-you { transform-box: fill-box; transform-origin: center; animation: lcYou 7s ease-out infinite; }
 .lc-car { opacity: 0; animation: lcCar 7s linear infinite; }
@@ -779,7 +781,7 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .pills { display: flex; flex-wrap: nowrap; gap: 6px; }
 .pill { flex: 1; display: inline-flex; align-items: center; justify-content: center; min-height: 30px; padding: 0 6px; border-radius: 999px; border: 1.5px solid var(--gold); color: var(--gold); font-weight: 600; font-size: 12px; text-decoration: none; }
 .mk-foot { display: flex; justify-content: center; padding: 10px 20px calc(14px + env(safe-area-inset-bottom)); }
-.mk-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 34px; padding: 0 22px; border-radius: 999px; background: var(--gold); color: #2a1509; font-weight: 800; font-size: 16px; text-decoration: none; }
+.mk-pill { display: inline-flex; align-items: center; justify-content: center; min-height: 26px; padding: 0 16px; border-radius: 999px; background: var(--gold); color: #2a1509; font-weight: 800; font-size: 12px; text-decoration: none; }
 .mk p { margin-bottom: 10px; font-size: 17px; font-weight: 700; }
 .hrs { display: grid; gap: 3px; }
 .hr-row { display: flex; justify-content: space-between; gap: 10px; font-size: 15px; color: var(--muted); }
@@ -1269,7 +1271,7 @@ body.print-mode .print-salad small {
       <div class="msec"><h3>Sobre</h3><p id="sobre"></p></div>
       <div class="msec"><h3>Horário de funcionamento</h3><div class="hrs" id="horas"></div></div>
       <div class="msec"><a class="loc-card" href="https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac" target="_blank" rel="noopener" aria-label="Como chegar: abrir no mapa">
-        <svg class="lc-map" viewBox="0 -14 320 170" aria-hidden="true">
+        <div class="lc-top"><svg class="lc-map" viewBox="0 -14 320 170" aria-hidden="true">
           <rect y="-14" width="320" height="170" fill="#33200f"/>
           <g class="lc-blocks" fill="#3d2815"><rect x="10" y="8" width="80" height="30" rx="6"/><rect x="110" y="8" width="52" height="30" rx="6"/><rect x="182" y="8" width="44" height="30" rx="6"/><rect x="246" y="8" width="64" height="30" rx="6"/><rect x="110" y="56" width="52" height="22" rx="6"/><rect x="182" y="56" width="124" height="22" rx="6"/><rect x="10" y="56" width="80" height="62" rx="6"/><rect x="110" y="96" width="196" height="22" rx="6"/><rect x="10" y="138" width="300" height="14" rx="6"/></g>
           <g stroke="#4a3220" stroke-width="7" stroke-linecap="round" fill="none"><path d="M0 46H320M0 86H320M0 128H320M100 0V156M172 0V156M236 0V156M296 0V156M28 0V156"/></g>
@@ -1282,7 +1284,8 @@ body.print-mode .print-salad small {
           <g class="lc-tag"><rect x="150" y="2" width="58" height="19" rx="9.5" fill="#2a1509" stroke="#f2c46d" stroke-width="1.2"/><text x="179" y="15.4" text-anchor="middle" font-size="11" font-weight="800" fill="#f2c46d" font-family="inherit">Rancharia</text></g>
           <circle class="lc-car" r="6.5" fill="#fff6dc" stroke="#2a1509" stroke-width="2.5"><animateMotion dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;.12;.55;1" keyPoints="0;0;1;1" path="M28 128H100V86H172V46H236"/></circle>
         </svg>
-        <div class="lc-info"><span class="lc-txt"><b>Como chegar</b><small>R. dos Pinheiros, São Geraldo · Juazeiro-BA</small></span><span class="lc-go">Abrir no Maps<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <span class="lc-txt"><b>Como chegar</b><small>R. dos Pinheiros, São Geraldo · Juazeiro-BA</small></span></div>
+        <span class="lc-go">Abrir no Maps<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
       </a></div>
       <div class="msec"><h3>Perguntas frequentes</h3><div class="faq" id="faq"></div></div>
       <div class="msec"><div class="pills" id="sites"></div></div>
