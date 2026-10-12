@@ -2046,7 +2046,7 @@ function lineHTML(it) {
 }
 
 const seg = (name, list, val) => list.map(([v, l]) => `<button type="button" class="opt ${val === v ? 'on' : ''}" data-seg="${name}" data-v="${v}">${l}</button>`).join('');
-const drinkName = (d, t, item) => [d.nome, t.nome, item].filter(Boolean).join(' ');
+const drinkName = (d, t, item) => [d.nome, (t.subId || (t.itens && t.itens.length > 1)) ? t.nome : '', item].filter(Boolean).join(' ');   // grupo de 1 item (descrição do item) não entra no nome do carrinho; tamanhos (vários itens) entram
 const drinkQty = nome => { const it = cart.find(x => x.kind === 'extra' && x.nome === nome); return it ? it.qty : 0; };
 
 const divSub = t => t.div ? `<div class="sub-div"><span>${tit(t.orig || t.div, t.div)}</span></div>${titS(t.orig || t.div, t.sub) ? `<div class="sub-div-s">${fmtT(titS(t.orig || t.div, t.sub))}</div>` : ''}` : '';
@@ -2074,7 +2074,7 @@ function drinkHTML(d) {
   return `<div class="drink ${open ? 'open' : ''}">
     <button type="button" class="drink-h" data-a="dtoggle" data-d="${d.id}">
       <span class="d-emoji">${d.emoji}</span>
-      <span class="d-txt"><b>${tit(d.orig || d.nome, d.nome)}</b><small>${fmtT(titS(d.orig || d.nome, d.desc))}</small></span>
+      <span class="d-txt"><b>${tit(d.orig || d.nome, d.nome)}</b>${titS(d.orig || d.nome, '') ? `<small>${fmtT(titS(d.orig || d.nome, ''))}</small>` : ''}</span>
       <span class="d-price"><i>a partir de</i><b>${brl(min)}</b>${n ? `<i class="d-n">${icoI('ok', 12)} ${n}</i>` : ''}</span>
       <span class="chev"></span>
     </button>
