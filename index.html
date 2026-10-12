@@ -687,6 +687,31 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .fb-row { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; }
 .fb-face { aspect-ratio: 1 / 1; border: 2px solid transparent; border-radius: 18px; background: #000; display: grid; place-items: center; padding: 0; -webkit-tap-highlight-color: transparent; }
 .fb-face svg { width: 74%; height: 74%; display: block; }
+/* rostinhos animados (ciclo de 6s) */
+.fa-b { transform-origin: 24px 26px; animation: faBob 6s ease-in-out infinite; }
+.fb-face:nth-child(2) .fa-b { animation-delay: -1.2s; } .fb-face:nth-child(3) .fa-b { animation-delay: -2.4s; } .fb-face:nth-child(4) .fa-b { animation-delay: -3.6s; } .fb-face:nth-child(5) .fa-b { animation-delay: -4.8s; }
+.fa-eye, .fa-mouth, .fa-brow, .fa-happy, .fa-star, .fa-spk, .fa-glance { transform-box: fill-box; transform-origin: center; }
+.fa-eye { animation: faBlink 6s ease-in-out infinite; }
+.fb-face:nth-child(2) .fa-eye { animation-delay: -1.2s; } .fb-face:nth-child(3) .fa-eye { animation-delay: -2.4s; } .fb-face:nth-child(4) .fa-eye { animation-delay: -3.6s; }
+.fa-brow { animation: faBrow 6s ease-in-out infinite; }
+.fb-face:nth-child(2) .fa-brow { animation-delay: -1.2s; }
+.fa-mouth { animation: faMouth 6s ease-in-out infinite; }
+.fb-face:nth-child(2) .fa-mouth { animation-delay: -1.2s; } .fb-face:nth-child(3) .fa-mouth { animation-delay: -2.4s; } .fb-face:nth-child(4) .fa-mouth { animation-delay: -3.6s; }
+.fa-glance { animation: faGlance 6s ease-in-out infinite; animation-delay: -2.4s; }
+.fa-happy { animation: faHappy 6s ease-in-out infinite; animation-delay: -3.6s; }
+.fa-star { animation: faStar 3s ease-in-out infinite; }
+.fa-spk { opacity: 0; animation: faSpk 6s ease-in-out infinite; animation-delay: -4.8s; } .fa-spk2 { animation-delay: -3.3s; }
+.fb-face.on svg { animation: faPop .6s cubic-bezier(.3, 1.6, .5, 1); }
+@keyframes faBob { 0%, 100% { transform: translateY(0) rotate(0); } 25% { transform: translateY(-1.2px) rotate(-2deg); } 75% { transform: translateY(.8px) rotate(2deg); } }
+@keyframes faBlink { 0%, 86%, 94%, 100% { transform: scaleY(1); } 90% { transform: scaleY(.1); } }
+@keyframes faBrow { 0%, 55%, 75%, 100% { transform: translateY(0) rotate(0); } 62% { transform: translateY(-1.6px) rotate(-3deg); } 68% { transform: translateY(.8px) rotate(2deg); } }
+@keyframes faMouth { 0%, 40%, 70%, 100% { transform: scale(1, 1); } 52% { transform: scale(1.1, 1.3); } }
+@keyframes faGlance { 0%, 30%, 100% { transform: translateX(0); } 40%, 48% { transform: translateX(-1.8px); } 58%, 66% { transform: translateX(1.8px); } 75% { transform: translateX(0); } }
+@keyframes faHappy { 0%, 50%, 80%, 100% { transform: translateY(0); } 62%, 70% { transform: translateY(-1.5px) scale(1.06); } }
+@keyframes faStar { 0%, 100% { transform: scale(1) rotate(0); } 50% { transform: scale(1.22) rotate(14deg); } }
+@keyframes faSpk { 0%, 55%, 100% { opacity: 0; transform: scale(0) rotate(0); } 65% { opacity: 1; transform: scale(1.2) rotate(45deg); } 78% { opacity: 0; transform: scale(.2) rotate(90deg); } }
+@keyframes faPop { 0% { transform: scale(.7); } 100% { transform: scale(1); } }
+@media (prefers-reduced-motion: reduce) { .fa-b, .fa-eye, .fa-mouth, .fa-brow, .fa-happy, .fa-star, .fa-spk, .fa-glance, .fb-face.on svg { animation: none; } }
 .fb-face:active { transform: scale(.95); }
 .fb-face.on { border-color: var(--gold); }
 .fb-txt { width: 100%; margin-top: 14px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: #000; color: var(--cream); font: inherit; font-size: 15px; resize: none; box-sizing: border-box; }
@@ -697,6 +722,21 @@ select.sel { appearance: none; -webkit-appearance: none; background-image: linea
 .rev-btn { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 12px; padding: 13px 14px; border: 1px solid rgba(242, 196, 109, .45); border-radius: 16px; background: rgba(242, 196, 109, .06); color: var(--cream); font-weight: 700; font-size: 15px; text-decoration: none; -webkit-tap-highlight-color: transparent; }
 .rev-btn svg { color: var(--gold); flex: none; }
 .rev-btn:active { background: rgba(242, 196, 109, .14); }
+.loc-btn .cc { width: 46px; height: 46px; overflow: visible; }
+/* ícone animado do Como chegar (ciclo de 7s) */
+.cc-route { stroke-dasharray: 100; stroke-dashoffset: 100; stroke-width: 2.2; animation: ccRoute 7s ease-in-out infinite; }
+.cc-start { transform-box: fill-box; transform-origin: center; animation: ccStart 7s ease-out infinite; }
+.cc-car { opacity: 0; animation: ccCar 7s linear infinite; }
+.cc-pin { transform-box: fill-box; transform-origin: 50% 100%; opacity: 0; animation: ccPin 7s ease-out infinite; }
+.cc-rip { transform-box: fill-box; transform-origin: center; opacity: 0; animation: ccRip 7s ease-out infinite; }
+.cc-rip2 { animation-name: ccRip2; }
+@keyframes ccStart { 0% { transform: scale(0); opacity: 0; } 5% { transform: scale(1.5); opacity: 1; } 9%, 88% { transform: scale(1); opacity: 1; } 96%, 100% { transform: scale(1); opacity: 0; } }
+@keyframes ccRoute { 0%, 9% { stroke-dashoffset: 100; opacity: 1; } 50% { stroke-dashoffset: 0; opacity: 1; } 88% { stroke-dashoffset: 0; opacity: 1; } 96%, 100% { stroke-dashoffset: 0; opacity: 0; } }
+@keyframes ccCar { 0%, 9% { opacity: 0; } 11%, 48% { opacity: 1; } 52%, 100% { opacity: 0; } }
+@keyframes ccPin { 0%, 48% { opacity: 0; transform: translateY(-14px) scale(.8); } 54% { opacity: 1; transform: translateY(1.5px) scale(1.06, .9); } 58% { transform: translateY(-3px) scale(.96, 1.05); } 62% { transform: translateY(0) scale(1); } 66%, 76% { transform: translateY(-1.2px); } 71% { transform: translateY(0); } 82%, 88% { opacity: 1; transform: translateY(0); } 96%, 100% { opacity: 0; transform: translateY(-4px); } }
+@keyframes ccRip { 0%, 53% { opacity: 0; transform: scale(.3); } 56% { opacity: .9; } 72% { opacity: 0; transform: scale(1.7); } 100% { opacity: 0; transform: scale(1.7); } }
+@keyframes ccRip2 { 0%, 62% { opacity: 0; transform: scale(.3); } 65% { opacity: .7; } 82% { opacity: 0; transform: scale(1.9); } 100% { opacity: 0; transform: scale(1.9); } }
+@media (prefers-reduced-motion: reduce) { .cc-route { animation: none; stroke-dashoffset: 0; } .cc-start, .cc-car, .cc-pin, .cc-rip { animation: none; } .cc-pin { opacity: 1; } .cc-car, .cc-rip { opacity: 0; } }
 .loc-btn:active { background: rgba(242, 196, 109, .14); }
 .loc-btn > span:nth-of-type(1) { flex: 1; min-width: 0; }
 .loc-row { flex: 0 0 100%; display: flex; justify-content: flex-end; }
@@ -1205,7 +1245,7 @@ body.print-mode .print-salad small {
     <div class="body">
       <div class="msec"><h3>Sobre</h3><p id="sobre"></p></div>
       <div class="msec"><h3>Horário de funcionamento</h3><div class="hrs" id="horas"></div></div>
-      <div class="msec"><a class="loc-btn" href="https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac" target="_blank" rel="noopener"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.4"/></svg><span><b>Como chegar</b><small>R. dos Pinheiros, São Geraldo · Juazeiro-BA</small></span><span class="loc-row"><span class="loc-go">Ir<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a></div>
+      <div class="msec"><a class="loc-btn" href="https://maps.app.goo.gl/iMurXLn1RaquJ2o48?g_st=ac" target="_blank" rel="noopener"><svg class="cc" width="46" height="46" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path class="cc-road" d="M7 41C7 33 19 36 19 30S30 26 34 30" stroke-width="5" opacity=".14"/><path class="cc-route" pathLength="100" d="M7 41C7 33 19 36 19 30S30 26 34 30"/><circle class="cc-start" cx="7" cy="41" r="2.6"/><ellipse class="cc-rip" cx="34" cy="31" rx="7" ry="2.6" stroke-width="1.6"/><ellipse class="cc-rip cc-rip2" cx="34" cy="31" rx="7" ry="2.6" stroke-width="1.6"/><g class="cc-pin"><path d="M34 31s-8-6.2-8-12.5a8 8 0 0 1 16 0C42 24.8 34 31 34 31z"/><circle cx="34" cy="18.5" r="3"/></g><circle class="cc-car" r="2.6" fill="currentColor" stroke="none"><animateMotion dur="7s" repeatCount="indefinite" calcMode="linear" keyTimes="0;.1;.5;1" keyPoints="0;0;1;1" path="M7 41C7 33 19 36 19 30S30 26 34 30"/></circle></svg><span><b>Como chegar</b><small>R. dos Pinheiros, São Geraldo · Juazeiro-BA</small></span><span class="loc-row"><span class="loc-go">Ir<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a></div>
       <div class="msec"><h3>Perguntas frequentes</h3><div class="faq" id="faq"></div></div>
       <div class="msec"><div class="pills" id="sites"></div></div>
     </div>
@@ -2511,16 +2551,16 @@ window.addEventListener('online', retomaSite);
 const FB = {};   // avaliação por pedido: { nota, texto, enviado }
 const FB_LAB = ['', 'Muito ruim', 'Ruim', 'Neutro', 'Bom', 'Ótimo'];
 function faceSVG(n) {
-  const eye = (x, y) => `<circle cx="${x}" cy="${y}" r="2.6" fill="#3b2400"/>`;
+  const eye = (x, y) => `<circle class="fa-eye" cx="${x}" cy="${y}" r="2.6" fill="#3b2400"/>`;
   const base = c1 => `<defs><radialGradient id="fg${n}" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="${c1[0]}"/><stop offset="1" stop-color="${c1[1]}"/></radialGradient></defs><circle cx="24" cy="24" r="22" fill="url(#fg${n})"/>`;
   const st = 'fill="none" stroke="#3b2400" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"';
   let b = '';
-  if (n === 1) b = base(['#ff8a5c', '#e5432d']) + `<path d="M13 15l9 4M35 15l-9 4" ${st}/>` + eye(17.5, 23) + eye(30.5, 23) + `<path d="M16 35q8-6 16 0" ${st}/>`;
-  if (n === 2) b = base(['#ffe07a', '#ffb52e']) + `<path d="M14 17l8-1.5M34 19l-8-3" ${st} stroke-width="2"/>` + eye(17.5, 23) + eye(30.5, 23) + `<path d="M16 34q8-5 16-1" ${st}/>`;
-  if (n === 3) b = base(['#ffe07a', '#ffb52e']) + eye(17.5, 21) + eye(30.5, 21) + `<path d="M16 33h16" ${st}/>`;
-  if (n === 4) b = base(['#ffe07a', '#ffb52e']) + `<path d="M13 22q4.5-6 9 0M26 22q4.5-6 9 0" ${st}/>` + `<path d="M15 29q9 9 18 0" ${st}/>`;
-  if (n === 5) { const star = (x, y) => `<path transform="translate(${x} ${y})" d="M0-6.5l1.9 4 4.4.6-3.2 3 .8 4.4L0 3.4l-3.9 2.1.8-4.4-3.2-3 4.4-.6z" fill="#e5334a"/>`; b = base(['#ffe07a', '#ffb52e']) + star(16.5, 20) + star(31.5, 20) + `<path d="M14 28h20q-1 10-10 10t-10-10z" fill="#7a2a12"/><path d="M17 28h14q-.5 4-7 4t-7-4z" fill="#fff"/>`; }
-  return `<svg viewBox="0 0 48 48" aria-hidden="true">${b}</svg>`;
+  if (n === 1) b = base(['#ff8a5c', '#e5432d']) + `<path class="fa-brow" d="M13 15l9 4M35 15l-9 4" ${st}/>` + eye(17.5, 23) + eye(30.5, 23) + `<path class="fa-mouth" d="M16 35q8-6 16 0" ${st}/>`;
+  if (n === 2) b = base(['#ffe07a', '#ffb52e']) + `<path class="fa-brow" d="M14 17l8-1.5M34 19l-8-3" ${st} stroke-width="2"/>` + eye(17.5, 23) + eye(30.5, 23) + `<path class="fa-mouth" d="M16 34q8-5 16-1" ${st}/>`;
+  if (n === 3) b = base(['#ffe07a', '#ffb52e']) + `<g class="fa-glance">` + eye(17.5, 21) + eye(30.5, 21) + `</g><path class="fa-mouth" d="M16 33h16" ${st}/>`;
+  if (n === 4) b = base(['#ffe07a', '#ffb52e']) + `<path class="fa-happy" d="M13 22q4.5-6 9 0M26 22q4.5-6 9 0" ${st}/>` + `<path class="fa-mouth" d="M15 29q9 9 18 0" ${st}/>`;
+  if (n === 5) { const star = (x, y) => `<g transform="translate(${x} ${y})"><path class="fa-star" d="M0-6.5l1.9 4 4.4.6-3.2 3 .8 4.4L0 3.4l-3.9 2.1.8-4.4-3.2-3 4.4-.6z" fill="#e5334a"/></g>`; b = base(['#ffe07a', '#ffb52e']) + star(16.5, 20) + star(31.5, 20) + `<path d="M14 28h20q-1 10-10 10t-10-10z" fill="#7a2a12"/><path d="M17 28h14q-.5 4-7 4t-7-4z" fill="#fff"/><path class="fa-spk" d="M40 9l1 2.4 2.4 1-2.4 1-1 2.4-1-2.4-2.4-1 2.4-1z" fill="#fff6c2"/><path class="fa-spk fa-spk2" d="M7 12l.8 1.8 1.8.8-1.8.8L7 17.2l-.8-1.8-1.8-.8 1.8-.8z" fill="#fff6c2"/>`; }
+  return `<svg viewBox="0 0 48 48" aria-hidden="true"><g class="fa-b">${b}</g></svg>`;
 }
 function fbHTML(o) {
   const f = FB[o.ref] || {};
@@ -2619,7 +2659,7 @@ function renderPostCheckoutContent() {
         </div></div>
       </div>
 
-      ${fbHTML(o)}
+      ${fim ? fbHTML(o) : ''}
 
       ${temConcluidos ? '<button type="button" class="track-clear" data-a="limpar-concluidos">Limpar pedidos concluídos</button>' : ''}
     </div>
