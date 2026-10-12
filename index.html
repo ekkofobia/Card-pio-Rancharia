@@ -213,7 +213,7 @@ section { padding: 46px 0; scroll-margin-top: 62px; }
 .plate li { position: relative; padding-left: 16px; }
 .plate li .li-d { display: block; color: var(--muted); font-size: 12px; line-height: 1.25; }
 .plate li.li-p .li-d { flex-basis: 100%; }
-.plate li.li-p { flex-wrap: wrap; display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.plate li.li-p { flex-wrap: wrap; display: flex; justify-content: flex-start; column-gap: 12px; row-gap: 0; align-items: baseline; line-height: 1.25; }
 .plate li.li-p b { color: var(--gold); font-weight: 800; white-space: nowrap; }
 .plate li::before { content: ""; position: absolute; left: 0; top: .55em; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
 .plate .photo { margin: 28px -16px 0 0; pointer-events: none; -webkit-mask-image: linear-gradient(90deg, transparent 0, #000 26%); mask-image: linear-gradient(90deg, transparent 0, #000 26%); }
@@ -1116,6 +1116,15 @@ body.print-mode .print-salad small {
       </div>
       <div class="adm-grid"><button class="btn btn--block adm-sec" type="button" id="admVerTela">Abrir tela do pedido</button></div>
 
+      <h4 class="adm-h">Realtime <small style="text-transform:none;letter-spacing:0">· eventos recebidos: <b id="admRtCnt">0</b></small></h4>
+      <div class="adm-grid2" id="admRt">
+        <button type="button" class="adm-mini" data-rt="estado">Ver estado da conexão</button>
+        <button type="button" class="adm-mini" data-rt="log">Ver últimos eventos</button>
+        <button type="button" class="adm-mini" data-rt="ping">Teste de ida e volta</button>
+        <button type="button" class="adm-mini" data-rt="reconectar">Reconectar realtime</button>
+        <button type="button" class="adm-mini" data-rt="recarregar" style="grid-column:1/-1">Recarregar cardápio e textos agora</button>
+      </div>
+
       <h4 class="adm-h">Ferramentas</h4>
       <div class="adm-grid2" id="admFerr">
         <button type="button" class="adm-mini" data-tool="zap">Testar WhatsApp da loja</button>
@@ -1379,7 +1388,7 @@ function renderPlates() {
         <div>
           <div class="t1">${fmtT(titS(p.titulo2, p.titulo1))}</div>
           <div class="t2">${tit(p.titulo2, p.titulo2)}</div>
-          <ul>${p.proteinas.map(n => { const ds = p.descs && p.descs[n] ? `<small class="li-d">${esc(p.descs[n])}</small>` : ''; return p.carta && p.precos[n] > 0 ? `<li class="li-p"><span>${esc(n)}</span><b>${brl(p.precos[n])}</b>${ds}</li>` : `<li>${esc(n)}${ds}</li>`; }).join('')}</ul>
+          <ul>${p.proteinas.map(n => p.carta && p.precos[n] > 0 ? `<li class="li-p"><span>${esc(n)}</span><b>${brl(p.precos[n])}</b></li>` : `<li>${esc(n)}</li>`).join('')}</ul>
         </div>
         ${p.img ? `<div class="photo"><img src="${p.img}" alt="Prato ${esc(p.titulo2)}" loading="lazy" width="298" height="220"></div>` : ''}
       </div>
@@ -2933,6 +2942,49 @@ $('#admVerTela').addEventListener('click', () => {
   setTimeout(() => openPostCheckout(), 250);
 });
 
+/* ---- Realtime (modo ADM) ---- */
+const hhmmss = t => new Date(t).toLocaleTimeString('pt-BR');
+$('#admRt').addEventListener('click', async e => {
+  const b = e.target.closest('[data-rt]');
+  if (!b) return;
+  const k = b.dataset.rt;
+  if (k === 'estado') {
+    const st = rtCatCh ? rtCatCh.state : 'sem canal';
+    admLinha(`Cardápio/textos (catalogo-site): ${st}`, st === 'joined' ? 'ok' : 'bad');
+    admLinha(`Status do pedido (status-pedidos): ${rtChSite ? rtChSite.state : (rtSiteEstado || 'desligado — só liga com pedido em andamento')}`, rtChSite && rtChSite.state === 'joined' ? 'ok' : '');
+    admLinha(`Biblioteca realtime: ${window.supabase ? 'carregada' : 'não carregada'} · tela ${document.hidden ? 'oculta' : 'visível'} · internet ${navigator.onLine ? 'ok' : 'sem conexão'}`, window.supabase && navigator.onLine ? 'ok' : 'bad');
+    admLinha(`Eventos recebidos: ${RT_LOG.length}` + (RT_LOG.length ? ` · último às ${hhmmss(RT_LOG[RT_LOG.length - 1].t)}` : ''), RT_LOG.length ? 'ok' : '');
+  }
+  if (k === 'log') {
+    if (!RT_LOG.length) { admLinha('Nenhum evento ainda. Mude algo no painel (ex.: pausar um item) e toque de novo.', ''); return; }
+    RT_LOG.slice(-8).forEach(x => admLinha(`${hhmmss(x.t)} · ${x.tab} · ${x.tipo}`, 'ok'));
+  }
+  if (k === 'ping') {
+    const n0 = RT_LOG.length, t0 = Date.now();
+    admLinha('Gravando um valor de teste e esperando o aviso de volta…', '');
+    let r = null;
+    try {
+      r = await fetch(`${SUPABASE_URL}/rest/v1/site_config`, { method: 'POST', cache: 'no-store', headers: { apikey: SUPABASE_KEY, Authorization: 'Bearer ' + SUPABASE_KEY, 'Content-Type': 'application/json', Prefer: 'resolution=merge-duplicates,return=minimal' }, body: JSON.stringify({ key: 'rt_teste', value: { t: t0 }, updated_at: new Date().toISOString() }) });
+    } catch (err) {}
+    if (!r || !r.ok) { admLinha(`Teste de ida e volta indisponível: o site não pode gravar (${r ? 'HTTP ' + r.status : 'sem conexão'}). Faça uma mudança no painel e use "Ver últimos eventos".`, 'bad'); return; }
+    while (Date.now() - t0 < 6000 && RT_LOG.length === n0) await new Promise(res => setTimeout(res, 100));
+    if (RT_LOG.length > n0) admLinha(`✓ Realtime respondeu em ${Date.now() - t0} ms`, 'ok');
+    else admLinha('✗ Gravou, mas nenhum aviso chegou em 6 s — use "Reconectar realtime"', 'bad');
+  }
+  if (k === 'reconectar') {
+    admLinha('Reconectando…', '');
+    pararCatRT(); rtCatTent = 0; await iniciarCatRT();
+    await new Promise(res => setTimeout(res, 2500));
+    const st = rtCatCh ? rtCatCh.state : 'sem canal';
+    admLinha(`Canal catalogo-site: ${st}`, st === 'joined' ? 'ok' : 'bad');
+  }
+  if (k === 'recarregar') {
+    const t0 = performance.now();
+    try { await carregarConfig(true); await carregarCardapio(true); admLinha(`✓ Cardápio e textos recarregados em ${Math.round(performance.now() - t0)} ms`, 'ok'); }
+    catch (err) { admLinha('✗ Falha ao recarregar', 'bad'); }
+  }
+});
+
 /* ---- Ferramentas ---- */
 async function copiaTxt(t) {
   try { await navigator.clipboard.writeText(t); return true; } catch (e) {}
@@ -3541,6 +3593,8 @@ checarLoja(); setInterval(() => { if (!document.hidden) checarLoja(); }, 60000);
 /* ===== REALTIME do cardápio, textos e loja aberta/fechada ===== */
 let rtCat = null, rtCatCh = null, rtCatTimer = null, rtCatSai = null, rtCatTent = 0;
 async function atualizaTudo() { checarLoja(); try { await carregarConfig(true); } catch (e) {} carregarCardapio(true); }
+const RT_LOG = [];   // eventos de realtime recebidos (para o modo ADM)
+function rtEvt(tab, p) { RT_LOG.push({ t: Date.now(), tab, tipo: (p && p.eventType) || '?' }); if (RT_LOG.length > 50) RT_LOG.shift(); try { const el = document.getElementById('admRtCnt'); if (el) el.textContent = RT_LOG.length; } catch (e) {} }
 function catMudou() { clearTimeout(rtCatTimer); rtCatTimer = setTimeout(atualizaTudo, 800); }
 function pararCatRT() { try { if (rtCat) rtCat.removeAllChannels(); } catch (e) {} rtCat = null; rtCatCh = null; }
 async function iniciarCatRT() {
@@ -3553,9 +3607,9 @@ async function iniciarCatRT() {
   try {
     rtCat = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, { auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false } });
     rtCatCh = rtCat.channel('catalogo-site')
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'categorias' }, catMudou)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'produtos' }, catMudou)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_config' }, catMudou)
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'categorias' }, p => { rtEvt('categorias', p); catMudou(); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'produtos' }, p => { rtEvt('produtos', p); catMudou(); })
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'site_config' }, p => { rtEvt('site_config', p); catMudou(); })
       .subscribe(st => { if (st === 'SUBSCRIBED') atualizaTudo(); });   // ao (re)conectar, confere o que perdeu
   } catch (e) {}
 }
