@@ -1403,7 +1403,7 @@ const form = { nome: '', modo: 'local', mesa: '', bairro: '', rua: '', numero: '
 /* lembra os dados do cliente neste aparelho */
 try { const c = JSON.parse(localStorage.getItem('rancharia_cli_v1') || 'null'); if (c) ['nome', 'bairro', 'rua', 'numero'].forEach(k => { if (typeof c[k] === 'string') form[k] = c[k]; }); } catch (e) {}
 const salvaCli = () => { try { localStorage.setItem('rancharia_cli_v1', JSON.stringify({ nome: form.nome, bairro: form.bairro, rua: form.rua, numero: form.numero })); } catch (e) {} };
-let LOJA_MARK = false, LOJA_CFG = {}, lojaAtual = null, PIX_KEY = '';
+let LOJA_MARK = false, LOJA_CFG = {}, lojaAtual = null, PIX_KEY = '', pixCopiado = false;
 
 /* ===== LOJA: horário automático + abrir/fechar manual ===== */
 const _sn = s => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
@@ -2207,7 +2207,7 @@ $('#cart').addEventListener('click', e => {
   }
   const a = t.dataset.a, it = cart.find(x => x.uid === +t.dataset.u);
   if (a === 'bairro') { abrirBairros(); return; }
-  if (a === 'copypix') { copiaTxt(PIX_KEY).then(ok => toast(ok ? 'Chave Pix copiada' : 'Não consegui copiar')); return; }
+  if (a === 'copypix') { copiaTxt(PIX_KEY).then(ok => { if (ok) pixCopiado = true; toast(ok ? 'Chave Pix copiada' : 'Não consegui copiar'); }); return; }
   if (a === 'dtoggle') {
     openDrink = openDrink === t.dataset.d ? null : t.dataset.d;
     fxOpenId = openDrink; renderCart(); fxOpenId = null; return;
@@ -3209,6 +3209,7 @@ async function sendOrder() {
   else if (form.modo === 'entregar' && !bairroOk()) bad = $('#fBairro');
   else if (form.modo === 'entregar' && !form.rua.trim()) bad = $('#fRua');
   if (bad) { bad.classList.add('err'); bad.focus(); shake(bad); toast('Preencha os campos em destaque'); return; }
+  if (form.modo === 'entregar' && form.pag === 'pix' && PIX_KEY && !pixCopiado) { const pb = $('#fPixW .pixbox'); if (pb) shake(pb); toast('Copie a chave Pix antes de enviar'); return; }
 
   const btnSend = $('#cart [data-a="send"]');
   if (btnSend) {
@@ -3783,7 +3784,8 @@ iniciarCatRT();
       ['.sec-sub', 'fx-text', 90],
       ['#avisos > *', 'fx-text', 0],
       ['.plate', 'fx-card', 0],
-      ['#extrasList .drink, #extrasList .xcard', 'fx-card', 0],
+      ['#extrasList .drink, #extrasList .xcard, #plates .inl-x .drink, #plates .inl-x .xcard', 'fx-card', 0],
+      ['#heroCta', 'fx-text', 0],
       ['.final .btn', 'fx-text', 140],
       ['footer .wrap', 'fx-text', 0]
     ];
@@ -3839,7 +3841,7 @@ iniciarCatRT();
       if (eraPrint && !p) replay();
       eraPrint = p; agenda();
     }).observe(document.body, { attributes: true, attributeFilter: ['class'] });
-    ['#plates', '#extrasList', '#avisos', 'main'].forEach(s => { const n = document.querySelector(s); if (n) new MutationObserver(agenda).observe(n, { childList: true, subtree: s === 'main' }); });
+    ['#plates', '#extrasList', '#avisos', 'main'].forEach(s => { const n = document.querySelector(s); if (n) new MutationObserver(agenda).observe(n, { childList: true, subtree: s === 'main' || s === '#plates' }); });
 
     window.fxGate = function () { if (gate) return; gate = true; scan(); recheck(); setTimeout(() => { pronto = true; }, 1500); };
     setTimeout(window.fxGate, 4000);                     // segurança: nunca deixa conteúdo escondido
