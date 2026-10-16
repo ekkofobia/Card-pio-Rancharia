@@ -851,11 +851,11 @@ body.print-mode .hero .cta {
   display: none !important; 
 }
 body.print-mode .hero h1 { 
-  font-size: clamp(28px, 7vw, 40px);
+  font-size: clamp(31px, 7vw, 43px);
   line-height: 1;
 }
 body.print-mode .hero .script { 
-  font-size: clamp(26px, 6.5vw, 36px);
+  font-size: clamp(29px, 6.5vw, 39px);
   margin-top: -0.1em; 
   line-height: 1;
 }
@@ -902,11 +902,11 @@ body.print-mode .plate .price {
   order: 1;
   margin-bottom: 3px;
   align-self: flex-start;
-  font-size: 14px; 
+  font-size: 17px; 
   padding: 1px 8px; 
   line-height: 1.2; 
 }
-body.print-mode .plate .price small { font-size: 12px; }
+body.print-mode .plate .price small { font-size: 15px; }
 
 body.print-mode .plate .row { 
   display: flex;
@@ -928,14 +928,14 @@ body.print-mode .plate .row > div {
 }
 
 body.print-mode .plate .t1 { 
-  font-size: 11px; 
+  font-size: 14px; 
   line-height: 1.1;
   letter-spacing: 0.01em;
   text-align: left;
   width: 100%;
 }
 body.print-mode .plate .t2 { 
-  font-size: 16px; 
+  font-size: 19px; 
   line-height: 1.1; 
   margin-bottom: 3px;
   text-align: left;
@@ -943,7 +943,7 @@ body.print-mode .plate .t2 {
 }
 
 body.print-mode .plate ul { 
-  font-size: 12.5px; 
+  font-size: 15.5px; 
   line-height: 1.2;
   display: flex;
   flex-direction: column;
@@ -1014,7 +1014,7 @@ body.print-mode .print-salad {
   margin-top: 4px;
 }
 body.print-mode .print-salad b { 
-  font-size: 15px; 
+  font-size: 18px; 
   line-height: 1.15;
   color: var(--gold); 
   text-transform: uppercase; 
@@ -1022,7 +1022,7 @@ body.print-mode .print-salad b {
 body.print-mode .print-salad small { 
   display: block; 
   margin-top: 3px; 
-  font-size: 12.5px; 
+  font-size: 15.5px; 
   line-height: 1.25;
   color: var(--muted); 
 }
@@ -1030,22 +1030,24 @@ body.print-mode .print-salad small {
 /* print-mode em celulares baixos (iPhone): cabe tudo sem rolar */
 @media (max-height: 800px) {
   body.print-mode .plate { padding: 6px 6px 6px 8px; }
-  body.print-mode .plate .t2 { font-size: 14px; margin-bottom: 2px; }
-  body.print-mode .plate .t1 { font-size: 10px; }
-  body.print-mode .plate ul { font-size: 11px; margin-bottom: 3px !important; }
+  body.print-mode .plate .t2 { font-size: 17px; margin-bottom: 2px; }
+  body.print-mode .plate .t1 { font-size: 13px; }
+  body.print-mode .plate ul { font-size: 14px; margin-bottom: 3px !important; }
   body.print-mode .plate li { padding-left: 10px; }
-  body.print-mode .plate .price { font-size: 12px; margin-bottom: 2px; }
+  body.print-mode .plate .price { font-size: 15px; margin-bottom: 2px; }
   body.print-mode .plate .photo, body.print-mode .plate .photo img { width: 104px; }
   body.print-mode .plates { gap: 6px; }
   body.print-mode .print-salad { min-height: 40px; padding: 6px 8px !important; }
-  body.print-mode .print-salad b { font-size: 13px; }
-  body.print-mode .print-salad small { font-size: 11px; margin-top: 2px; }
+  body.print-mode .print-salad b { font-size: 16px; }
+  body.print-mode .print-salad small { font-size: 14px; margin-top: 2px; }
 }
 @media (max-height: 680px) {
   body.print-mode .plate .photo, body.print-mode .plate .photo img { width: 84px; }
-  body.print-mode .plate ul { font-size: 10.5px; }
-  body.print-mode .plate .t2 { font-size: 13px; }
+  body.print-mode .plate ul { font-size: 13.5px; }
+  body.print-mode .plate .t2 { font-size: 16px; }
 }
+
+body.print-mode .plate .price { align-self: flex-end !important; margin-left: auto !important; }
 @media (min-width: 760px) {
   .wrap { padding: 0 32px; }
   .plates { grid-template-columns: 1fr 1fr; }
