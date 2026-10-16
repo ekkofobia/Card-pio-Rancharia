@@ -1027,6 +1027,25 @@ body.print-mode .print-salad small {
   color: var(--muted); 
 }
 
+/* print-mode em celulares baixos (iPhone): cabe tudo sem rolar */
+@media (max-height: 800px) {
+  body.print-mode .plate { padding: 6px 6px 6px 8px; }
+  body.print-mode .plate .t2 { font-size: 14px; margin-bottom: 2px; }
+  body.print-mode .plate .t1 { font-size: 10px; }
+  body.print-mode .plate ul { font-size: 11px; margin-bottom: 3px !important; }
+  body.print-mode .plate li { padding-left: 10px; }
+  body.print-mode .plate .price { font-size: 12px; margin-bottom: 2px; }
+  body.print-mode .plate .photo, body.print-mode .plate .photo img { width: 104px; }
+  body.print-mode .plates { gap: 6px; }
+  body.print-mode .print-salad { min-height: 40px; padding: 6px 8px !important; }
+  body.print-mode .print-salad b { font-size: 13px; }
+  body.print-mode .print-salad small { font-size: 11px; margin-top: 2px; }
+}
+@media (max-height: 680px) {
+  body.print-mode .plate .photo, body.print-mode .plate .photo img { width: 84px; }
+  body.print-mode .plate ul { font-size: 10.5px; }
+  body.print-mode .plate .t2 { font-size: 13px; }
+}
 @media (min-width: 760px) {
   .wrap { padding: 0 32px; }
   .plates { grid-template-columns: 1fr 1fr; }
