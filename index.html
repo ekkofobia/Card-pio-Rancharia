@@ -279,6 +279,8 @@ footer { position: relative; padding: 26px 0 120px; text-align: center; color: v
 }
 .sheet .head h2 { flex: 1; font-size: 21px; line-height: 1.15; }
 .sheet .head h2 small { display: block; font-size: 14px; font-weight: 500; color: var(--muted); }
+.sheet .head.head-sub { padding-top: 15px; padding-bottom: 15px; }
+.sheet .head.head-sub h2 small { font-size: 12px; line-height: 1.2; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .x { width: 40px; height: 40px; border-radius: 50%; border: 1.5px solid var(--line); font-size: 22px; line-height: 1; transition: background .2s; }
 .x:hover { background: rgba(242, 196, 109, .14); }
 .sheet .body { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 18px 20px; }
@@ -1425,10 +1427,10 @@ let openedFromOrderBump = false;
 let deferredPwaPrompt = null;
 let trackPollInterval = null;
 
-const form = { nome: '', modo: 'local', mesa: '', bairro: '', rua: '', numero: '', pag: 'pix', troco: '', obs: '' };
+const form = { nome: '', tel: '', modo: 'local', mesa: '', bairro: '', rua: '', numero: '', pag: 'pix', troco: '', obs: '' };
 /* lembra os dados do cliente neste aparelho */
-try { const c = JSON.parse(localStorage.getItem('rancharia_cli_v1') || 'null'); if (c) ['nome', 'bairro', 'rua', 'numero'].forEach(k => { if (typeof c[k] === 'string') form[k] = c[k]; }); } catch (e) {}
-const salvaCli = () => { try { localStorage.setItem('rancharia_cli_v1', JSON.stringify({ nome: form.nome, bairro: form.bairro, rua: form.rua, numero: form.numero })); } catch (e) {} };
+try { const c = JSON.parse(localStorage.getItem('rancharia_cli_v1') || 'null'); if (c) ['nome', 'tel', 'bairro', 'rua', 'numero'].forEach(k => { if (typeof c[k] === 'string') form[k] = c[k]; }); } catch (e) {}
+const salvaCli = () => { try { localStorage.setItem('rancharia_cli_v1', JSON.stringify({ nome: form.nome, tel: form.tel, bairro: form.bairro, rua: form.rua, numero: form.numero })); } catch (e) {} };
 let LOJA_MARK = false, LOJA_CFG = {}, lojaAtual = null, PIX_KEY = '', pixCopiado = false;
 
 /* ===== LOJA: horário automático + abrir/fechar manual ===== */
@@ -2159,6 +2161,8 @@ $('#viewOrder').addEventListener('click', e => {
 function renderCart() {
   const body = $('#cBody'), foot = $('#cFoot');
   $('#cTitle').textContent = { list: 'Seu pedido', drinks: 'Ofertas adicionais', form: 'Quase lá' }[step];
+  if (step === 'form') $('#cTitle').insertAdjacentHTML('beforeend', '<small>Salvo só neste aparelho, pra comprar mais rápido</small>');
+  $('#cart .head').classList.toggle('head-sub', step === 'form');
   $('#cart').classList.toggle('sheet--full', step === 'form' || step === 'drinks');
 
   if (step === 'list') {
@@ -2181,7 +2185,7 @@ function renderCart() {
   } else {
     const ent = form.modo === 'entregar';
     body.innerHTML = `
-      <div class="field"><input id="fNome" type="text" placeholder="Seu nome" value="${esc(form.nome)}"></div>
+      <div style="display:flex;gap:10px"><div class="field" style="flex:1;min-width:0"><input id="fNome" type="text" placeholder="Seu nome" value="${esc(form.nome)}"></div><div class="field" style="flex:1;min-width:0"><input id="fTel" type="tel" inputmode="tel" autocomplete="tel" placeholder="WhatsApp (DDD)" value="${esc(form.tel)}"></div></div>
       <div class="field"><span class="lbl">Como quer receber?</span>
         <div class="seg">${seg('modo', [['local', 'Comer aqui'], ['retirar', 'Retirar'], ['entregar', 'Entrega']], form.modo)}</div></div>
       <div class="field" id="fMesaW" ${form.modo === 'local' ? '' : 'hidden'}>
@@ -2261,7 +2265,7 @@ $('#cart').addEventListener('click', e => {
 });
 
 $('#cart').addEventListener('input', e => {
-  const m = { fNome: 'nome', fMesa: 'mesa', fBairro: 'bairro', fRua: 'rua', fNumero: 'numero', fTroco: 'troco', fObs: 'obs' }[e.target.id];
+  const m = { fNome: 'nome', fTel: 'tel', fMesa: 'mesa', fBairro: 'bairro', fRua: 'rua', fNumero: 'numero', fTroco: 'troco', fObs: 'obs' }[e.target.id];
   if (m) { form[m] = e.target.value; e.target.classList.remove('err'); salvaCli(); }
   if (e.target.id === 'fBairro') atualizaTotaisCheckout();
 });
@@ -3232,6 +3236,7 @@ async function sendOrder() {
   pedeNotificacao(); salvaCli();
   let bad = null;
   if (!form.nome.trim()) bad = $('#fNome');
+  if (!bad && form.tel.replace(/\D/g, '').length < 10) bad = $('#fTel');
   else if (form.modo === 'local' && !form.mesa.trim()) bad = $('#fMesa');
   else if (form.modo === 'entregar' && !bairroOk()) bad = $('#fBairro');
   else if (form.modo === 'entregar' && !form.rua.trim()) bad = $('#fRua');
@@ -3265,6 +3270,7 @@ async function sendOrder() {
   msg += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
   msg += `*${modoTexto}*\n`;
   msg += `*NOME:* ${form.nome.trim()}\n`;
+  msg += `*WHATSAPP:* ${form.tel.trim()}\n`;
 
   if (form.modo === 'entregar') {
     msg += `Endereço: ${form.rua.trim()}${form.numero.trim() ? ', nº ' + form.numero.trim() : ''} - ${form.bairro.trim()}\n`;
