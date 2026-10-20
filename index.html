@@ -1027,6 +1027,8 @@ body.print-mode .print-salad small {
   color: var(--muted); 
 }
 
+.track-aviso{padding:12px 16px;background:#FFF3CD;color:#5a3a00;font-weight:700;font-size:15px;line-height:1.35;border-bottom:2px solid #E0A93B;flex:none}
+.track-aviso[hidden]{display:none!important}
 /* print-mode em celulares baixos (iPhone): cabe tudo sem rolar */
 @media (max-height: 800px) {
   body.print-mode .plate { padding: 6px 6px 6px 8px; }
@@ -1157,7 +1159,7 @@ body.print-mode .plate .price { align-self: flex-end !important; margin-left: au
   </section>
 </main>
 
-<footer><div class="wrap">© 2026 Rancharia · Todos os direitos reservados</div><div class="mk-line"><a id="mkFoot" target="_blank" rel="noopener">Criar site</a></div></footer>
+<footer><div class="wrap" id="rodapeTxt">© 2026 Rancharia · Todos os direitos reservados</div><div class="mk-line"><a id="mkFoot" target="_blank" rel="noopener">Criar site</a></div></footer>
 
 <button id="cartBar" aria-label="Ver pedido">
   <span class="info">
@@ -1264,6 +1266,7 @@ body.print-mode .plate .price { align-self: flex-end !important; margin-left: au
       <h2 id="trackTitle">Acompanhar Pedido<small id="trackSubtitle">Carregando status...</small></h2>
       <button class="x" data-close aria-label="Fechar">×</button>
     </div>
+    <div class="track-aviso" id="trackAviso" hidden></div>
     <div class="body" id="trackBody"></div>
     <div class="foot">
       <div class="track-shortcuts-grid" id="trackShortcuts" aria-label="Atalhos úteis"></div>
@@ -1389,6 +1392,8 @@ const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': 
 /* TÍTULOS editáveis pelo painel (site_config: titulos). /texto/ fica amarelo */
 const fmtT = s => esc(s).replace(/\/([^\/]+)\//g, '<span class="ty">$1</span>');
 let TIT = { hero: {}, extras: {}, nomes: {}, custom: [] };
+let AVISO = {};
+function renderAviso() { const el = document.getElementById('trackAviso'); if (!el) return; const t = String(AVISO.texto || '').trim(); el.hidden = !(AVISO.ativo && t); el.textContent = t; }
 const tit = (orig, shown) => { const o = TIT.nomes[orig]; return fmtT(o && o.t ? o.t : shown); };
 const titS = (orig, fb) => { const o = TIT.nomes[orig]; return o && o.s ? o.s : fb; };
 const customHTML = (orig, after) => (TIT.custom || []).filter(c => c.cat === orig && (c.pos === 'after') === !!after && (c.t || c.s)).map(c =>
@@ -2635,6 +2640,7 @@ function fbHTML(o) {
 }
 
 function renderPostCheckoutContent() {
+  renderAviso();
   const body = $('#trackBody');
   const atalhos = $('#trackShortcuts');
   const o = selOrder();
@@ -3389,7 +3395,9 @@ async function carregarConfig(force) {
     try { avaliaLoja(); } catch (e) {}
     const tv = get('titulos') || {};
     TIT = { hero: tv.hero || {}, extras: tv.extras || {}, nomes: tv.nomes || {}, custom: Array.isArray(tv.custom) ? tv.custom : [] };
+    AVISO = get('aviso') || {}; renderAviso();
     aplicaTitulos();
+    { const rt = String(tv.rodape || '').trim(); const rf = document.getElementById('rodapeTxt'); if (rf && rt) rf.textContent = rt; }
     try { const cd = get('cdia'); const a = cd && Array.isArray(cd.cards) ? (cd.cards.find(k => k.id === cd.ativo) || cd.cards[0]) : null; CDIA_IDS = a && Array.isArray(a.cats) ? a.cats.map(Number) : null; } catch (e) { CDIA_IDS = null; }
     const ent = get('entrega'); ENTREGA_COMBINAR = !!(ent && ent.combinar);
     const b = get('bairros');
