@@ -2185,7 +2185,7 @@ function renderCart() {
   } else {
     const ent = form.modo === 'entregar';
     body.innerHTML = `
-      <div style="display:flex;gap:10px"><div class="field" style="flex:1;min-width:0"><input id="fNome" type="text" placeholder="Seu nome" value="${esc(form.nome)}"></div><div class="field" style="flex:1;min-width:0"><input id="fTel" type="tel" inputmode="tel" autocomplete="tel" placeholder="WhatsApp (DDD)" value="${esc(form.tel)}"></div></div>
+      <div style="display:flex;gap:10px"><div class="field" style="flex:1;min-width:0"><input id="fNome" type="text" placeholder="Seu nome" value="${esc(form.nome)}"></div><div class="field" style="flex:1;min-width:0"><input id="fTel" type="text" inputmode="tel" autocomplete="tel" placeholder="WhatsApp (DDD)" value="${esc(form.tel)}"></div></div>
       <div class="field"><span class="lbl">Como quer receber?</span>
         <div class="seg">${seg('modo', [['local', 'Comer aqui'], ['retirar', 'Retirar'], ['entregar', 'Entrega']], form.modo)}</div></div>
       <div class="field" id="fMesaW" ${form.modo === 'local' ? '' : 'hidden'}>
